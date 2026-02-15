@@ -1,334 +1,598 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
-import type { BusinessData, StockItem, Sale, Purchase, Order, ServiceRecord, BusinessInfo, OrderItem } from '@/types/business';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from './AuthContext';
 
-const defaultBusinessInfo: BusinessInfo = {
-  name: 'My Business',
-  address: '123 Main Street',
-  contact: '+1 234 567 890',
-  email: 'info@mybusiness.com',
-  totalCapital: 0,
-};
-
-const defaultData: BusinessData = {
-  businessInfo: defaultBusinessInfo,
-  stock: [],
-  sales: [],
-  purchases: [],
-  orders: [],
-  services: [],
-};
-
-function loadData(): BusinessData {
-  try {
-    const raw = localStorage.getItem('biztrack_data');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      // Ensure totalCapital exists
-      if (parsed.businessInfo && parsed.businessInfo.totalCapital === undefined) {
-        parsed.businessInfo.totalCapital = 0;
-      }
-      return parsed;
-    }
-  } catch {}
-  return defaultData;
+// Types matching the database schema
+export interface StockItem {
+  id: string;
+  business_id: string;
+  name: string;
+  category: string;
+  quality: string;
+  wholesale_price: number;
+  retail_price: number;
+  quantity: number;
+  min_stock_level: number;
+  created_at: string;
+  updated_at: string;
 }
 
-function saveData(data: BusinessData) {
-  localStorage.setItem('biztrack_data', JSON.stringify(data));
+export interface SaleItem {
+  id: string;
+  sale_id: string;
+  stock_item_id: string | null;
+  item_name: string;
+  category: string;
+  quality: string;
+  quantity: number;
+  price_type: string;
+  unit_price: number;
+  subtotal: number;
+  created_at: string;
 }
 
-function generateId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
+export interface Sale {
+  id: string;
+  business_id: string;
+  grand_total: number;
+  recorded_by: string;
+  from_order_id: string | null;
+  from_order_code: string | null;
+  created_at: string;
+  items: SaleItem[];
 }
+
+export interface PurchaseItem {
+  id: string;
+  purchase_id: string;
+  item_name: string;
+  category: string;
+  quality: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+  created_at: string;
+}
+
+export interface Purchase {
+  id: string;
+  business_id: string;
+  grand_total: number;
+  supplier: string;
+  recorded_by: string;
+  created_at: string;
+  items: PurchaseItem[];
+}
+
+export interface OrderItem {
+  id: string;
+  order_id: string;
+  item_name: string;
+  category: string;
+  quality: string;
+  quantity: number;
+  price_type: string;
+  unit_price: number;
+  subtotal: number;
+  created_at: string;
+}
+
+export interface Order {
+  id: string;
+  business_id: string;
+  type: string;
+  customer_name: string;
+  grand_total: number;
+  status: string;
+  code: string;
+  transferred_to_sale: boolean;
+  sharing_code: string | null;
+  created_at: string;
+  items: OrderItem[];
+}
+
+export interface ServiceRecord {
+  id: string;
+  business_id: string;
+  service_name: string;
+  description: string;
+  cost: number;
+  customer_name: string;
+  created_at: string;
+}
+
+export interface Business {
+  id: string;
+  name: string;
+  address: string;
+  contact: string;
+  email: string;
+  total_capital: number;
+  owner_id: string;
+  created_at: string;
+}
+
+export interface BusinessMembership {
+  id: string;
+  user_id: string;
+  business_id: string;
+  role: string;
+  created_at: string;
+}
+
+interface BusinessContextType {
+  currentBusiness: Business | null;
+  businesses: Business[];
+  memberships: BusinessMembership[];
+  userRole: string | null;
+  stock: StockItem[];
+  sales: Sale[];
+  purchases: Purchase[];
+  orders: Order[];
+  services: ServiceRecord[];
+  loading: boolean;
+  setCurrentBusinessId: (id: string) => void;
+  createBusiness: (name: string, address: string, contact: string, email: string) => Promise<void>;
+  updateBusiness: (updates: Partial<Business>) => Promise<void>;
+  addStockItem: (item: Omit<StockItem, 'id' | 'business_id' | 'created_at' | 'updated_at'>) => Promise<void>;
+  updateStockItem: (id: string, updates: Partial<StockItem>) => Promise<void>;
+  deleteStockItem: (id: string) => Promise<void>;
+  addSale: (items: { stock_item_id?: string; item_name: string; category: string; quality: string; quantity: number; price_type: string; unit_price: number; subtotal: number }[], grandTotal: number, recordedBy: string, fromOrderId?: string, fromOrderCode?: string) => Promise<void>;
+  addPurchase: (items: { item_name: string; category: string; quality: string; quantity: number; unit_price: number; subtotal: number }[], grandTotal: number, supplier: string, recordedBy: string) => Promise<void>;
+  addOrder: (type: string, customerName: string, items: { item_name: string; category: string; quality: string; quantity: number; price_type: string; unit_price: number; subtotal: number }[], grandTotal: number, status: string) => Promise<void>;
+  updateOrder: (id: string, items: OrderItem[], grandTotal: number, status?: string) => Promise<void>;
+  completeOrderToSale: (orderId: string) => Promise<void>;
+  addService: (service: Omit<ServiceRecord, 'id' | 'business_id' | 'created_at'>) => Promise<void>;
+  generateInviteCode: () => Promise<string | null>;
+  redeemInviteCode: (code: string) => Promise<boolean>;
+  getMembers: () => Promise<{ user_id: string; role: string; email: string; full_name: string }[]>;
+  removeMember: (userId: string) => Promise<void>;
+  updateMemberRole: (userId: string, role: string) => Promise<void>;
+  refreshData: () => Promise<void>;
+}
+
+const BusinessContext = createContext<BusinessContextType | null>(null);
 
 function generateCode(): string {
   return 'ORD-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-interface BusinessContextType {
-  data: BusinessData;
-  updateBusinessInfo: (info: BusinessInfo) => void;
-  addStockItem: (item: Omit<StockItem, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateStockItem: (id: string, updates: Partial<StockItem>) => void;
-  deleteStockItem: (id: string) => void;
-  addSale: (sale: Omit<Sale, 'id' | 'timestamp'>) => void;
-  addPurchase: (purchase: Omit<Purchase, 'id' | 'timestamp'>) => void;
-  addOrder: (order: Omit<Order, 'id' | 'timestamp' | 'code'>) => void;
-  updateOrder: (id: string, updates: Partial<Order>) => void;
-  updateOrderStatus: (id: string, status: Order['status']) => void;
-  completeOrderToSale: (orderId: string) => void;
-  addService: (service: Omit<ServiceRecord, 'id' | 'timestamp'>) => void;
-  getTopSellingItems: () => { name: string; totalSold: number }[];
-  getLowStockItems: () => StockItem[];
-  getOutOfStockItems: () => StockItem[];
-  getTodayRevenue: () => number;
-  getExpectedRevenue: () => { wholesale: number; retail: number; totalProfit: number };
-}
-
-const BusinessContext = createContext<BusinessContextType | null>(null);
-
 export function BusinessProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<BusinessData>(loadData);
+  const { user } = useAuth();
+  const [businesses, setBusinesses] = useState<Business[]>([]);
+  const [memberships, setMemberships] = useState<BusinessMembership[]>([]);
+  const [currentBusinessId, setCurrentBusinessId] = useState<string | null>(() => {
+    return localStorage.getItem('biztrack_current_business');
+  });
+  const [stock, setStock] = useState<StockItem[]>([]);
+  const [sales, setSales] = useState<Sale[]>([]);
+  const [purchases, setPurchases] = useState<Purchase[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [services, setServices] = useState<ServiceRecord[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  const currentBusiness = businesses.find(b => b.id === currentBusinessId) || null;
+  const userRole = memberships.find(m => m.business_id === currentBusinessId)?.role || null;
+
+  // Save current business to localStorage
   useEffect(() => {
-    saveData(data);
-  }, [data]);
+    if (currentBusinessId) {
+      localStorage.setItem('biztrack_current_business', currentBusinessId);
+    }
+  }, [currentBusinessId]);
 
-  const updateBusinessInfo = useCallback((info: BusinessInfo) => {
-    setData(prev => ({ ...prev, businessInfo: info }));
-  }, []);
+  // Load businesses and memberships
+  useEffect(() => {
+    if (!user) {
+      setBusinesses([]);
+      setMemberships([]);
+      setLoading(false);
+      return;
+    }
+    loadBusinesses();
+  }, [user]);
 
-  const addStockItem = useCallback((item: Omit<StockItem, 'id' | 'createdAt' | 'updatedAt'>) => {
-    const now = new Date().toISOString();
-    setData(prev => ({
-      ...prev,
-      stock: [...prev.stock, { ...item, id: generateId(), createdAt: now, updatedAt: now }],
-    }));
-  }, []);
+  // Load business data when current business changes
+  useEffect(() => {
+    if (currentBusinessId && user) {
+      loadBusinessData();
+      setupRealtimeSubscriptions();
+    }
+  }, [currentBusinessId, user]);
 
-  const updateStockItem = useCallback((id: string, updates: Partial<StockItem>) => {
-    setData(prev => ({
-      ...prev,
-      stock: prev.stock.map(item =>
-        item.id === id ? { ...item, ...updates, updatedAt: new Date().toISOString() } : item
-      ),
-    }));
-  }, []);
-
-  const deleteStockItem = useCallback((id: string) => {
-    setData(prev => ({
-      ...prev,
-      stock: prev.stock.filter(item => item.id !== id),
-    }));
-  }, []);
-
-  const addSale = useCallback((sale: Omit<Sale, 'id' | 'timestamp'>) => {
-    const now = new Date().toISOString();
-    setData(prev => {
-      const newStock = [...prev.stock];
-      sale.items.forEach(saleItem => {
-        const idx = newStock.findIndex(s => s.id === saleItem.stockItemId);
-        if (idx >= 0) {
-          newStock[idx] = {
-            ...newStock[idx],
-            quantity: Math.max(0, newStock[idx].quantity - saleItem.quantity),
-            updatedAt: now,
-          };
-        }
-      });
-      return {
-        ...prev,
-        stock: newStock,
-        sales: [...prev.sales, { ...sale, id: generateId(), timestamp: now }],
-      };
-    });
-  }, []);
-
-  const addPurchase = useCallback((purchase: Omit<Purchase, 'id' | 'timestamp'>) => {
-    const now = new Date().toISOString();
-    setData(prev => {
-      const newStock = [...prev.stock];
-      const addedItems: string[] = [];
-      const updatedItems: string[] = [];
+  async function loadBusinesses() {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { data: membershipData } = await supabase
+        .from('business_memberships')
+        .select('*')
+        .eq('user_id', user.id);
       
-      purchase.items.forEach(purchaseItem => {
-        const idx = newStock.findIndex(
-          s => s.name.toLowerCase() === purchaseItem.itemName.toLowerCase()
-        );
-        if (idx >= 0) {
-          newStock[idx] = {
-            ...newStock[idx],
-            quantity: newStock[idx].quantity + purchaseItem.quantity,
-            updatedAt: now,
-          };
-          updatedItems.push(`${purchaseItem.itemName} (+${purchaseItem.quantity})`);
-        } else {
-          newStock.push({
-            id: generateId(),
-            name: purchaseItem.itemName,
-            category: purchaseItem.category,
-            quality: purchaseItem.quality,
-            wholesalePrice: purchaseItem.unitPrice,
-            retailPrice: purchaseItem.unitPrice,
-            quantity: purchaseItem.quantity,
-            minStockLevel: 5,
-            createdAt: now,
-            updatedAt: now,
-          });
-          addedItems.push(`${purchaseItem.itemName} (${purchaseItem.quantity})`);
+      if (membershipData && membershipData.length > 0) {
+        setMemberships(membershipData as BusinessMembership[]);
+        const businessIds = membershipData.map(m => m.business_id);
+        const { data: businessData } = await supabase
+          .from('businesses')
+          .select('*')
+          .in('id', businessIds);
+        
+        if (businessData) {
+          setBusinesses(businessData as Business[]);
+          if (!currentBusinessId || !businessIds.includes(currentBusinessId)) {
+            setCurrentBusinessId(businessData[0].id);
+          }
         }
-      });
-
-      // Notify about stock changes
-      if (updatedItems.length > 0) {
-        toast.success('Stock Updated', { description: updatedItems.join(', ') });
+      } else {
+        setMemberships([]);
+        setBusinesses([]);
       }
-      if (addedItems.length > 0) {
-        toast.info('New Items Added to Stock', { description: addedItems.join(', ') });
-      }
+    } catch (err) {
+      console.error('Error loading businesses:', err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-      return {
-        ...prev,
-        stock: newStock,
-        purchases: [...prev.purchases, { ...purchase, id: generateId(), timestamp: now }],
-      };
-    });
-  }, []);
+  async function loadBusinessData() {
+    if (!currentBusinessId) return;
+    
+    const [stockRes, salesRes, purchasesRes, ordersRes, servicesRes] = await Promise.all([
+      supabase.from('stock_items').select('*').eq('business_id', currentBusinessId).order('name'),
+      supabase.from('sales').select('*').eq('business_id', currentBusinessId).order('created_at', { ascending: false }),
+      supabase.from('purchases').select('*').eq('business_id', currentBusinessId).order('created_at', { ascending: false }),
+      supabase.from('orders').select('*').eq('business_id', currentBusinessId).order('created_at', { ascending: false }),
+      supabase.from('services').select('*').eq('business_id', currentBusinessId).order('created_at', { ascending: false }),
+    ]);
 
-  const addOrder = useCallback((order: Omit<Order, 'id' | 'timestamp' | 'code'>) => {
-    setData(prev => ({
-      ...prev,
-      orders: [...prev.orders, { ...order, id: generateId(), timestamp: new Date().toISOString(), code: generateCode() }],
-    }));
-  }, []);
-
-  const updateOrder = useCallback((id: string, updates: Partial<Order>) => {
-    setData(prev => ({
-      ...prev,
-      orders: prev.orders.map(o => (o.id === id ? { ...o, ...updates } : o)),
-    }));
-  }, []);
-
-  const updateOrderStatus = useCallback((id: string, status: Order['status']) => {
-    setData(prev => ({
-      ...prev,
-      orders: prev.orders.map(o => (o.id === id ? { ...o, status } : o)),
-    }));
-  }, []);
-
-  const completeOrderToSale = useCallback((orderId: string) => {
-    const now = new Date().toISOString();
-    setData(prev => {
-      const order = prev.orders.find(o => o.id === orderId);
-      if (!order || order.transferredToSale) return prev;
-
-      // Deduct from stock
-      const newStock = [...prev.stock];
-      order.items.forEach(orderItem => {
-        const idx = newStock.findIndex(s => s.name.toLowerCase() === orderItem.itemName.toLowerCase());
-        if (idx >= 0) {
-          newStock[idx] = {
-            ...newStock[idx],
-            quantity: Math.max(0, newStock[idx].quantity - orderItem.quantity),
-            updatedAt: now,
-          };
-        }
-      });
-
-      const saleItems = order.items.map(item => ({
-        id: generateId(),
-        stockItemId: '',
-        itemName: item.itemName,
-        category: item.category,
-        quality: item.quality,
-        quantity: item.quantity,
-        priceType: item.priceType,
-        unitPrice: item.unitPrice,
-        subtotal: item.subtotal,
-        timestamp: now,
+    setStock((stockRes.data || []) as StockItem[]);
+    
+    // Load sale items for each sale
+    const salesData = (salesRes.data || []) as any[];
+    if (salesData.length > 0) {
+      const saleIds = salesData.map(s => s.id);
+      const { data: saleItemsData } = await supabase.from('sale_items').select('*').in('sale_id', saleIds);
+      const salesWithItems = salesData.map(s => ({
+        ...s,
+        items: (saleItemsData || []).filter((si: any) => si.sale_id === s.id),
       }));
+      setSales(salesWithItems as Sale[]);
+    } else {
+      setSales([]);
+    }
 
-      const newSale: Sale = {
-        id: generateId(),
-        items: saleItems,
-        grandTotal: order.grandTotal,
-        timestamp: now,
-        recordedBy: 'Order Transfer',
-        fromOrderId: order.id,
-        fromOrderCode: order.code,
-      };
+    // Load purchase items
+    const purchasesData = (purchasesRes.data || []) as any[];
+    if (purchasesData.length > 0) {
+      const purchaseIds = purchasesData.map(p => p.id);
+      const { data: purchaseItemsData } = await supabase.from('purchase_items').select('*').in('purchase_id', purchaseIds);
+      const purchasesWithItems = purchasesData.map(p => ({
+        ...p,
+        items: (purchaseItemsData || []).filter((pi: any) => pi.purchase_id === p.id),
+      }));
+      setPurchases(purchasesWithItems as Purchase[]);
+    } else {
+      setPurchases([]);
+    }
 
-      toast.success('Order Transferred to Sales', {
-        description: `Order ${order.code} (${order.customerName}) — $${order.grandTotal.toFixed(2)}`,
-      });
+    // Load order items
+    const ordersData = (ordersRes.data || []) as any[];
+    if (ordersData.length > 0) {
+      const orderIds = ordersData.map(o => o.id);
+      const { data: orderItemsData } = await supabase.from('order_items').select('*').in('order_id', orderIds);
+      const ordersWithItems = ordersData.map(o => ({
+        ...o,
+        items: (orderItemsData || []).filter((oi: any) => oi.order_id === o.id),
+      }));
+      setOrders(ordersWithItems as Order[]);
+    } else {
+      setOrders([]);
+    }
 
-      return {
-        ...prev,
-        stock: newStock,
-        orders: prev.orders.map(o => o.id === orderId ? { ...o, status: 'completed' as const, transferredToSale: true } : o),
-        sales: [...prev.sales, newSale],
-      };
-    });
-  }, []);
+    setServices((servicesRes.data || []) as ServiceRecord[]);
+  }
 
-  const addService = useCallback((service: Omit<ServiceRecord, 'id' | 'timestamp'>) => {
-    setData(prev => ({
-      ...prev,
-      services: [...prev.services, { ...service, id: generateId(), timestamp: new Date().toISOString() }],
-    }));
-  }, []);
+  function setupRealtimeSubscriptions() {
+    if (!currentBusinessId) return;
 
-  const getTopSellingItems = useCallback(() => {
-    const counts: Record<string, { name: string; totalSold: number }> = {};
-    data.sales.forEach(sale => {
-      sale.items.forEach(item => {
-        if (!counts[item.itemName]) counts[item.itemName] = { name: item.itemName, totalSold: 0 };
-        counts[item.itemName].totalSold += item.quantity;
-      });
-    });
-    return Object.values(counts).sort((a, b) => b.totalSold - a.totalSold).slice(0, 10);
-  }, [data.sales]);
+    const channel = supabase
+      .channel(`business-${currentBusinessId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `business_id=eq.${currentBusinessId}` }, () => {
+        loadBusinessData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sales', filter: `business_id=eq.${currentBusinessId}` }, () => {
+        loadBusinessData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases', filter: `business_id=eq.${currentBusinessId}` }, () => {
+        loadBusinessData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `business_id=eq.${currentBusinessId}` }, () => {
+        loadBusinessData();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'services', filter: `business_id=eq.${currentBusinessId}` }, () => {
+        loadBusinessData();
+      })
+      .subscribe();
 
-  const getLowStockItems = useCallback(() => {
-    return data.stock.filter(item => item.quantity > 0 && item.quantity <= item.minStockLevel);
-  }, [data.stock]);
-
-  const getOutOfStockItems = useCallback(() => {
-    return data.stock.filter(item => item.quantity === 0);
-  }, [data.stock]);
-
-  const getTodayRevenue = useCallback(() => {
-    const today = new Date().toDateString();
-    return data.sales
-      .filter(s => new Date(s.timestamp).toDateString() === today)
-      .reduce((sum, s) => sum + s.grandTotal, 0);
-  }, [data.sales]);
-
-  const getExpectedRevenue = useCallback(() => {
-    let wholesale = 0;
-    let retail = 0;
-    let totalCost = 0;
-
-    data.stock.forEach(item => {
-      wholesale += item.quantity * item.wholesalePrice;
-      retail += item.quantity * item.retailPrice;
-    });
-
-    // Estimate cost from purchases
-    data.purchases.forEach(p => {
-      totalCost += p.grandTotal;
-    });
-
-    return {
-      wholesale,
-      retail,
-      totalProfit: retail - totalCost,
+    return () => {
+      supabase.removeChannel(channel);
     };
-  }, [data.stock, data.purchases]);
+  }
+
+  const createBusiness = useCallback(async (name: string, address: string, contact: string, email: string) => {
+    if (!user) return;
+    const { data, error } = await supabase.from('businesses').insert({
+      name, address, contact, email, owner_id: user.id,
+    }).select().single();
+    if (error) { toast.error(error.message); return; }
+    toast.success('Business created!');
+    await loadBusinesses();
+    if (data) setCurrentBusinessId(data.id);
+  }, [user]);
+
+  const updateBusiness = useCallback(async (updates: Partial<Business>) => {
+    if (!currentBusinessId) return;
+    const { error } = await supabase.from('businesses').update(updates).eq('id', currentBusinessId);
+    if (error) { toast.error(error.message); return; }
+    setBusinesses(prev => prev.map(b => b.id === currentBusinessId ? { ...b, ...updates } : b));
+    toast.success('Business updated!');
+  }, [currentBusinessId]);
+
+  const addStockItem = useCallback(async (item: Omit<StockItem, 'id' | 'business_id' | 'created_at' | 'updated_at'>) => {
+    if (!currentBusinessId) return;
+    const { error } = await supabase.from('stock_items').insert({ ...item, business_id: currentBusinessId });
+    if (error) { toast.error(error.message); return; }
+    toast.success('Item added to stock!');
+  }, [currentBusinessId]);
+
+  const updateStockItem = useCallback(async (id: string, updates: Partial<StockItem>) => {
+    const { error } = await supabase.from('stock_items').update(updates).eq('id', id);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Stock item updated!');
+  }, []);
+
+  const deleteStockItem = useCallback(async (id: string) => {
+    const { error } = await supabase.from('stock_items').delete().eq('id', id);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Stock item deleted!');
+  }, []);
+
+  const addSale = useCallback(async (
+    items: { stock_item_id?: string; item_name: string; category: string; quality: string; quantity: number; price_type: string; unit_price: number; subtotal: number }[],
+    grandTotal: number, recordedBy: string, fromOrderId?: string, fromOrderCode?: string
+  ) => {
+    if (!currentBusinessId) return;
+    const { data: saleData, error: saleError } = await supabase.from('sales').insert({
+      business_id: currentBusinessId, grand_total: grandTotal, recorded_by: recordedBy,
+      from_order_id: fromOrderId || null, from_order_code: fromOrderCode || null,
+    }).select().single();
+    if (saleError || !saleData) { toast.error(saleError?.message || 'Failed'); return; }
+
+    const saleItems = items.map(item => ({
+      sale_id: saleData.id,
+      stock_item_id: item.stock_item_id || null,
+      item_name: item.item_name,
+      category: item.category,
+      quality: item.quality,
+      quantity: item.quantity,
+      price_type: item.price_type,
+      unit_price: item.unit_price,
+      subtotal: item.subtotal,
+    }));
+    await supabase.from('sale_items').insert(saleItems);
+
+    // Deduct from stock
+    for (const item of items) {
+      if (item.stock_item_id) {
+        const stockItem = stock.find(s => s.id === item.stock_item_id);
+        if (stockItem) {
+          await supabase.from('stock_items').update({
+            quantity: Math.max(0, stockItem.quantity - item.quantity),
+          }).eq('id', item.stock_item_id);
+        }
+      } else {
+        const stockItem = stock.find(s => s.name.toLowerCase() === item.item_name.toLowerCase());
+        if (stockItem) {
+          await supabase.from('stock_items').update({
+            quantity: Math.max(0, stockItem.quantity - item.quantity),
+          }).eq('id', stockItem.id);
+        }
+      }
+    }
+    toast.success('Sale recorded!');
+  }, [currentBusinessId, stock]);
+
+  const addPurchase = useCallback(async (
+    items: { item_name: string; category: string; quality: string; quantity: number; unit_price: number; subtotal: number }[],
+    grandTotal: number, supplier: string, recordedBy: string
+  ) => {
+    if (!currentBusinessId) return;
+    const { data: purchaseData, error } = await supabase.from('purchases').insert({
+      business_id: currentBusinessId, grand_total: grandTotal, supplier, recorded_by: recordedBy,
+    }).select().single();
+    if (error || !purchaseData) { toast.error(error?.message || 'Failed'); return; }
+
+    const purchaseItems = items.map(item => ({
+      purchase_id: purchaseData.id, item_name: item.item_name, category: item.category,
+      quality: item.quality, quantity: item.quantity, unit_price: item.unit_price, subtotal: item.subtotal,
+    }));
+    await supabase.from('purchase_items').insert(purchaseItems);
+
+    // Update stock
+    for (const item of items) {
+      const existingStock = stock.find(s => s.name.toLowerCase() === item.item_name.toLowerCase());
+      if (existingStock) {
+        await supabase.from('stock_items').update({
+          quantity: existingStock.quantity + item.quantity,
+        }).eq('id', existingStock.id);
+        toast.success(`Stock Updated: ${item.item_name} (+${item.quantity})`);
+      } else {
+        await supabase.from('stock_items').insert({
+          business_id: currentBusinessId, name: item.item_name, category: item.category,
+          quality: item.quality, wholesale_price: item.unit_price, retail_price: item.unit_price,
+          quantity: item.quantity, min_stock_level: 5,
+        });
+        toast.info(`New Item Added to Stock: ${item.item_name}`);
+      }
+    }
+    toast.success('Purchase recorded!');
+  }, [currentBusinessId, stock]);
+
+  const addOrder = useCallback(async (
+    type: string, customerName: string,
+    items: { item_name: string; category: string; quality: string; quantity: number; price_type: string; unit_price: number; subtotal: number }[],
+    grandTotal: number, status: string
+  ) => {
+    if (!currentBusinessId) return;
+    const code = generateCode();
+    const { data: orderData, error } = await supabase.from('orders').insert({
+      business_id: currentBusinessId, type, customer_name: customerName,
+      grand_total: grandTotal, status, code,
+    }).select().single();
+    if (error || !orderData) { toast.error(error?.message || 'Failed'); return; }
+
+    const orderItems = items.map(item => ({
+      order_id: orderData.id, item_name: item.item_name, category: item.category,
+      quality: item.quality, quantity: item.quantity, price_type: item.price_type,
+      unit_price: item.unit_price, subtotal: item.subtotal,
+    }));
+    await supabase.from('order_items').insert(orderItems);
+    toast.success('Order created!');
+  }, [currentBusinessId]);
+
+  const updateOrder = useCallback(async (id: string, items: OrderItem[], grandTotal: number, status?: string) => {
+    const updates: any = { grand_total: grandTotal };
+    if (status) updates.status = status;
+    await supabase.from('orders').update(updates).eq('id', id);
+    // Delete old items and insert new ones
+    await supabase.from('order_items').delete().eq('order_id', id);
+    const orderItems = items.map(item => ({
+      order_id: id, item_name: item.item_name, category: item.category,
+      quality: item.quality, quantity: item.quantity, price_type: item.price_type,
+      unit_price: item.unit_price, subtotal: item.subtotal,
+    }));
+    await supabase.from('order_items').insert(orderItems);
+    toast.success('Order updated!');
+    await loadBusinessData();
+  }, [currentBusinessId]);
+
+  const completeOrderToSale = useCallback(async (orderId: string) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order || order.transferred_to_sale) return;
+
+    // Mark order as completed
+    await supabase.from('orders').update({ status: 'completed', transferred_to_sale: true }).eq('id', orderId);
+
+    // Create sale from order
+    await addSale(
+      order.items.map(item => ({
+        item_name: item.item_name, category: item.category, quality: item.quality,
+        quantity: item.quantity, price_type: item.price_type, unit_price: item.unit_price,
+        subtotal: item.subtotal,
+      })),
+      order.grand_total,
+      'Order Transfer',
+      order.id,
+      order.code
+    );
+
+    toast.success(`Order ${order.code} transferred to sales!`);
+    await loadBusinessData();
+  }, [orders, addSale]);
+
+  const addService = useCallback(async (service: Omit<ServiceRecord, 'id' | 'business_id' | 'created_at'>) => {
+    if (!currentBusinessId) return;
+    const { error } = await supabase.from('services').insert({ ...service, business_id: currentBusinessId });
+    if (error) { toast.error(error.message); return; }
+    toast.success('Service recorded!');
+  }, [currentBusinessId]);
+
+  const generateInviteCode = useCallback(async (): Promise<string | null> => {
+    if (!currentBusinessId || !user) return null;
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const { error } = await supabase.from('invite_codes').insert({
+      business_id: currentBusinessId, code, created_by: user.id,
+    });
+    if (error) { toast.error(error.message); return null; }
+    return code;
+  }, [currentBusinessId, user]);
+
+  const redeemInviteCode = useCallback(async (code: string): Promise<boolean> => {
+    if (!user) return false;
+    try {
+      const response = await supabase.functions.invoke('redeem-invite', {
+        body: { code: code.toUpperCase() },
+      });
+      if (response.error) { toast.error('Invalid or expired invite code'); return false; }
+      toast.success('Successfully joined business!');
+      await loadBusinesses();
+      return true;
+    } catch {
+      toast.error('Failed to redeem code');
+      return false;
+    }
+  }, [user]);
+
+  const getMembers = useCallback(async () => {
+    if (!currentBusinessId) return [];
+    const { data: memberData } = await supabase
+      .from('business_memberships')
+      .select('user_id, role')
+      .eq('business_id', currentBusinessId);
+    if (!memberData) return [];
+    
+    const userIds = memberData.map(m => m.user_id);
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .in('id', userIds);
+    
+    return memberData.map(m => {
+      const profile = profileData?.find(p => p.id === m.user_id);
+      return {
+        user_id: m.user_id,
+        role: m.role,
+        email: profile?.email || '',
+        full_name: profile?.full_name || '',
+      };
+    });
+  }, [currentBusinessId]);
+
+  const removeMember = useCallback(async (userId: string) => {
+    if (!currentBusinessId) return;
+    const { error } = await supabase.from('business_memberships').delete()
+      .eq('user_id', userId).eq('business_id', currentBusinessId);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Member removed');
+  }, [currentBusinessId]);
+
+  const updateMemberRole = useCallback(async (userId: string, role: string) => {
+    if (!currentBusinessId) return;
+    // Delete and re-insert since we can't update role easily with RLS
+    await supabase.from('business_memberships').delete()
+      .eq('user_id', userId).eq('business_id', currentBusinessId);
+    const { error } = await supabase.from('business_memberships').insert({
+      user_id: userId, business_id: currentBusinessId, role: role as any,
+    });
+    if (error) { toast.error(error.message); return; }
+    toast.success('Role updated');
+  }, [currentBusinessId]);
+
+  const refreshData = useCallback(async () => {
+    await loadBusinessData();
+  }, [currentBusinessId]);
 
   return (
-    <BusinessContext.Provider
-      value={{
-        data,
-        updateBusinessInfo,
-        addStockItem,
-        updateStockItem,
-        deleteStockItem,
-        addSale,
-        addPurchase,
-        addOrder,
-        updateOrder,
-        updateOrderStatus,
-        completeOrderToSale,
-        addService,
-        getTopSellingItems,
-        getLowStockItems,
-        getOutOfStockItems,
-        getTodayRevenue,
-        getExpectedRevenue,
-      }}
-    >
+    <BusinessContext.Provider value={{
+      currentBusiness, businesses, memberships, userRole,
+      stock, sales, purchases, orders, services, loading,
+      setCurrentBusinessId, createBusiness, updateBusiness,
+      addStockItem, updateStockItem, deleteStockItem,
+      addSale, addPurchase, addOrder, updateOrder, completeOrderToSale,
+      addService, generateInviteCode, redeemInviteCode,
+      getMembers, removeMember, updateMemberRole, refreshData,
+    }}>
       {children}
     </BusinessContext.Provider>
   );
