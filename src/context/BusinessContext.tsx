@@ -144,7 +144,9 @@ interface BusinessContextType {
   updateOrder: (id: string, items: OrderItem[], grandTotal: number, status?: string) => Promise<void>;
   completeOrderToSale: (orderId: string) => Promise<void>;
   addService: (service: Omit<ServiceRecord, 'id' | 'business_id' | 'created_at'>) => Promise<void>;
-  generateInviteCode: () => Promise<string | null>;
+  generateInviteCode: (type?: 'worker' | 'customer') => Promise<string | null>;
+  getCustomers: () => Promise<{ id: string; user_id: string; customer_name: string; phone: string; created_at: string }[]>;
+  removeCustomer: (id: string) => Promise<void>;
   redeemInviteCode: (code: string) => Promise<boolean>;
   getMembers: () => Promise<{ user_id: string; role: string; email: string; full_name: string }[]>;
   removeMember: (userId: string) => Promise<void>;
@@ -508,12 +510,12 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     toast.success('Service recorded!');
   }, [currentBusinessId]);
 
-  const generateInviteCode = useCallback(async (): Promise<string | null> => {
+  const generateInviteCode = useCallback(async (type: 'worker' | 'customer' = 'worker'): Promise<string | null> => {
     if (!currentBusinessId || !user) return null;
     const code = Math.random().toString(36).substring(2, 8).toUpperCase();
     const { error } = await supabase.from('invite_codes').insert({
-      business_id: currentBusinessId, code, created_by: user.id,
-    });
+      business_id: currentBusinessId, code, created_by: user.id, type,
+    } as any);
     if (error) { toast.error(error.message); return null; }
     return code;
   }, [currentBusinessId, user]);
@@ -579,6 +581,22 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     toast.success('Role updated');
   }, [currentBusinessId]);
 
+  const getCustomers = useCallback(async () => {
+    if (!currentBusinessId) return [];
+    const { data } = await supabase
+      .from('business_customers')
+      .select('*')
+      .eq('business_id', currentBusinessId)
+      .order('created_at', { ascending: false });
+    return (data || []) as any[];
+  }, [currentBusinessId]);
+
+  const removeCustomer = useCallback(async (id: string) => {
+    const { error } = await supabase.from('business_customers').delete().eq('id', id);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Customer removed');
+  }, []);
+
   const refreshData = useCallback(async () => {
     await loadBusinessData();
   }, [currentBusinessId]);
@@ -591,7 +609,8 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       addStockItem, updateStockItem, deleteStockItem,
       addSale, addPurchase, addOrder, updateOrder, completeOrderToSale,
       addService, generateInviteCode, redeemInviteCode,
-      getMembers, removeMember, updateMemberRole, refreshData,
+      getMembers, removeMember, updateMemberRole,
+      getCustomers, removeCustomer, refreshData,
     }}>
       {children}
     </BusinessContext.Provider>

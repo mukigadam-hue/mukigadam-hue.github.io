@@ -14,6 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_customers: {
+        Row: {
+          business_id: string
+          created_at: string
+          customer_name: string
+          id: string
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          customer_name?: string
+          id?: string
+          phone?: string
+          user_id: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          customer_name?: string
+          id?: string
+          phone?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_customers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_memberships: {
         Row: {
           business_id: string
@@ -88,6 +123,7 @@ export type Database = {
           expires_at: string
           id: string
           is_active: boolean
+          type: string
         }
         Insert: {
           business_id: string
@@ -97,6 +133,7 @@ export type Database = {
           expires_at?: string
           id?: string
           is_active?: boolean
+          type?: string
         }
         Update: {
           business_id?: string
@@ -106,6 +143,7 @@ export type Database = {
           expires_at?: string
           id?: string
           is_active?: boolean
+          type?: string
         }
         Relationships: [
           {

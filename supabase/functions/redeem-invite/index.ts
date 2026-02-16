@@ -16,7 +16,6 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
     )
 
-    // Get the user from the auth header
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Not authenticated' }), {
@@ -54,33 +53,72 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Check if user is already a member
-    const { data: existing } = await supabase
-      .from('business_memberships')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('business_id', invite.business_id)
-      .maybeSingle()
+    const inviteType = invite.type || 'worker'
 
-    if (existing) {
-      return new Response(JSON.stringify({ error: 'Already a member of this business' }), {
-        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
-    }
+    if (inviteType === 'worker') {
+      // Check if user is already a member
+      const { data: existing } = await supabase
+        .from('business_memberships')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('business_id', invite.business_id)
+        .maybeSingle()
 
-    // Add user as worker
-    const { error: memberError } = await supabase
-      .from('business_memberships')
-      .insert({
-        user_id: user.id,
-        business_id: invite.business_id,
-        role: 'worker',
-      })
+      if (existing) {
+        return new Response(JSON.stringify({ error: 'Already a member of this business' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
 
-    if (memberError) {
-      return new Response(JSON.stringify({ error: memberError.message }), {
-        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+      // Add user as worker
+      const { error: memberError } = await supabase
+        .from('business_memberships')
+        .insert({
+          user_id: user.id,
+          business_id: invite.business_id,
+          role: 'worker',
+        })
+
+      if (memberError) {
+        return new Response(JSON.stringify({ error: memberError.message }), {
+          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+    } else if (inviteType === 'customer') {
+      // Check if already a customer
+      const { data: existing } = await supabase
+        .from('business_customers')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('business_id', invite.business_id)
+        .maybeSingle()
+
+      if (existing) {
+        return new Response(JSON.stringify({ error: 'Already a customer of this business' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
+
+      // Get user profile for name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      const { error: custError } = await supabase
+        .from('business_customers')
+        .insert({
+          user_id: user.id,
+          business_id: invite.business_id,
+          customer_name: profile?.full_name || '',
+        })
+
+      if (custError) {
+        return new Response(JSON.stringify({ error: custError.message }), {
+          status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        })
+      }
     }
 
     // Deactivate the invite code
@@ -89,7 +127,7 @@ Deno.serve(async (req) => {
       .update({ is_active: false })
       .eq('id', invite.id)
 
-    return new Response(JSON.stringify({ success: true, business_id: invite.business_id }), {
+    return new Response(JSON.stringify({ success: true, business_id: invite.business_id, type: inviteType }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
