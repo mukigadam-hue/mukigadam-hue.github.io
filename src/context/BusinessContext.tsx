@@ -94,6 +94,19 @@ export interface Order {
   items: OrderItem[];
 }
 
+export interface ServiceItemUsed {
+  id: string;
+  service_id: string;
+  stock_item_id: string;
+  item_name: string;
+  category: string;
+  quality: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+  created_at: string;
+}
+
 export interface ServiceRecord {
   id: string;
   business_id: string;
@@ -103,6 +116,7 @@ export interface ServiceRecord {
   customer_name: string;
   seller_name: string;
   created_at: string;
+  items_used?: ServiceItemUsed[];
 }
 
 export interface Business {
@@ -180,7 +194,7 @@ interface BusinessContextType {
   addOrder: (type: string, customerName: string, items: { item_name: string; category: string; quality: string; quantity: number; price_type: string; unit_price: number; subtotal: number }[], grandTotal: number, status: string) => Promise<void>;
   updateOrder: (id: string, items: OrderItem[], grandTotal: number, status?: string) => Promise<void>;
   completeOrderToSale: (orderId: string, buyerName: string, sellerName: string) => Promise<void>;
-  addService: (service: Omit<ServiceRecord, 'id' | 'business_id' | 'created_at'>) => Promise<ServiceRecord | null>;
+  addService: (service: Omit<ServiceRecord, 'id' | 'business_id' | 'created_at' | 'items_used'>, itemsUsed?: { stock_item_id: string; item_name: string; category: string; quality: string; quantity: number; unit_price: number; subtotal: number }[]) => Promise<ServiceRecord | null>;
   saveReceipt: (receipt: Omit<ReceiptRecord, 'id' | 'created_at'>) => Promise<void>;
   getReceipts: () => Promise<ReceiptRecord[]>;
   markNotificationRead: (id: string) => Promise<void>;
@@ -588,16 +602,46 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     await loadBusinessData();
   }, [orders, addSale]);
 
-  const addService = useCallback(async (service: Omit<ServiceRecord, 'id' | 'business_id' | 'created_at'>): Promise<ServiceRecord | null> => {
+  const addService = useCallback(async (
+    service: Omit<ServiceRecord, 'id' | 'business_id' | 'created_at' | 'items_used'>,
+    itemsUsed?: { stock_item_id: string; item_name: string; category: string; quality: string; quantity: number; unit_price: number; subtotal: number }[]
+  ): Promise<ServiceRecord | null> => {
     if (!currentBusinessId) return null;
     const { data, error } = await supabase.from('services').insert({
       ...service,
       business_id: currentBusinessId,
     } as any).select().single();
-    if (error) { toast.error(error.message); return null; }
+    if (error || !data) { toast.error(error?.message || 'Failed'); return null; }
+
+    // Save items used and deduct from stock
+    if (itemsUsed && itemsUsed.length > 0) {
+      const serviceItemRows = itemsUsed.map(item => ({
+        service_id: data.id,
+        stock_item_id: item.stock_item_id,
+        item_name: item.item_name,
+        category: item.category,
+        quality: item.quality,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        subtotal: item.subtotal,
+      }));
+      await supabase.from('service_items').insert(serviceItemRows);
+
+      // Deduct from stock
+      const currentStock = stock;
+      for (const item of itemsUsed) {
+        const stockItem = currentStock.find(s => s.id === item.stock_item_id);
+        if (stockItem) {
+          await supabase.from('stock_items').update({
+            quantity: Math.max(0, stockItem.quantity - item.quantity),
+          }).eq('id', item.stock_item_id);
+        }
+      }
+    }
+
     toast.success('Service recorded!');
-    return data as ServiceRecord;
-  }, [currentBusinessId]);
+    return { ...data, items_used: [] } as ServiceRecord;
+  }, [currentBusinessId, stock]);
 
   const saveReceipt = useCallback(async (receipt: Omit<ReceiptRecord, 'id' | 'created_at'>) => {
     if (!currentBusinessId) return;

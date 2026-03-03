@@ -5,8 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Wrench, Receipt as ReceiptIcon } from 'lucide-react';
+import { Wrench, Receipt as ReceiptIcon, Plus, Trash2, Package } from 'lucide-react';
 import Receipt from '@/components/Receipt';
 import type { ServiceRecord } from '@/context/BusinessContext';
 
@@ -16,41 +17,80 @@ function toSentenceCase(str: string): string {
 }
 
 export default function ServicesPage() {
-  const { services, addService, saveReceipt, currentBusiness } = useBusiness();
+  const { services, stock, addService, saveReceipt, currentBusiness } = useBusiness();
   const { fmt } = useCurrency();
   const [form, setForm] = useState({ service_name: '', description: '', cost: '', customer_name: '', seller_name: '' });
   const [receiptService, setReceiptService] = useState<ServiceRecord | null>(null);
 
+  // Items used from stock
+  const [itemsUsed, setItemsUsed] = useState<{ stock_item_id: string; item_name: string; category: string; quality: string; quantity: number; unit_price: number; subtotal: number }[]>([]);
+  const [selectedStock, setSelectedStock] = useState('');
+  const [itemQty, setItemQty] = useState('1');
+
+  const activeStock = stock.filter(s => !s.deleted_at && s.quantity > 0);
+
   const canSubmit = form.service_name.trim() && form.customer_name.trim() && form.seller_name.trim();
+
+  function addUsedItem() {
+    const stockItem = activeStock.find(s => s.id === selectedStock);
+    if (!stockItem) return;
+    const qty = parseInt(itemQty) || 1;
+    const maxQty = stockItem.quantity - itemsUsed.filter(u => u.stock_item_id === stockItem.id).reduce((s, u) => s + u.quantity, 0);
+    if (qty > maxQty) return;
+    setItemsUsed(prev => [...prev, {
+      stock_item_id: stockItem.id,
+      item_name: stockItem.name,
+      category: stockItem.category,
+      quality: stockItem.quality,
+      quantity: qty,
+      unit_price: Number(stockItem.retail_price),
+      subtotal: qty * Number(stockItem.retail_price),
+    }]);
+    setSelectedStock('');
+    setItemQty('1');
+  }
+
+  function removeUsedItem(idx: number) {
+    setItemsUsed(prev => prev.filter((_, i) => i !== idx));
+  }
+
+  const itemsTotal = itemsUsed.reduce((sum, i) => sum + i.subtotal, 0);
+  const serviceCost = parseFloat(form.cost) || 0;
+  const totalCost = serviceCost + itemsTotal;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
-    const newService = await addService({
-      service_name: toSentenceCase(form.service_name.trim()),
-      description: form.description.trim(),
-      cost: parseFloat(form.cost) || 0,
-      customer_name: toSentenceCase(form.customer_name.trim()),
-      seller_name: toSentenceCase(form.seller_name.trim()),
-    });
+    const newService = await addService(
+      {
+        service_name: toSentenceCase(form.service_name.trim()),
+        description: form.description.trim(),
+        cost: totalCost,
+        customer_name: toSentenceCase(form.customer_name.trim()),
+        seller_name: toSentenceCase(form.seller_name.trim()),
+      },
+      itemsUsed.length > 0 ? itemsUsed : undefined
+    );
     if (newService && currentBusiness) {
+      const receiptItems = [
+        { itemName: newService.service_name, category: 'Service', quality: newService.description || '-', quantity: 1, priceType: 'service', unitPrice: serviceCost, subtotal: serviceCost },
+        ...itemsUsed.map(i => ({ itemName: `[Part] ${i.item_name}`, category: i.category, quality: i.quality, quantity: i.quantity, priceType: 'part', unitPrice: i.unit_price, subtotal: i.subtotal })),
+      ];
       await saveReceipt({
         business_id: currentBusiness.id,
         receipt_type: 'service',
         transaction_id: newService.id,
         buyer_name: newService.customer_name,
         seller_name: newService.seller_name,
-        grand_total: newService.cost,
-        items: [{
-          itemName: newService.service_name, category: 'Service', quality: newService.description || '-',
-          quantity: 1, priceType: 'service', unitPrice: newService.cost, subtotal: newService.cost,
-        }],
+        grand_total: totalCost,
+        items: receiptItems,
         business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
         code: null,
       });
-      setReceiptService(newService);
+      setReceiptService({ ...newService, cost: totalCost });
     }
     setForm({ service_name: '', description: '', cost: '', customer_name: '', seller_name: '' });
+    setItemsUsed([]);
   }
 
   return (
@@ -93,16 +133,75 @@ export default function ServicesPage() {
                 />
               </div>
               <div>
-                <Label>Cost</Label>
-                <Input type="number" min="0" step="0.01" value={form.cost} onChange={e => setForm(f => ({ ...f, cost: e.target.value }))} required />
+                <Label>Service Fee (Labour)</Label>
+                <Input type="number" min="0" step="0.01" value={form.cost} onChange={e => setForm(f => ({ ...f, cost: e.target.value }))} placeholder="Labour cost" />
               </div>
             </div>
             <div>
               <Label>Description</Label>
               <Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
             </div>
+
+            {/* Items Used from Stock */}
+            <div className="border rounded-lg p-3 space-y-2">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
+                <Package className="h-3.5 w-3.5" /> Items/Parts Used (from Stock)
+              </p>
+              <div className="flex flex-wrap gap-2 items-end">
+                <div className="flex-1 min-w-[180px]">
+                  <Label className="text-xs">Select Part</Label>
+                  <Select value={selectedStock} onValueChange={setSelectedStock}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose from stock..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activeStock.map(s => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name}{s.category ? ` · ${s.category}` : ''}{s.quality ? ` · ${s.quality}` : ''} (qty: {s.quantity})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="w-16">
+                  <Label className="text-xs">Qty</Label>
+                  <Input type="number" min="1" value={itemQty} onChange={e => setItemQty(e.target.value)} />
+                </div>
+                <Button type="button" size="sm" variant="outline" onClick={addUsedItem} disabled={!selectedStock}>
+                  <Plus className="h-3.5 w-3.5 mr-1" />Add
+                </Button>
+              </div>
+              {itemsUsed.length > 0 && (
+                <div className="space-y-1 mt-2">
+                  {itemsUsed.map((item, i) => (
+                    <div key={i} className="flex items-center justify-between text-sm bg-muted/30 rounded px-2 py-1">
+                      <span>
+                        {item.item_name} × {item.quantity}
+                        {item.category && <span className="text-xs text-muted-foreground ml-1">· {item.category}</span>}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="tabular-nums font-medium text-xs">{fmt(item.subtotal)}</span>
+                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeUsedItem(i)}>
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="text-xs text-muted-foreground text-right">Parts total: {fmt(itemsTotal)}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Total */}
+            {(serviceCost > 0 || itemsUsed.length > 0) && (
+              <div className="flex justify-between items-center p-2 bg-success/5 rounded-lg border border-success/20">
+                <span className="text-sm font-medium">Total Cost (Labour + Parts)</span>
+                <span className="font-bold text-success tabular-nums">{fmt(totalCost)}</span>
+              </div>
+            )}
+
             <Button type="submit" className="w-full" disabled={!canSubmit}>
-              <Wrench className="h-4 w-4 mr-2" />Record Service
+              <Wrench className="h-4 w-4 mr-2" />Record Service — {totalCost > 0 ? fmt(totalCost) : ''}
             </Button>
           </form>
         </CardContent>
