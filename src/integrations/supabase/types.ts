@@ -519,6 +519,60 @@ export type Database = {
           },
         ]
       }
+      service_items: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          item_name: string
+          quality: string
+          quantity: number
+          service_id: string
+          stock_item_id: string
+          subtotal: number
+          unit_price: number
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          item_name: string
+          quality?: string
+          quantity?: number
+          service_id: string
+          stock_item_id: string
+          subtotal?: number
+          unit_price?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          item_name?: string
+          quality?: string
+          quantity?: number
+          service_id?: string
+          stock_item_id?: string
+          subtotal?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_items_stock_item_id_fkey"
+            columns: ["stock_item_id"]
+            isOneToOne: false
+            referencedRelation: "stock_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           business_id: string

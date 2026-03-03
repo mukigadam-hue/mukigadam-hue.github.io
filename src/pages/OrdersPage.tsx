@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -340,6 +341,18 @@ export default function OrdersPage() {
               </div>
               <div className="w-20"><Label>Qty</Label><Input type="number" min="1" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} /></div>
               {orderMode !== 'request' && (
+                <div className="w-28">
+                  <Label>Price Type</Label>
+                  <Select value={form.priceType} onValueChange={v => setForm(f => ({ ...f, priceType: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="retail">Retail</SelectItem>
+                      <SelectItem value="wholesale">Wholesale</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+              {orderMode !== 'request' && (
                 <div className="w-24"><Label>Price</Label><Input type="number" min="0" step="0.01" value={form.unitPrice} onChange={e => setForm(f => ({ ...f, unitPrice: e.target.value }))} placeholder="Auto" /></div>
               )}
               <Button onClick={addItem} disabled={!form.name.trim()}><Plus className="h-4 w-4 mr-1" />Add</Button>
@@ -350,8 +363,9 @@ export default function OrdersPage() {
                 <div className="overflow-x-auto max-h-60 overflow-y-auto">
                   <Table>
                     <TableHeader>
-                      <TableRow>
+                       <TableRow>
                         <TableHead>Item</TableHead><TableHead>Category</TableHead><TableHead>Quality</TableHead>
+                        {orderMode !== 'request' && <TableHead>Type</TableHead>}
                         <TableHead className="text-right">Qty</TableHead>
                         {orderMode !== 'request' && <TableHead className="text-right">Price</TableHead>}
                         {orderMode !== 'request' && <TableHead className="text-right">Subtotal</TableHead>}
@@ -364,6 +378,7 @@ export default function OrdersPage() {
                           <TableCell className="font-medium">{item.item_name}</TableCell>
                           <TableCell>{item.category}</TableCell>
                           <TableCell>{item.quality}</TableCell>
+                          {orderMode !== 'request' && <TableCell className="capitalize text-xs">{item.price_type}</TableCell>}
                           <TableCell className="text-right">{item.quantity}</TableCell>
                           {orderMode !== 'request' && <TableCell className="text-right tabular-nums">{fmt(item.unit_price)}</TableCell>}
                           {orderMode !== 'request' && <TableCell className="text-right font-semibold tabular-nums">{fmt(item.quantity * item.unit_price)}</TableCell>}
@@ -372,7 +387,7 @@ export default function OrdersPage() {
                       ))}
                       {orderMode !== 'request' && (
                         <TableRow>
-                          <TableCell colSpan={5} className="text-right font-bold">Grand Total</TableCell>
+                          <TableCell colSpan={6} className="text-right font-bold">Grand Total</TableCell>
                           <TableCell className="text-right font-bold text-lg text-success tabular-nums">{fmt(grandTotal)}</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
