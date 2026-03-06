@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useBusiness } from '@/context/BusinessContext';
+import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Trash2, Shield, Crown, User, Users, ShoppingBag, MessageCircle, Share2, Send } from 'lucide-react';
+import { UserPlus, Trash2, Shield, Crown, User, Users, ShoppingBag, MessageCircle, Share2, Send, Calendar, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Member {
