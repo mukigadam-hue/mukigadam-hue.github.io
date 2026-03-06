@@ -104,6 +104,43 @@ export default function FactoryTeam() {
         {isOwnerOrAdmin && <Button onClick={() => { resetForm(); setShowAdd(true); }}><Plus className="h-4 w-4 mr-1" />Add Worker</Button>}
       </div>
 
+      {/* Worker's own profile (when not owner/admin) */}
+      {!isOwnerOrAdmin && (() => {
+        const { user } = useAuth();
+        const myMembership = memberships.find((m: any) => m.business_id === currentBusiness?.id && m.user_id === user?.id);
+        const myTeamRecord = teamMembers.find(t => t.full_name.toLowerCase() === (user?.user_metadata?.full_name || '').toLowerCase());
+        const joinDate = myMembership?.created_at;
+        const tenure = joinDate ? Math.floor((Date.now() - new Date(joinDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
+        const tenureLabel = tenure < 30 ? `${tenure} days` : tenure < 365 ? `${Math.floor(tenure / 30)} months` : `${Math.floor(tenure / 365)} yr ${Math.floor((tenure % 365) / 30)} mo`;
+        return (
+          <Card className="shadow-card border-primary/20">
+            <CardContent className="p-4">
+              <h2 className="text-base font-semibold flex items-center gap-2 mb-3"><User className="h-4 w-4" /> My Employment Details</h2>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                  <p className="text-xs text-muted-foreground">Role</p>
+                  <p className="text-sm font-semibold capitalize">{myMembership?.role || 'worker'}</p>
+                </div>
+                {myTeamRecord && (
+                  <div className="p-3 rounded-lg bg-success/5 border border-success/20">
+                    <p className="text-xs text-muted-foreground">Salary</p>
+                    <p className="text-sm font-semibold text-success">{fmt(Number(myTeamRecord.salary))}/mo</p>
+                  </div>
+                )}
+                <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" /> Hired</p>
+                  <p className="text-sm font-semibold">{myTeamRecord?.hire_date ? new Date(myTeamRecord.hire_date).toLocaleDateString() : joinDate ? new Date(joinDate).toLocaleDateString() : 'N/A'}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                  <p className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="h-3 w-3" /> Tenure</p>
+                  <p className="text-sm font-semibold">{tenureLabel}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {/* Invite Section */}
       <div className="grid md:grid-cols-2 gap-4">
         <Card className="shadow-card border-dashed">
