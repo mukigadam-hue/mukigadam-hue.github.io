@@ -18,7 +18,7 @@ const RANKS = ['Supervisor', 'Inspector', 'Maintenance', 'Security', 'Worker', '
 
 export default function FactoryTeam() {
   const { teamMembers, addTeamMember, updateTeamMember, deleteTeamMember } = useFactory();
-  const { currentBusiness, generateInviteCode, redeemInviteCode } = useBusiness();
+  const { currentBusiness, userRole, generateInviteCode, redeemInviteCode } = useBusiness();
   const { fmt } = useCurrency();
   const [showAdd, setShowAdd] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -27,6 +27,8 @@ export default function FactoryTeam() {
   const [workerCode, setWorkerCode] = useState<string | null>(null);
   const [redeemCode, setRedeemCode] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const isOwnerOrAdmin = userRole === 'owner' || userRole === 'admin';
 
   const activeMembers = teamMembers.filter(t => t.is_active);
   const inactiveMembers = teamMembers.filter(t => !t.is_active);
@@ -95,10 +97,10 @@ export default function FactoryTeam() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="h-6 w-6" /> Factory Team</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {activeMembers.length} active members · Monthly salary: {fmt(totalSalary)}
+            {activeMembers.length} active members{isOwnerOrAdmin && ` · Monthly salary: ${fmt(totalSalary)}`}
           </p>
         </div>
-        <Button onClick={() => { resetForm(); setShowAdd(true); }}><Plus className="h-4 w-4 mr-1" />Add Worker</Button>
+        {isOwnerOrAdmin && <Button onClick={() => { resetForm(); setShowAdd(true); }}><Plus className="h-4 w-4 mr-1" />Add Worker</Button>}
       </div>
 
       {/* Invite Section */}
