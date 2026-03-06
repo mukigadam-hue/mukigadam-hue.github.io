@@ -136,7 +136,8 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
 }
 
 export default function TeamPage() {
-  const { currentBusiness, userRole, generateInviteCode, getMembers, removeMember, updateMemberRole, getCustomers, removeCustomer } = useBusiness();
+  const { currentBusiness, userRole, generateInviteCode, getMembers, removeMember, updateMemberRole, getCustomers, removeCustomer, memberships } = useBusiness();
+  const { user } = useAuth();
   const [members, setMembers] = useState<Member[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [workerCode, setWorkerCode] = useState<string | null>(null);
