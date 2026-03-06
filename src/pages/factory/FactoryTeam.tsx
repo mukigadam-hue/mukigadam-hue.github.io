@@ -107,7 +107,6 @@ export default function FactoryTeam() {
 
       {/* Worker's own profile (when not owner/admin) */}
       {!isOwnerOrAdmin && (() => {
-        const { user } = useAuth();
         const myMembership = memberships.find((m: any) => m.business_id === currentBusiness?.id && m.user_id === user?.id);
         const myTeamRecord = teamMembers.find(t => t.full_name.toLowerCase() === (user?.user_metadata?.full_name || '').toLowerCase());
         const joinDate = myMembership?.created_at;
