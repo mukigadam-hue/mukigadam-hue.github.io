@@ -28,6 +28,8 @@ const factoryNavItems = [
   { to: '/sales', label: 'Sales', icon: TrendingUp },
   { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
   { to: '/orders', label: 'Orders', icon: ClipboardList },
+  { to: '/checkout', label: 'Checkout', icon: ShoppingBag },
+  { to: '/payments', label: 'Verify Payments', icon: ShieldCheck },
   { to: '/services', label: 'Services', icon: Wrench },
   { to: '/expenses', label: 'Expenses', icon: Flame },
   { to: '/team', label: 'Team', icon: Users },
