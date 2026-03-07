@@ -18,6 +18,8 @@ import ServicesPage from "./pages/ServicesPage";
 import SettingsPage from "./pages/SettingsPage";
 import TeamPage from "./pages/TeamPage";
 import NotFound from "./pages/NotFound";
+import CheckoutPage from "./pages/CheckoutPage";
+import PaymentVerificationPage from "./pages/PaymentVerificationPage";
 
 // Factory pages
 import FactoryDashboard from "./pages/factory/FactoryDashboard";
@@ -86,6 +88,8 @@ function BusinessContent() {
               <Route path="/sales" element={<FactorySales />} />
               <Route path="/purchases" element={<FactoryPurchases />} />
               <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/payments" element={<PaymentVerificationPage />} />
               <Route path="/services" element={<FactoryServices />} />
               <Route path="/expenses" element={<FactoryExpenses />} />
               <Route path="/team" element={<FactoryTeam />} />
@@ -107,6 +111,8 @@ function BusinessContent() {
           <Route path="/sales" element={<SalesPage />} />
           <Route path="/purchases" element={<PurchasesPage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/payments" element={<PaymentVerificationPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/team" element={<TeamPage />} />

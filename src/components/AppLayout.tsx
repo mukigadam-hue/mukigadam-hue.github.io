@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Settings, Users, LogOut, Building2, Crown, User, Bell, BellDot, Factory, Flame, Boxes } from 'lucide-react';
+import { LayoutDashboard, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Settings, Users, LogOut, Building2, Crown, User, Bell, BellDot, Factory, Flame, Boxes, ShoppingBag, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useBusiness } from '@/context/BusinessContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,6 +13,8 @@ const businessNavItems = [
   { to: '/sales', label: 'Sales', icon: TrendingUp },
   { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
   { to: '/orders', label: 'Orders', icon: ClipboardList },
+  { to: '/checkout', label: 'Checkout', icon: ShoppingBag },
+  { to: '/payments', label: 'Verify Payments', icon: ShieldCheck },
   { to: '/services', label: 'Services', icon: Wrench },
   { to: '/team', label: 'Team', icon: Users },
   { to: '/settings', label: 'Settings', icon: Settings },
@@ -26,6 +28,8 @@ const factoryNavItems = [
   { to: '/sales', label: 'Sales', icon: TrendingUp },
   { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
   { to: '/orders', label: 'Orders', icon: ClipboardList },
+  { to: '/checkout', label: 'Checkout', icon: ShoppingBag },
+  { to: '/payments', label: 'Verify Payments', icon: ShieldCheck },
   { to: '/services', label: 'Services', icon: Wrench },
   { to: '/expenses', label: 'Expenses', icon: Flame },
   { to: '/team', label: 'Team', icon: Users },
@@ -210,7 +214,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center py-2">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center py-2 pb-safe">
         {mobileMainNav.map(({ to, label, icon: Icon }) => {
           const active = pathname === to;
           return (
