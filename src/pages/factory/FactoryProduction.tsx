@@ -210,6 +210,8 @@ export default function FactoryProduction() {
         </CardContent>
       </Card>
 
+      <AdSpace variant="banner" />
+
       {/* Production History */}
       <Card className="shadow-card">
         <CardContent className="p-4">
