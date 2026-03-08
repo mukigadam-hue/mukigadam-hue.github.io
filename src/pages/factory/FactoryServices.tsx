@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import type { ServiceRecord } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
 
-function toSentenceCase(str: string) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str; }
+import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
 const SERVICE_TYPES = [
   'Equipment Repair', 'Machine Maintenance', 'Custom Manufacturing',

@@ -12,7 +12,7 @@ import { Plus, Edit2, Trash2, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import AdSpace from '@/components/AdSpace';
 
-function toSentenceCase(str: string) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str; }
+import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
 const UNIT_TYPES = ['Pieces', 'Kilograms', 'Litres', 'Metres', 'Tonnes', 'Rolls'];
 const CATEGORIES = ['Chemicals', 'Fabrics', 'Metals', 'Plastics', 'Wood', 'Electronics', 'Agricultural', 'Packaging', 'Other'];

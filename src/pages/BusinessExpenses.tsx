@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Trash2, Plus, Flame } from 'lucide-react';
 import AdSpace from '@/components/AdSpace';
 
-function toSentenceCase(str: string) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str; }
+import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
 const EXPENSE_CATEGORIES = [
   'Rent', 'Electricity', 'Water', 'Internet', 'Cleaning Equipment',

@@ -12,10 +12,7 @@ import Receipt from '@/components/Receipt';
 import type { ServiceRecord } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
 
-function toSentenceCase(str: string): string {
-  if (!str) return str;
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
+import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
 export default function ServicesPage() {
   const { services, stock, addService, saveReceipt, currentBusiness, updateServicePayment } = useBusiness();

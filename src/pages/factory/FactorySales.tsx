@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import type { Sale } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
 
-function toSentenceCase(str: string) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str; }
+import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
 export default function FactorySales() {
   const { stock, sales, addSale, saveReceipt, currentBusiness, updateSalePayment } = useBusiness();

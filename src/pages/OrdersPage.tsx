@@ -18,10 +18,7 @@ import BarcodeScanner from '@/components/BarcodeScanner';
 import type { Order, OrderItem } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
 
-function toSentenceCase(str: string): string {
-  if (!str) return str;
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
+import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
 export default function OrdersPage() {
   const { stock, orders, addOrder, updateOrder, completeOrderToSale, saveReceipt, currentBusiness, addStockItem, addExpense, refreshData, notifications, userRole } = useBusiness();

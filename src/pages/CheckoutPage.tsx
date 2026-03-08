@@ -15,9 +15,7 @@ import Receipt from '@/components/Receipt';
 import type { Order } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
 
-function toSentenceCase(str: string) {
-  return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str;
-}
+import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
 export default function CheckoutPage() {
   const { stock, addOrder, saveReceipt, currentBusiness } = useBusiness();

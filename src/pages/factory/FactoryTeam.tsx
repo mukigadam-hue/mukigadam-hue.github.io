@@ -14,7 +14,7 @@ import { Plus, Edit2, Trash2, Users, UserPlus, Send, Calendar, Clock, User, Wall
 import WorkerPaymentManager from '@/components/factory/WorkerPaymentManager';
 import AdSpace from '@/components/AdSpace';
 
-function toSentenceCase(str: string) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str; }
+import { toTitleCase } from '@/lib/utils';
 
 const RANKS = ['Supervisor', 'Inspector', 'Maintenance', 'Security', 'Worker', 'Operator', 'Quality Control', 'Driver'];
 

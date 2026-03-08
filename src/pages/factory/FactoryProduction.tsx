@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Plus, Trash2, Factory, AlertTriangle } from 'lucide-react';
 import AdSpace from '@/components/AdSpace';
 
-function toSentenceCase(str: string) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str; }
+import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
 const WASTE_UNITS = ['Pieces', 'Kilograms', 'Litres', 'Metres', 'Tonnes', 'Rolls'];
 
