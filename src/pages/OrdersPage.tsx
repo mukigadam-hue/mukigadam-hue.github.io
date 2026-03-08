@@ -564,7 +564,7 @@ export default function OrdersPage() {
           status: paymentMethod === 'card' ? 'paid' : 'pending',
         } as any).eq('id', completeDialog.id);
 
-        await completeOrderToSale(completeDialog.id, toSentenceCase(completeBuyer.trim()), toSentenceCase(completeSeller.trim()));
+        await completeOrderToSale(completeDialog.id, toTitleCase(completeBuyer.trim()), toTitleCase(completeSeller.trim()));
         
         if (currentBusiness) {
           await saveReceipt({
