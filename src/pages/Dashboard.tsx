@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getCountryFlag } from '@/lib/countries';
 import { useTranslation } from 'react-i18next';
 import { useBusiness } from '@/context/BusinessContext';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -106,7 +107,7 @@ export default function Dashboard() {
             {currentBusiness?.business_code && (
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-xs sm:text-sm font-mono bg-primary-foreground/20 px-2 py-0.5 rounded">
-                  🔗 {t('dashboard.businessCode')}: {currentBusiness.business_code}
+                  {(currentBusiness as any)?.country_code ? getCountryFlag((currentBusiness as any).country_code) : '🔗'} {t('dashboard.businessCode')}: {currentBusiness.business_code}
                 </span>
                 <button
                   onClick={() => {

@@ -144,6 +144,7 @@ export interface Business {
   business_type: string;
   business_code: string;
   settings_password: string;
+  country_code: string;
   created_at: string;
 }
 
@@ -205,7 +206,7 @@ interface BusinessContextType {
   notifications: Notification[];
   loading: boolean;
   setCurrentBusinessId: (id: string) => void;
-  createBusiness: (name: string, address: string, contact: string, email: string) => Promise<void>;
+  createBusiness: (name: string, address: string, contact: string, email: string, countryCode?: string) => Promise<void>;
   deleteBusiness: (businessId: string, reason: string) => Promise<boolean>;
   updateBusiness: (updates: Partial<Business>) => Promise<void>;
   addStockItem: (item: Omit<StockItem, 'id' | 'business_id' | 'created_at' | 'updated_at' | 'deleted_at'>) => Promise<void>;
@@ -475,11 +476,11 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     } as any);
   }
 
-  const createBusiness = useCallback(async (name: string, address: string, contact: string, email: string) => {
+  const createBusiness = useCallback(async (name: string, address: string, contact: string, email: string, countryCode?: string) => {
     if (!user) return;
-    const { data, error } = await supabase.from('businesses').insert({
-      name, address, contact, email, owner_id: user.id,
-    }).select().single();
+    const insertData: any = { name, address, contact, email, owner_id: user.id };
+    if (countryCode) insertData.country_code = countryCode;
+    const { data, error } = await supabase.from('businesses').insert(insertData).select().single();
     if (error) { toast.error(error.message); return; }
     toast.success('Business created!');
     await loadBusinesses();
