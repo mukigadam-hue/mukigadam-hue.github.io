@@ -486,6 +486,26 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     if (data) setCurrentBusinessId(data.id);
   }, [user]);
 
+  const deleteBusiness = useCallback(async (businessId: string, reason: string): Promise<boolean> => {
+    if (!user) return false;
+    // Log the deletion reason as a note (could also store in a table)
+    console.log(`Business ${businessId} deleted. Reason: ${reason}`);
+    const { error } = await supabase.from('businesses').delete().eq('id', businessId);
+    if (error) { toast.error(error.message); return false; }
+    toast.success('Business deleted permanently');
+    setBusinesses(prev => prev.filter(b => b.id !== businessId));
+    if (currentBusinessId === businessId) {
+      const remaining = businesses.filter(b => b.id !== businessId);
+      if (remaining.length > 0) {
+        setCurrentBusinessId(remaining[0].id);
+      } else {
+        setCurrentBusinessId('');
+      }
+    }
+    await loadBusinesses();
+    return true;
+  }, [user, currentBusinessId, businesses]);
+
   const updateBusiness = useCallback(async (updates: Partial<Business>) => {
     if (!currentBusinessId) return;
     const { error } = await supabase.from('businesses').update(updates).eq('id', currentBusinessId);
