@@ -402,6 +402,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases', filter: `business_id=eq.${currentBusinessId}` }, debouncedReload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `business_id=eq.${currentBusinessId}` }, debouncedReload)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'services', filter: `business_id=eq.${currentBusinessId}` }, debouncedReload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'business_expenses', filter: `business_id=eq.${currentBusinessId}` }, debouncedReload)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `business_id=eq.${currentBusinessId}` }, (payload) => {
         const notif = payload.new as Notification;
         setNotifications(prev => [notif, ...prev]);
