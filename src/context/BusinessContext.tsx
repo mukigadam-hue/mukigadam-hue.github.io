@@ -833,6 +833,21 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     toast.success('Customer removed');
   }, []);
 
+  const addExpense = useCallback(async (expense: { category: string; description: string; amount: number; recorded_by: string; expense_date: string; from_order_id?: string }) => {
+    if (!currentBusinessId) return;
+    const { error } = await supabase.from('business_expenses').insert({ ...expense, business_id: currentBusinessId } as any);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Expense recorded!');
+    await loadBusinessData();
+  }, [currentBusinessId]);
+
+  const deleteExpense = useCallback(async (id: string) => {
+    const { error } = await supabase.from('business_expenses').delete().eq('id', id);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Expense deleted');
+    setExpenses(prev => prev.filter(e => e.id !== id));
+  }, []);
+
   const refreshData = useCallback(async () => {
     await loadBusinessData();
   }, [currentBusinessId]);
@@ -840,11 +855,12 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   return (
     <BusinessContext.Provider value={{
       currentBusiness, businesses, memberships, userRole,
-      stock, sales, purchases, orders, services, notifications, loading,
+      stock, sales, purchases, orders, services, expenses, notifications, loading,
       setCurrentBusinessId, createBusiness, updateBusiness,
       addStockItem, updateStockItem, deleteStockItem, restoreStockItem, permanentDeleteStockItem,
       addSale, addPurchase, addOrder, updateOrder, completeOrderToSale,
       addService, saveReceipt, getReceipts,
+      addExpense, deleteExpense,
       markNotificationRead, markAllNotificationsRead,
       generateInviteCode, redeemInviteCode,
       getMembers, removeMember, updateMemberRole,
