@@ -69,6 +69,7 @@ export default function OrdersPage() {
   const liveOrders = orders.filter(o => o.type === 'my_order');
   const inboxOrders = orders.filter(o => o.type === 'inbox');
   const myRequests = orders.filter(o => o.type === 'request');
+  const requestsNeedingAction = myRequests.filter(o => o.status === 'priced' || o.status === 'confirmed').length;
 
   const activeStock = stock.filter(s => !s.deleted_at);
   const suggestions = activeStock.map(s => s.name);
