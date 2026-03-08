@@ -78,6 +78,35 @@ export default function OrdersPage() {
   const myRequests = orders.filter(o => o.type === 'request');
   const requestsNeedingAction = myRequests.filter(o => o.status === 'priced' || o.status === 'confirmed').length;
 
+  // Load checkout orders for payment verification tab
+  async function loadCheckoutOrders() {
+    if (!currentBusiness) return;
+    setLoadingCheckout(true);
+    let query = supabase
+      .from('orders')
+      .select('*')
+      .eq('business_id', currentBusiness.id)
+      .eq('type', 'checkout')
+      .order('created_at', { ascending: false });
+    if (verifyFilter !== 'all') {
+      query = query.eq('status', verifyFilter);
+    }
+    const { data } = await query;
+    setCheckoutOrders(data || []);
+    setLoadingCheckout(false);
+  }
+
+  useEffect(() => {
+    if (tab === 'verify_payments' && currentBusiness) loadCheckoutOrders();
+  }, [tab, currentBusiness, verifyFilter]);
+
+  async function updateCheckoutStatus(orderId: string, status: 'paid' | 'cancelled') {
+    const { error } = await supabase.from('orders').update({ status } as any).eq('id', orderId);
+    if (error) { toast.error(error.message); return; }
+    toast.success(status === 'paid' ? 'Payment verified ✓' : 'Order cancelled');
+    setCheckoutOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+  }
+
   const activeStock = stock.filter(s => !s.deleted_at);
   const suggestions = activeStock.map(s => s.name);
   const existingCategories = [...new Set(activeStock.map(s => s.category).filter(Boolean))];
