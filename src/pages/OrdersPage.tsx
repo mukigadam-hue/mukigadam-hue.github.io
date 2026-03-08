@@ -78,34 +78,42 @@ export default function OrdersPage() {
   const [scannerOpen, setScannerOpen] = useState(false);
   const [orderMode, setOrderMode] = useState<'my_order' | 'inbox' | 'request'>('my_order');
 
+  const [contactSearch, setContactSearch] = useState('');
+  const [contactPickerOpen, setContactPickerOpen] = useState(false);
+
   // Load contacts for recipient selection
-  useEffect(() => {
+  async function loadOrderContacts() {
     if (!currentBusiness) return;
-    async function loadContacts() {
-      const { data } = await supabase
-        .from('business_contacts')
-        .select('id, contact_business_id, nickname')
-        .eq('business_id', currentBusiness!.id);
-      if (data) {
-        // Fetch business names for contacts
-        const contactIds = data.map(c => c.contact_business_id);
-        if (contactIds.length > 0) {
-          const { data: bizData } = await supabase
-            .from('businesses')
-            .select('id, name, business_code')
-            .in('id', contactIds);
-          const enriched = data.map(c => {
-            const biz = bizData?.find(b => b.id === c.contact_business_id);
-            return { ...c, business_name: biz?.name || '', business_code: biz?.business_code || '' };
-          });
-          setContacts(enriched);
-        } else {
-          setContacts(data.map(c => ({ ...c, business_name: '', business_code: '' })));
-        }
+    const { data } = await supabase
+      .from('business_contacts')
+      .select('id, contact_business_id, nickname')
+      .eq('business_id', currentBusiness.id);
+    if (data) {
+      const contactIds = data.map(c => c.contact_business_id);
+      if (contactIds.length > 0) {
+        const { data: bizData } = await supabase
+          .from('businesses')
+          .select('id, name, business_code')
+          .in('id', contactIds);
+        const enriched = data.map(c => {
+          const biz = bizData?.find(b => b.id === c.contact_business_id);
+          return { ...c, business_name: biz?.name || '', business_code: biz?.business_code || '' };
+        });
+        setContacts(enriched);
+      } else {
+        setContacts(data.map(c => ({ ...c, business_name: '', business_code: '' })));
       }
     }
-    loadContacts();
+  }
+
+  useEffect(() => {
+    if (currentBusiness) loadOrderContacts();
   }, [currentBusiness]);
+
+  // Reload contacts when switching to request mode
+  useEffect(() => {
+    if (orderMode === 'request' && currentBusiness) loadOrderContacts();
+  }, [orderMode]);
 
   async function lookupRecipientByCode() {
     if (!recipientCode.trim()) return;
@@ -789,20 +797,70 @@ export default function OrdersPage() {
                 </div>
 
                 {recipientMode === 'contact' && (
-                  <div>
+                  <div className="space-y-2">
                     {contacts.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No contacts saved. Use a business code instead, or add contacts from the Contacts page.</p>
                     ) : (
-                      <Select value={selectedContactBusinessId} onValueChange={setSelectedContactBusinessId}>
-                        <SelectTrigger><SelectValue placeholder="Select a contact..." /></SelectTrigger>
-                        <SelectContent>
-                          {contacts.map(c => (
-                            <SelectItem key={c.contact_business_id} value={c.contact_business_id}>
-                              {c.nickname || c.business_name} {c.business_code ? `(${c.business_code})` : ''}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <>
+                        {selectedContactBusinessId ? (
+                          <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center justify-between">
+                            <span className="flex items-center gap-2">
+                              <CheckCircle className="h-3.5 w-3.5 text-success" />
+                              Sending to: <strong>{contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.nickname || contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.business_name}</strong>
+                            </span>
+                            <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setSelectedContactBusinessId(''); setContactPickerOpen(true); }}>Change</Button>
+                          </div>
+                        ) : (
+                          <Button size="sm" variant="outline" className="w-full justify-start gap-2" onClick={() => { setContactPickerOpen(true); setContactSearch(''); }}>
+                            <Search className="h-3.5 w-3.5" /> Select a contact...
+                          </Button>
+                        )}
+
+                        <Dialog open={contactPickerOpen} onOpenChange={setContactPickerOpen}>
+                          <DialogContent className="max-w-sm">
+                            <DialogHeader><DialogTitle>Choose Contact</DialogTitle></DialogHeader>
+                            <div className="space-y-3">
+                              <Input
+                                value={contactSearch}
+                                onChange={e => setContactSearch(e.target.value)}
+                                placeholder="Search contacts..."
+                                autoFocus
+                              />
+                              <div className="max-h-60 overflow-y-auto space-y-1">
+                                {contacts
+                                  .filter(c => {
+                                    const q = contactSearch.toLowerCase();
+                                    return !q || (c.nickname || '').toLowerCase().includes(q) || (c.business_name || '').toLowerCase().includes(q) || (c.business_code || '').toLowerCase().includes(q);
+                                  })
+                                  .map(c => (
+                                    <button
+                                      key={c.contact_business_id}
+                                      className="w-full text-left p-2.5 rounded-md hover:bg-accent transition-colors flex items-center gap-3"
+                                      onClick={() => {
+                                        setSelectedContactBusinessId(c.contact_business_id);
+                                        setContactPickerOpen(false);
+                                      }}
+                                    >
+                                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm">🏪</div>
+                                      <div>
+                                        <p className="text-sm font-medium">{c.nickname || c.business_name || 'Unknown'}</p>
+                                        {c.nickname && c.business_name && <p className="text-[10px] text-muted-foreground">{c.business_name}</p>}
+                                        {c.business_code && <p className="text-[10px] text-muted-foreground font-mono">{c.business_code}</p>}
+                                      </div>
+                                    </button>
+                                  ))
+                                }
+                                {contacts.filter(c => {
+                                  const q = contactSearch.toLowerCase();
+                                  return !q || (c.nickname || '').toLowerCase().includes(q) || (c.business_name || '').toLowerCase().includes(q) || (c.business_code || '').toLowerCase().includes(q);
+                                }).length === 0 && (
+                                  <p className="text-xs text-center text-muted-foreground py-4">No contacts match your search</p>
+                                )}
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </>
                     )}
                   </div>
                 )}
