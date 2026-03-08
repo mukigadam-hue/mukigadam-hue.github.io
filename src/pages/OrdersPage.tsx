@@ -377,6 +377,7 @@ export default function OrdersPage() {
       case 'completed': return <CheckCircle className="h-3.5 w-3.5 text-primary" />;
       case 'paid': return <CheckCircle className="h-3.5 w-3.5 text-success" />;
       case 'payment_submitted': return <Clock className="h-3.5 w-3.5 text-info" />;
+      case 'rejected': return <span className="text-destructive text-sm">❌</span>;
       default: return <Clock className="h-3.5 w-3.5 text-muted-foreground" />;
     }
   }
