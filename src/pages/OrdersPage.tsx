@@ -148,17 +148,36 @@ export default function OrdersPage() {
 
   async function handleCreateOrder(type: string) {
     if (items.length === 0) return;
+    
+    // For requests, require a recipient
+    let recipientBusinessId: string | undefined;
+    if (type === 'request') {
+      if (recipientMode === 'contact') {
+        if (!selectedContactBusinessId) { toast.error('Please select a recipient business'); return; }
+        recipientBusinessId = selectedContactBusinessId;
+      } else {
+        if (!recipientLookup) { toast.error('Please look up a valid business code first'); return; }
+        recipientBusinessId = recipientLookup.id;
+      }
+      // Don't send to yourself
+      if (recipientBusinessId === currentBusiness?.id) { toast.error("You can't send an order to yourself"); return; }
+    }
+
     const comment = type === 'request' && requestComment.trim() ? requestComment.trim() : undefined;
     const name = customerName.trim() || (comment ? `Comment: ${comment}` : 'Walk-in');
     await addOrder(
       type, name,
       items.map(item => ({ ...item, subtotal: item.quantity * item.unit_price })),
-      grandTotal, type === 'request' ? 'pending' : 'confirmed'
+      grandTotal, type === 'request' ? 'pending' : 'confirmed',
+      recipientBusinessId
     );
     setItems([]);
     setCustomerName('');
     setSellerName('');
     setRequestComment('');
+    setSelectedContactBusinessId('');
+    setRecipientCode('');
+    setRecipientLookup(null);
   }
 
   function openEditOrder(order: Order) {
