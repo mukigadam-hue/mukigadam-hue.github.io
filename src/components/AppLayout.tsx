@@ -237,23 +237,24 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center py-2 pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center py-1.5 pb-safe">
         {mobileMainNav.map(({ to, label, icon: Icon }) => {
           const active = pathname === to;
           return (
-            <Link key={to} to={to} className={`flex flex-col items-center gap-0.5 text-xs transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
+            <Link key={to} to={to} className={`flex flex-col items-center justify-center gap-0.5 text-[11px] min-h-[44px] min-w-[44px] transition-colors ${active ? 'text-primary' : 'text-muted-foreground'}`}>
               <Icon className="h-5 w-5" />{label}
             </Link>
           );
         })}
 
+        {/* Alerts */}
         <Sheet>
           <SheetTrigger asChild>
-            <button className="relative flex flex-col items-center gap-0.5 text-xs text-muted-foreground">
+            <button className="relative flex flex-col items-center justify-center gap-0.5 text-[11px] text-muted-foreground min-h-[44px] min-w-[44px]">
               {unreadCount > 0 ? <BellDot className="h-5 w-5 text-warning" /> : <Bell className="h-5 w-5" />}
               <span>Alerts</span>
               {unreadCount > 0 && (
-                <span className="absolute -top-1 right-1 h-3.5 w-3.5 rounded-full bg-warning text-warning-foreground text-[9px] flex items-center justify-center font-bold">
+                <span className="absolute top-0 right-0 h-3.5 w-3.5 rounded-full bg-warning text-warning-foreground text-[9px] flex items-center justify-center font-bold">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -265,46 +266,65 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </SheetContent>
         </Sheet>
 
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+        {/* More Menu - contains all other pages + business switcher */}
+        <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
           <SheetTrigger asChild>
-            <button className="flex flex-col items-center gap-0.5 text-xs text-muted-foreground transition-colors">
-              <Building2 className="h-5 w-5" />
-              <span className="truncate max-w-[56px]">Switch</span>
+            <button className="flex flex-col items-center justify-center gap-0.5 text-[11px] text-muted-foreground min-h-[44px] min-w-[44px] transition-colors">
+              <Menu className="h-5 w-5" />
+              <span>More</span>
             </button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh] overflow-y-auto">
+          <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
             <SheetHeader>
-              <SheetTitle className="text-left flex items-center gap-2"><Building2 className="h-5 w-5" /> My Businesses & Factories</SheetTitle>
+              <SheetTitle className="text-left">Menu</SheetTitle>
             </SheetHeader>
-            <div className="mt-4 space-y-2">
-              {businesses.map(b => {
-                const role = getRoleForBusiness(b.id);
-                const isActive = b.id === currentBusiness?.id;
-                const isFact = (b as any).business_type === 'factory';
+
+            {/* Business Switcher */}
+            <div className="mt-3 mb-2">
+              <p className="text-xs text-muted-foreground font-medium mb-2 px-1">Current Business</p>
+              <Select value={currentBusiness?.id || ''} onValueChange={(val) => { setCurrentBusinessId(val); }}>
+                <SelectTrigger className="w-full text-sm h-10">
+                  <Building2 className="h-4 w-4 mr-2" />
+                  <SelectValue placeholder="Select business" />
+                </SelectTrigger>
+                <SelectContent>
+                  {businesses.map(b => {
+                    const role = getRoleForBusiness(b.id);
+                    return (
+                      <SelectItem key={b.id} value={b.id}>
+                        <span className="flex items-center gap-2">
+                          <span>{getBusinessType(b)}</span>
+                          <span>{b.name}</span>
+                          <span className="text-[10px] text-muted-foreground ml-1">({getRoleLabel(role)})</span>
+                        </span>
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* All other nav items */}
+            <div className="grid grid-cols-3 gap-2 mt-3">
+              {mobileMoreNav.map(({ to, label, icon: Icon }) => {
+                const active = pathname === to;
                 return (
-                  <button key={b.id} onClick={() => { setCurrentBusinessId(b.id); setSheetOpen(false); }}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
-                      isActive ? 'bg-primary/10 border-2 border-primary' : 'bg-muted/50 border-2 border-transparent hover:border-muted-foreground/20'
+                  <Link key={to} to={to} onClick={() => setMoreOpen(false)}
+                    className={`flex flex-col items-center gap-1.5 p-3 rounded-xl text-xs font-medium transition-colors ${
+                      active ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-muted/50 text-foreground hover:bg-muted'
                     }`}>
-                    <span className="text-2xl">{isFact ? '🏭' : '🏪'}</span>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate">{b.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {getRoleBadge(role)} {getRoleLabel(role)} · {isFact ? 'Factory' : 'Business'}
-                      </p>
-                    </div>
-                    {isActive && <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">Active</span>}
-                  </button>
+                    <Icon className="h-5 w-5" />
+                    <span className="text-center leading-tight">{label}</span>
+                  </Link>
                 );
               })}
-              <div className="pt-3 border-t space-y-1">
-                <Link to="/settings" onClick={() => setSheetOpen(false)} className="flex items-center gap-3 p-3 rounded-xl text-sm text-muted-foreground hover:bg-muted/50">
-                  <Settings className="h-4 w-4" /> Settings & Add Business
-                </Link>
-                <Link to="/team" onClick={() => setSheetOpen(false)} className="flex items-center gap-3 p-3 rounded-xl text-sm text-muted-foreground hover:bg-muted/50">
-                  <Users className="h-4 w-4" /> Team
-                </Link>
-              </div>
+            </div>
+
+            {/* Sign Out */}
+            <div className="mt-4 pt-3 border-t">
+              <Button variant="ghost" className="w-full justify-start text-destructive text-sm" onClick={signOut}>
+                <LogOut className="h-4 w-4 mr-2" /> Sign Out
+              </Button>
             </div>
           </SheetContent>
         </Sheet>
