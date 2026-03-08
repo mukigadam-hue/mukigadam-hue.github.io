@@ -144,7 +144,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const isFactory = (currentBusiness as any)?.business_type === 'factory';
   const navItems = isFactory ? factoryNavItems : businessNavItems;
   const mobileMainNav = isFactory ? factoryMobileNav : businessMobileNav;
+  const mobileMoreNav = isFactory ? factoryMoreNav : businessMoreNav;
   const unreadCount = notifications.filter(n => !n.is_read).length;
+  const [moreOpen, setMoreOpen] = useState(false);
 
   function getRoleForBusiness(businessId: string) {
     return memberships.find(m => m.business_id === businessId)?.role || 'worker';
