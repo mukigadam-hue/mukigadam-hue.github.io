@@ -326,8 +326,8 @@ export default function OrdersPage() {
         await refreshData();
         // Immediately open payment dialog
         setCompleteDialog({ ...order, status: 'confirmed' });
-        setCompleteBuyer(order.customer_name);
-        setCompleteSeller('');
+        setCompleteBuyer(order.customer_name || 'Buyer');
+        setCompleteSeller(currentBusiness?.name || 'Seller');
       }
     } finally {
       setSyncing(false);
