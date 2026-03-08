@@ -1183,8 +1183,8 @@ export default function OrdersPage() {
                           </div>
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-bold text-success tabular-nums">{fmt(Number(order.grand_total))}</span>
-                            {order.proof_url && (
-                              <Button size="sm" variant="outline" onClick={() => setViewingProof(order.proof_url)}>
+                            {order.proof_url && order.proof_url.length > 5 && (
+                              <Button size="sm" variant="outline" onClick={(e) => { e.stopPropagation(); setViewingProof(order.proof_url); }}>
                                 <Eye className="h-3.5 w-3.5 mr-1" /> Proof
                               </Button>
                             )}
