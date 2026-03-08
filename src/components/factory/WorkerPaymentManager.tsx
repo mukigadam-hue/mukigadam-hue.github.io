@@ -443,12 +443,28 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
             <DialogTitle>Pay {selectedWorker?.full_name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <div className="p-3 rounded-lg bg-muted/50">
-              <p className="text-sm">Salary: <span className="font-semibold">{selectedWorker && fmt(selectedWorker.salary)}</span> / {selectedWorker?.payment_frequency || 'monthly'}</p>
-              {selectedWorker && getWorkerBalance(selectedWorker.id).totalAdvances > 0 && (
-                <p className="text-sm text-warning">Advance to deduct: {fmt(getWorkerBalance(selectedWorker.id).totalAdvances)}</p>
-              )}
-            </div>
+            {selectedWorker && (() => {
+              const bal = getWorkerBalance(selectedWorker.id);
+              const netPay = Math.max(0, selectedWorker.salary - bal.totalAdvances);
+              return (
+                <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Salary</span>
+                    <span className="font-semibold">{fmt(selectedWorker.salary)}</span>
+                  </div>
+                  {bal.totalAdvances > 0 && (
+                    <div className="flex justify-between text-sm text-warning">
+                      <span>− Advance deduction</span>
+                      <span className="font-semibold">{fmt(bal.totalAdvances)}</span>
+                    </div>
+                  )}
+                  <div className="border-t pt-1 flex justify-between text-sm font-bold">
+                    <span>Net to pay</span>
+                    <span className="text-success">{fmt(netPay)}</span>
+                  </div>
+                </div>
+              );
+            })()}
             <div>
               <Label>Amount to Pay</Label>
               <Input 
