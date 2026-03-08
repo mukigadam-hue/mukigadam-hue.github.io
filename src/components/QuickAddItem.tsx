@@ -45,8 +45,7 @@ export default function QuickAddItem({ open, onOpenChange }: QuickAddItemProps) 
     try {
       const compressed = await compressImage(file);
       const fileName = `${currentBusiness?.id || 'item'}/${Date.now()}-${Math.random().toString(36).slice(2, 6)}.jpg`;
-    try {
-      const { error } = await supabase.storage.from('item-images').upload(fileName, file, { upsert: true });
+      const { error } = await supabase.storage.from('item-images').upload(fileName, compressed, { upsert: true });
       if (error) throw error;
       const { data: { publicUrl } } = supabase.storage.from('item-images').getPublicUrl(fileName);
       setImages(prev => [...prev, publicUrl]);
