@@ -7,8 +7,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit2, Trash2, RotateCcw, Package, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, RotateCcw, Package, Image as ImageIcon, ScanLine } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
+import BarcodeScanner from '@/components/BarcodeScanner';
+import { toast } from 'sonner';
 
 function toSentenceCase(str: string) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str; }
 
@@ -19,8 +21,9 @@ export default function FactoryProductStock() {
   const [editItem, setEditItem] = useState<string | null>(null);
   const [viewGallery, setViewGallery] = useState<string | null>(null);
   const [showDeleted, setShowDeleted] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [form, setForm] = useState({
-    name: '', category: '', quality: '', quantity: '0',
+    name: '', category: '', quality: '', quantity: '0', barcode: '',
     buying_price: '', wholesale_price: '', retail_price: '', min_stock_level: '5',
     image_url_1: '', image_url_2: '', image_url_3: '',
   });
@@ -29,7 +32,7 @@ export default function FactoryProductStock() {
   const deleted = stock.filter(s => s.deleted_at);
 
   function resetForm() {
-    setForm({ name: '', category: '', quality: '', quantity: '0', buying_price: '', wholesale_price: '', retail_price: '', min_stock_level: '5', image_url_1: '', image_url_2: '', image_url_3: '' });
+    setForm({ name: '', category: '', quality: '', quantity: '0', barcode: '', buying_price: '', wholesale_price: '', retail_price: '', min_stock_level: '5', image_url_1: '', image_url_2: '', image_url_3: '' });
   }
 
   async function handleAdd(e: React.FormEvent) {
@@ -40,7 +43,7 @@ export default function FactoryProductStock() {
       quality: toSentenceCase(form.quality.trim()), quantity: parseInt(form.quantity) || 0,
       buying_price: parseFloat(form.buying_price) || 0, wholesale_price: parseFloat(form.wholesale_price) || 0,
       retail_price: parseFloat(form.retail_price) || 0, min_stock_level: parseInt(form.min_stock_level) || 5,
-      barcode: '',
+      barcode: form.barcode.trim(),
       image_url_1: form.image_url_1, image_url_2: form.image_url_2, image_url_3: form.image_url_3,
     });
     resetForm(); setShowAdd(false);
@@ -62,6 +65,7 @@ export default function FactoryProductStock() {
   function openEdit(item: typeof active[0]) {
     setForm({
       name: item.name, category: item.category, quality: item.quality, quantity: String(item.quantity),
+      barcode: item.barcode || '',
       buying_price: String(item.buying_price), wholesale_price: String(item.wholesale_price),
       retail_price: String(item.retail_price), min_stock_level: String(item.min_stock_level),
       image_url_1: item.image_url_1 || '', image_url_2: item.image_url_2 || '', image_url_3: item.image_url_3 || '',
@@ -74,9 +78,17 @@ export default function FactoryProductStock() {
 
   return (
     <div className="space-y-6">
+      <BarcodeScanner open={scannerOpen} onOpenChange={setScannerOpen} onScan={(code) => {
+        const match = active.find(s => s.barcode && s.barcode === code);
+        if (match) { toast.success(`Found: ${match.name}`); }
+        else { toast.error(`No product found for barcode: ${code}`); }
+      }} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2"><Package className="h-6 w-6" /> Product Stock</h1>
-        <Button onClick={() => { resetForm(); setShowAdd(true); }}><Plus className="h-4 w-4 mr-1" />Add Product</Button>
+        <div className="flex gap-2">
+          <Button variant="outline" size="icon" onClick={() => setScannerOpen(true)} title="Scan barcode"><ScanLine className="h-4 w-4" /></Button>
+          <Button onClick={() => { resetForm(); setShowAdd(true); }}><Plus className="h-4 w-4 mr-1" />Add Product</Button>
+        </div>
       </div>
 
       <Card className="shadow-card">
@@ -177,6 +189,7 @@ export default function FactoryProductStock() {
               <div><Label>Wholesale</Label><Input type="number" min="0" step="0.01" value={form.wholesale_price} onChange={e => setForm(f => ({ ...f, wholesale_price: e.target.value }))} /></div>
               <div><Label>Retail</Label><Input type="number" min="0" step="0.01" value={form.retail_price} onChange={e => setForm(f => ({ ...f, retail_price: e.target.value }))} /></div>
             </div>
+            <div><Label>Barcode (Optional)</Label><Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} placeholder="Scan or type barcode..." /></div>
             <div className="space-y-2">
               <Label>Product Images (up to 3)</Label>
               <div className="grid grid-cols-3 gap-2">
