@@ -21,7 +21,7 @@ import NotFound from "./pages/NotFound";
 import ContactsPage from "./pages/ContactsPage";
 import BusinessExpenses from "./pages/BusinessExpenses";
 import DiscoverPage from "./pages/DiscoverPage";
-
+import CheckoutPage from "./pages/CheckoutPage";
 
 
 // Factory pages
