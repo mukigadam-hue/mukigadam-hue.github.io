@@ -527,6 +527,8 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
+      <AdSpace variant="banner" />
+
       {/* Recycle Bin */}
       {deletedStock.length > 0 && (
         <Card className="shadow-card border-destructive/20">
