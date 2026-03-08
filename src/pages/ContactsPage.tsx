@@ -356,6 +356,8 @@ export default function ContactsPage() {
         </div>
       )}
 
+      <AdSpace variant="banner" />
+
       {/* Contacts List */}
       {loading ? (
         <div className="text-center py-12 text-muted-foreground">Loading contacts...</div>
