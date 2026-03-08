@@ -591,12 +591,19 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
   const addPurchase = useCallback(async (
     items: { item_name: string; category: string; quality: string; quantity: number; unit_price: number; wholesale_price?: number; retail_price?: number; subtotal: number }[],
-    grandTotal: number, supplier: string, recordedBy: string
+    grandTotal: number, supplier: string, recordedBy: string,
+    paymentStatus: string = 'paid', amountPaid?: number
   ) => {
     if (!currentBusinessId) return;
+    const paid = amountPaid ?? grandTotal;
+    const bal = Math.max(0, grandTotal - paid);
+    const status = bal <= 0 ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
     const { data: purchaseData, error } = await supabase.from('purchases').insert({
       business_id: currentBusinessId, grand_total: grandTotal, supplier, recorded_by: recordedBy,
-    }).select().single();
+      payment_status: paymentStatus === 'paid' ? status : paymentStatus,
+      amount_paid: paid,
+      balance: bal,
+    } as any).select().single();
     if (error || !purchaseData) { toast.error(error?.message || 'Failed'); return; }
 
     const purchaseItems = items.map(item => ({
