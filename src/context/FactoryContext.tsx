@@ -110,7 +110,7 @@ interface FactoryContextType {
   addWorkerAdvance: (advance: Omit<WorkerAdvance, 'id' | 'business_id' | 'created_at'>) => Promise<void>;
   updateWorkerAdvance: (id: string, updates: Partial<WorkerAdvance>) => Promise<void>;
   deleteWorkerAdvance: (id: string) => Promise<void>;
-  getWorkerBalance: (workerId: string) => { totalAdvances: number; totalOwed: number; pendingPayments: WorkerPayment[] };
+  getWorkerBalance: (workerId: string) => { totalAdvances: number; totalOwed: number; pendingPayments: WorkerPayment[]; activeAdvances: WorkerAdvance[] };
   getDuePayments: () => { overdue: FactoryTeamMember[]; dueToday: FactoryTeamMember[]; dueSoon: FactoryTeamMember[] };
   refreshFactory: () => Promise<void>;
 }
@@ -275,7 +275,7 @@ export function FactoryProvider({ children }: { children: React.ReactNode }) {
     const totalAdvances = activeAdvances.reduce((sum, a) => sum + a.remaining_balance, 0);
     const pendingPayments = workerPayments.filter(p => p.worker_id === workerId && p.status !== 'completed');
     const totalOwed = pendingPayments.reduce((sum, p) => sum + (p.amount_due - p.amount_paid), 0);
-    return { totalAdvances, totalOwed, pendingPayments };
+    return { totalAdvances, totalOwed, pendingPayments, activeAdvances };
   }, [workerAdvances, workerPayments]);
 
   // Helper: Get payment reminders

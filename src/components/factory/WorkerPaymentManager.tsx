@@ -78,45 +78,60 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
     }
     
     const balance = getWorkerBalance(selectedWorker.id);
+    const advanceDeduction = Math.min(balance.totalAdvances, selectedWorker.salary);
     const period = getPaymentPeriod(selectedWorker.payment_frequency || 'monthly');
     
-    // Check if there's an existing pending payment for this period
     const existingPayment = workerPayments.find(
       p => p.worker_id === selectedWorker.id && p.status !== 'completed'
     );
     
     if (existingPayment) {
-      // Update existing payment
       const newPaid = existingPayment.amount_paid + amountPaid;
       const newStatus = newPaid >= existingPayment.amount_due ? 'completed' : 'partial';
       await updateWorkerPayment(existingPayment.id, {
         amount_paid: newPaid,
+        advance_deducted: existingPayment.advance_deducted + advanceDeduction,
         status: newStatus as any,
         paid_at: newStatus === 'completed' ? new Date().toISOString() : null,
         notes: payForm.notes || existingPayment.notes,
       });
     } else {
-      // Create new payment record
       const amountDue = selectedWorker.salary;
-      const status = amountPaid >= amountDue ? 'completed' : 'partial';
+      const totalSettled = amountPaid + advanceDeduction;
+      const status = totalSettled >= amountDue ? 'completed' : 'partial';
       await addWorkerPayment({
         worker_id: selectedWorker.id,
         period_start: period.start,
         period_end: period.end,
         amount_due: amountDue,
         amount_paid: amountPaid,
-        advance_deducted: 0,
+        advance_deducted: advanceDeduction,
         status: status as any,
         paid_at: status === 'completed' ? new Date().toISOString() : null,
-        notes: payForm.notes,
+        notes: payForm.notes || (advanceDeduction > 0 ? `Advance deducted: ${advanceDeduction}` : ''),
       });
     }
+
+    // Auto-deduct from active advances
+    if (advanceDeduction > 0) {
+      let remaining = advanceDeduction;
+      for (const adv of balance.activeAdvances) {
+        if (remaining <= 0) break;
+        const deductFromThis = Math.min(remaining, adv.remaining_balance);
+        const newBal = adv.remaining_balance - deductFromThis;
+        await updateWorkerAdvance(adv.id, {
+          remaining_balance: newBal,
+          status: newBal <= 0 ? 'fully_deducted' : 'active',
+        });
+        remaining -= deductFromThis;
+      }
+    }
     
-    // Update next payment due date
     await updateTeamMember(selectedWorker.id, {
       next_payment_due: getNextPaymentDate(selectedWorker.payment_frequency || 'monthly'),
     });
     
+    toast.success(`Payment recorded!${advanceDeduction > 0 ? ` (advance deducted)` : ''}`);
     setShowPayDialog(false);
     setPayForm({ amount: '', notes: '' });
     setSelectedWorker(null);
@@ -256,16 +271,29 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
                             </span>
                           )}
                         </div>
+                        {/* Salary breakdown with auto-calculation */}
                         {balance.totalAdvances > 0 && (
-                          <p className="text-xs text-warning mt-1">
-                            <ArrowDownCircle className="inline h-3 w-3 mr-1" />
-                            Advance owed: {fmt(balance.totalAdvances)}
-                          </p>
+                          <div className="mt-1.5 p-2 rounded bg-muted/50 text-xs space-y-0.5">
+                            <div className="flex justify-between">
+                              <span>Salary</span>
+                              <span className="font-medium">{fmt(worker.salary)}</span>
+                            </div>
+                            <div className="flex justify-between text-warning">
+                              <span>− Advance</span>
+                              <span className="font-medium">{fmt(balance.totalAdvances)}</span>
+                            </div>
+                            <div className="border-t border-border pt-0.5 flex justify-between font-semibold">
+                              <span>Net Pay</span>
+                              <span className={worker.salary - balance.totalAdvances > 0 ? 'text-success' : 'text-destructive'}>
+                                {fmt(Math.max(0, worker.salary - balance.totalAdvances))}
+                              </span>
+                            </div>
+                          </div>
                         )}
-                        {balance.totalOwed > 0 && (
+                        {balance.totalAdvances <= 0 && balance.totalOwed > 0 && (
                           <p className="text-xs text-destructive mt-1">
                             <AlertTriangle className="inline h-3 w-3 mr-1" />
-                            Unpaid balance: {fmt(balance.totalOwed)}
+                            Business owes: {fmt(balance.totalOwed)}
                           </p>
                         )}
                       </div>
@@ -297,7 +325,8 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
                             className="h-7 text-xs flex-1"
                             onClick={() => { 
                               setSelectedWorker(worker); 
-                              setPayForm({ amount: String(worker.salary), notes: '' });
+                              const netPay = Math.max(0, worker.salary - balance.totalAdvances);
+                              setPayForm({ amount: String(netPay), notes: '' });
                               setShowPayDialog(true); 
                             }}
                           >
@@ -429,12 +458,28 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
             <DialogTitle>Pay {selectedWorker?.full_name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            <div className="p-3 rounded-lg bg-muted/50">
-              <p className="text-sm">Salary: <span className="font-semibold">{selectedWorker && fmt(selectedWorker.salary)}</span> / {selectedWorker?.payment_frequency || 'monthly'}</p>
-              {selectedWorker && getWorkerBalance(selectedWorker.id).totalAdvances > 0 && (
-                <p className="text-sm text-warning">Advance to deduct: {fmt(getWorkerBalance(selectedWorker.id).totalAdvances)}</p>
-              )}
-            </div>
+            {selectedWorker && (() => {
+              const bal = getWorkerBalance(selectedWorker.id);
+              const netPay = Math.max(0, selectedWorker.salary - bal.totalAdvances);
+              return (
+                <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Salary</span>
+                    <span className="font-semibold">{fmt(selectedWorker.salary)}</span>
+                  </div>
+                  {bal.totalAdvances > 0 && (
+                    <div className="flex justify-between text-sm text-warning">
+                      <span>− Advance deduction</span>
+                      <span className="font-semibold">{fmt(bal.totalAdvances)}</span>
+                    </div>
+                  )}
+                  <div className="border-t pt-1 flex justify-between text-sm font-bold">
+                    <span>Net to pay</span>
+                    <span className="text-success">{fmt(netPay)}</span>
+                  </div>
+                </div>
+              );
+            })()}
             <div>
               <Label>Amount to Pay</Label>
               <Input 

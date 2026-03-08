@@ -128,6 +128,8 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
     const amountPaid = parseFloat(payForm.amount) || 0;
     if (amountPaid <= 0) { toast.error('Enter a valid amount'); return; }
     
+    const balance = getWorkerBalance(selectedWorker.id);
+    const advanceDeduction = Math.min(balance.totalAdvances, selectedWorker.salary);
     const period = getPaymentPeriod(selectedWorker.payment_frequency || 'monthly');
     const existingPayment = workerPayments.find(p => p.worker_id === selectedWorker.id && p.status !== 'completed');
     
@@ -136,13 +138,15 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
       const newStatus = newPaid >= existingPayment.amount_due ? 'completed' : 'partial';
       await supabase.from('business_worker_payments').update({
         amount_paid: newPaid,
+        advance_deducted: existingPayment.advance_deducted + advanceDeduction,
         status: newStatus,
         paid_at: newStatus === 'completed' ? new Date().toISOString() : null,
         notes: payForm.notes || existingPayment.notes,
       }).eq('id', existingPayment.id);
     } else {
       const amountDue = selectedWorker.salary;
-      const status = amountPaid >= amountDue ? 'completed' : 'partial';
+      const totalSettled = amountPaid + advanceDeduction;
+      const status = totalSettled >= amountDue ? 'completed' : 'partial';
       await supabase.from('business_worker_payments').insert({
         business_id: businessId,
         worker_id: selectedWorker.id,
@@ -150,18 +154,33 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
         period_end: period.end,
         amount_due: amountDue,
         amount_paid: amountPaid,
-        advance_deducted: 0,
+        advance_deducted: advanceDeduction,
         status,
         paid_at: status === 'completed' ? new Date().toISOString() : null,
-        notes: payForm.notes,
+        notes: payForm.notes || (advanceDeduction > 0 ? `Advance deducted: ${advanceDeduction}` : ''),
       } as any);
+    }
+
+    // Auto-deduct from active advances
+    if (advanceDeduction > 0) {
+      let remaining = advanceDeduction;
+      for (const adv of balance.activeAdvances) {
+        if (remaining <= 0) break;
+        const deductFromThis = Math.min(remaining, adv.remaining_balance);
+        const newBalance = adv.remaining_balance - deductFromThis;
+        await supabase.from('business_worker_advances').update({
+          remaining_balance: newBalance,
+          status: newBalance <= 0 ? 'fully_deducted' : 'active',
+        }).eq('id', adv.id);
+        remaining -= deductFromThis;
+      }
     }
     
     await supabase.from('business_team_members').update({
       next_payment_due: getNextPaymentDate(selectedWorker.payment_frequency || 'monthly'),
     }).eq('id', selectedWorker.id);
     
-    toast.success('Payment recorded!');
+    toast.success(`Payment recorded!${advanceDeduction > 0 ? ` (${fmt(advanceDeduction)} deducted from advance)` : ''}`);
     setShowPayDialog(false);
     setPayForm({ amount: '', notes: '' });
     setSelectedWorker(null);
@@ -309,16 +328,29 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
                             </span>
                           )}
                         </div>
-                        {balance.totalOwed > 0 && (
+                        {/* Salary breakdown with auto-calculation */}
+                        {balance.totalAdvances > 0 && (
+                          <div className="mt-1.5 p-2 rounded bg-muted/50 text-xs space-y-0.5">
+                            <div className="flex justify-between">
+                              <span>Salary</span>
+                              <span className="font-medium">{fmt(worker.salary)}</span>
+                            </div>
+                            <div className="flex justify-between text-warning">
+                              <span>− Advance</span>
+                              <span className="font-medium">{fmt(balance.totalAdvances)}</span>
+                            </div>
+                            <div className="border-t border-border pt-0.5 flex justify-between font-semibold">
+                              <span>Net Pay</span>
+                              <span className={worker.salary - balance.totalAdvances > 0 ? 'text-success' : 'text-destructive'}>
+                                {fmt(Math.max(0, worker.salary - balance.totalAdvances))}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {balance.totalAdvances <= 0 && balance.totalOwed > 0 && (
                           <p className="text-xs text-destructive mt-1">
                             <AlertTriangle className="inline h-3 w-3 mr-1" />
                             Business owes: {fmt(balance.totalOwed)}
-                          </p>
-                        )}
-                        {balance.totalAdvances > 0 && (
-                          <p className="text-xs text-warning mt-1">
-                            <ArrowDownCircle className="inline h-3 w-3 mr-1" />
-                            Advance given: {fmt(balance.totalAdvances)}
                           </p>
                         )}
                       </div>
@@ -335,7 +367,12 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
                           <Button size="sm" variant="outline" className="h-7 text-xs flex-1" onClick={() => { setSelectedWorker(worker); setShowAdvanceDialog(true); }}>
                             <ArrowDownCircle className="h-3 w-3 mr-1" />Adv
                           </Button>
-                          <Button size="sm" className="h-7 text-xs flex-1" onClick={() => { setSelectedWorker(worker); setPayForm({ amount: String(worker.salary), notes: '' }); setShowPayDialog(true); }}>
+                          <Button size="sm" className="h-7 text-xs flex-1" onClick={() => { 
+                            setSelectedWorker(worker); 
+                            const netPay = Math.max(0, worker.salary - balance.totalAdvances);
+                            setPayForm({ amount: String(netPay), notes: '' });
+                            setShowPayDialog(true); 
+                          }}>
                             <Wallet className="h-3 w-3 mr-1" />Pay
                           </Button>
                         </div>
@@ -458,6 +495,28 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
         <DialogContent>
           <DialogHeader><DialogTitle>Pay {selectedWorker?.full_name}</DialogTitle></DialogHeader>
           <div className="space-y-3">
+            {selectedWorker && (() => {
+              const bal = getWorkerBalance(selectedWorker.id);
+              const netPay = Math.max(0, selectedWorker.salary - bal.totalAdvances);
+              return (
+                <div className="p-3 rounded-lg bg-muted/50 space-y-1">
+                  <div className="flex justify-between text-sm">
+                    <span>Salary</span>
+                    <span className="font-semibold">{fmt(selectedWorker.salary)}</span>
+                  </div>
+                  {bal.totalAdvances > 0 && (
+                    <div className="flex justify-between text-sm text-warning">
+                      <span>− Advance deduction</span>
+                      <span className="font-semibold">{fmt(bal.totalAdvances)}</span>
+                    </div>
+                  )}
+                  <div className="border-t pt-1 flex justify-between text-sm font-bold">
+                    <span>Net to pay</span>
+                    <span className="text-success">{fmt(netPay)}</span>
+                  </div>
+                </div>
+              );
+            })()}
             <div>
               <Label>Amount</Label>
               <Input type="number" value={payForm.amount} onChange={e => setPayForm(f => ({ ...f, amount: e.target.value }))} />
