@@ -600,10 +600,17 @@ export default function OrdersPage() {
                 </Button>
               )}
 
+              {/* REQUEST: Waiting for supplier after payment submitted */}
+              {order.type === 'request' && order.status === 'payment_submitted' && (
+                <span className="text-xs text-info flex items-center gap-1 px-2 py-1 bg-info/10 rounded-md">
+                  <Clock className="h-3.5 w-3.5" /> Waiting for supplier to confirm payment...
+                </span>
+              )}
+
               {/* LIVE ORDER ACTIONS (no B2B) */}
-              {order.type === 'my_order' && (order.status === 'confirmed' || order.status === 'priced') && (
+              {order.type === 'my_order' && (order.status === 'pending' || order.status === 'confirmed' || order.status === 'priced') && (
                 <Button size="sm" onClick={() => { setCompleteDialog(order); setCompleteBuyer(order.customer_name); setCompleteSeller(''); }}>
-                  <CheckCircle className="h-3.5 w-3.5 mr-1" />Complete & Give Receipt
+                  <CheckCircle className="h-3.5 w-3.5 mr-1" />Complete & Pay
                 </Button>
               )}
             </>
