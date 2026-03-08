@@ -34,6 +34,12 @@ export default function Dashboard() {
   const lowStock = activeStock.filter(item => item.quantity > 0 && item.quantity <= item.min_stock_level);
   const outOfStock = activeStock.filter(item => item.quantity === 0);
 
+  // Debt tracking
+  const salesDebts = sales.filter(s => s.payment_status !== 'paid' && Number(s.balance) > 0);
+  const purchaseDebts = purchases.filter(p => p.payment_status !== 'paid' && Number(p.balance) > 0);
+  const totalOwedToYou = salesDebts.reduce((sum, s) => sum + Number(s.balance), 0);
+  const totalYouOwe = purchaseDebts.reduce((sum, p) => sum + Number(p.balance), 0);
+
   // Top selling — combine same name+category+quality
   const itemCounts: Record<string, { name: string; category: string; quality: string; totalSold: number }> = {};
   sales.forEach(sale => {
