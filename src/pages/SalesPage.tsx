@@ -183,16 +183,27 @@ export default function SalesPage() {
   }
 
   function SaleCard({ sale }: { sale: Sale }) {
+    const isPaid = sale.payment_status === 'paid';
+    const isPartial = sale.payment_status === 'partial';
+    const isUnpaid = sale.payment_status === 'unpaid';
     return (
-      <div className="border rounded-lg p-3 space-y-2">
+      <div className={`border rounded-lg p-3 space-y-2 ${isUnpaid ? 'border-destructive/40 bg-destructive/5' : isPartial ? 'border-warning/40 bg-warning/5' : ''}`}>
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               {sale.customer_name && <span className="text-sm font-medium">👤 {sale.customer_name}</span>}
               {sale.from_order_code && <span className="text-xs bg-accent/10 text-accent px-1.5 py-0.5 rounded-full">From Order {sale.from_order_code}</span>}
+              <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${isPaid ? 'bg-success/10 text-success' : isPartial ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive'}`}>
+                {isPaid ? '✅ Paid' : isPartial ? `⚠️ Partial (${fmt(Number(sale.amount_paid))})` : '❌ Unpaid'}
+              </span>
             </div>
             {sale.recorded_by && <p className="text-xs text-muted-foreground">Seller: {sale.recorded_by}</p>}
             <p className="text-xs text-muted-foreground">{new Date(sale.created_at).toLocaleString()}</p>
+            {!isPaid && (
+              <p className="text-xs font-semibold text-destructive">
+                Balance owed: {fmt(Number(sale.balance))}
+              </p>
+            )}
           </div>
           <MoneyBadge value={Number(sale.grand_total)} />
         </div>
@@ -210,9 +221,16 @@ export default function SalesPage() {
             </div>
           ))}
         </div>
-        <Button size="sm" variant="ghost" onClick={() => setReceiptSale(sale)}>
-          <ReceiptIcon className="h-3.5 w-3.5 mr-1" />Receipt
-        </Button>
+        <div className="flex gap-1">
+          <Button size="sm" variant="ghost" onClick={() => setReceiptSale(sale)}>
+            <ReceiptIcon className="h-3.5 w-3.5 mr-1" />Receipt
+          </Button>
+          {!isPaid && (
+            <Button size="sm" variant="outline" onClick={() => { setEditPaymentSale(sale); setEditAmountPaid(String(sale.amount_paid || 0)); }}>
+              💰 Update Payment
+            </Button>
+          )}
+        </div>
       </div>
     );
   }
