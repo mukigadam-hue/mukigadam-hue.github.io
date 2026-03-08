@@ -167,7 +167,6 @@ export default function TeamPage() {
     setLoading(true);
     const code = await generateInviteCode(type);
     if (type === 'worker') setWorkerCode(code);
-    else setCustomerCode(code);
     setLoading(false);
   }
 
