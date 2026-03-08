@@ -232,7 +232,14 @@ export default function FactoryProduction() {
                 <div key={p.id} className="border rounded-lg p-3">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-sm font-medium">{p.product_name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-medium">{p.product_name}</p>
+                        {p.batch_number && (
+                          <span className="text-[10px] font-mono bg-muted px-1.5 py-0.5 rounded text-muted-foreground">
+                            {p.batch_number}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-muted-foreground">
                         📅 Produced: {new Date(p.production_date).toLocaleDateString()}
                         {p.expiry_date && ` · Expires: ${new Date(p.expiry_date).toLocaleDateString()}`}
