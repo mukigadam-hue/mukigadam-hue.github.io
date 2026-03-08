@@ -55,6 +55,17 @@ export default function OrdersPage() {
   const [recipientLookup, setRecipientLookup] = useState<{ id: string; name: string } | null>(null);
   const [lookingUp, setLookingUp] = useState(false);
 
+  // Allocation dialog state
+  const [allocateOrder, setAllocateOrder] = useState<Order | null>(null);
+  const [allocations, setAllocations] = useState<Record<number, 'stock' | 'expense'>>({});
+  const [expenseCategory, setExpenseCategory] = useState<Record<number, string>>({});
+  const [allocating, setAllocating] = useState(false);
+  const isFactory = currentBusiness?.business_type === 'factory';
+
+  const EXPENSE_CATEGORIES = isFactory
+    ? ['Electricity', 'Water', 'Gas', 'Machinery Repair', 'Building Repair', 'Lubricants', 'Cleaning Supplies', 'Safety Gear', 'Factory Rent', 'Transport Costs', 'Insurance', 'Other']
+    : ['Rent', 'Electricity', 'Water', 'Internet', 'Cleaning Equipment', 'Food for Workers', 'Transport', 'Repairs & Maintenance', 'Office Supplies', 'Security', 'Other'];
+
   const liveOrders = orders.filter(o => o.type === 'my_order');
   const inboxOrders = orders.filter(o => o.type === 'inbox');
   const myRequests = orders.filter(o => o.type === 'request');
