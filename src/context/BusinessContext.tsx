@@ -942,6 +942,32 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     setExpenses(prev => prev.filter(e => e.id !== id));
   }, []);
 
+  const updateSalePayment = useCallback(async (saleId: string, amountPaid: number, paymentStatus: string) => {
+    const sale = sales.find(s => s.id === saleId);
+    if (!sale) return;
+    const bal = Math.max(0, Number(sale.grand_total) - amountPaid);
+    const status = bal <= 0 ? 'paid' : (amountPaid > 0 ? 'partial' : 'unpaid');
+    const { error } = await supabase.from('sales').update({
+      amount_paid: amountPaid, balance: bal, payment_status: status,
+    }).eq('id', saleId);
+    if (error) { toast.error(error.message); return; }
+    setSales(prev => prev.map(s => s.id === saleId ? { ...s, amount_paid: amountPaid, balance: bal, payment_status: status } : s));
+    toast.success('Payment updated!');
+  }, [sales]);
+
+  const updatePurchasePayment = useCallback(async (purchaseId: string, amountPaid: number, paymentStatus: string) => {
+    const purchase = purchases.find(p => p.id === purchaseId);
+    if (!purchase) return;
+    const bal = Math.max(0, Number(purchase.grand_total) - amountPaid);
+    const status = bal <= 0 ? 'paid' : (amountPaid > 0 ? 'partial' : 'unpaid');
+    const { error } = await supabase.from('purchases').update({
+      amount_paid: amountPaid, balance: bal, payment_status: status,
+    } as any).eq('id', purchaseId);
+    if (error) { toast.error(error.message); return; }
+    setPurchases(prev => prev.map(p => p.id === purchaseId ? { ...p, amount_paid: amountPaid, balance: bal, payment_status: status } : p));
+    toast.success('Payment updated!');
+  }, [purchases]);
+
   const refreshData = useCallback(async () => {
     await loadBusinessData();
   }, [currentBusinessId]);
@@ -955,6 +981,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       addSale, addPurchase, addOrder, updateOrder, completeOrderToSale,
       addService, saveReceipt, getReceipts,
       addExpense, deleteExpense,
+      updateSalePayment, updatePurchasePayment,
       markNotificationRead, markAllNotificationsRead,
       generateInviteCode, redeemInviteCode,
       getMembers, removeMember, updateMemberRole,
