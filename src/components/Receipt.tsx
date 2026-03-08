@@ -29,6 +29,7 @@ interface ReceiptProps {
 
 export default function Receipt({ items, grandTotal, buyerName, sellerName, customerName, code, date, type, businessInfo }: ReceiptProps) {
   const { fmt } = useCurrency();
+  const { canShareReceipts, canDownloadReceipts, canPrintReceipts } = usePremium();
   const buyer = buyerName || customerName || '';
   const receiptRef = useRef<HTMLDivElement>(null);
   const fileName = `receipt-${type}-${code || new Date(date).toISOString().slice(0, 10)}`;
