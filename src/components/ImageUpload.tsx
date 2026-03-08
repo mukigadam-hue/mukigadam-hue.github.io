@@ -73,6 +73,18 @@ export default function ImageUpload({ bucket, path, currentUrl, onUploaded, onRe
     }
   }
 
+  if (blocked) {
+    return (
+      <div className={`flex flex-col items-center gap-2 ${className}`}>
+        {label && <p className="text-xs text-muted-foreground font-medium">{label}</p>}
+        <div className={`relative ${dimensions} rounded-xl border-2 border-dashed border-muted-foreground/30 flex flex-col items-center justify-center bg-muted/20`}>
+          <Lock className="h-5 w-5 text-amber-500" />
+          <p className="text-[9px] text-muted-foreground mt-1">Premium</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className={`flex flex-col items-center gap-2 ${className}`}>
