@@ -358,10 +358,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               })}
             </div>
 
-            <div className="mt-4 pt-3 border-t">
+            <div className="mt-4 pt-3 border-t space-y-1">
               <Button variant="ghost" className="w-full justify-start text-destructive text-sm" onClick={signOut}>
                 <LogOut className="h-4 w-4 mr-2" /> {t('nav.signOut')}
               </Button>
+              <p className="text-[10px] text-muted-foreground text-center">v{APP_VERSION}</p>
             </div>
           </SheetContent>
         </Sheet>
