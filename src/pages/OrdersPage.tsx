@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useBusiness } from '@/context/BusinessContext';
 import { useCurrency } from '@/hooks/useCurrency';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Send, CheckCircle, Clock, FileText, Pencil, Receipt as ReceiptIcon, MessageSquare, Smartphone, CreditCard, Upload, ScanLine } from 'lucide-react';
+import { Plus, Trash2, Send, CheckCircle, Clock, FileText, Pencil, Receipt as ReceiptIcon, MessageSquare, Smartphone, CreditCard, Upload, ScanLine, Search, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 import Receipt from '@/components/Receipt';
 import BarcodeScanner from '@/components/BarcodeScanner';
