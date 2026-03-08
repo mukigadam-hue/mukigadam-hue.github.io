@@ -80,6 +80,8 @@ export default function FactoryInputStock() {
         <Button onClick={() => { resetForm(); setShowAdd(true); }}><Plus className="h-4 w-4 mr-1" />Add Material</Button>
       </div>
 
+      <AdSpace variant="banner" />
+
       <Card className="shadow-card">
         <CardContent className="p-4">
           <p className="text-sm text-muted-foreground mb-3">Raw materials and inputs — {active.length} items</p>
