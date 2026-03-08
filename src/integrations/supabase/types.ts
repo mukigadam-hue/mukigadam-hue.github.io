@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_blocks: {
+        Row: {
+          blocked_business_id: string
+          business_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_business_id: string
+          business_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_business_id?: string
+          business_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_blocks_blocked_business_id_fkey"
+            columns: ["blocked_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_blocks_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_contacts: {
         Row: {
           business_id: string
@@ -382,6 +418,7 @@ export type Database = {
           created_at: string
           email: string
           id: string
+          is_discoverable: boolean
           logo_url: string | null
           name: string
           owner_id: string
@@ -397,6 +434,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          is_discoverable?: boolean
           logo_url?: string | null
           name: string
           owner_id: string
@@ -412,6 +450,7 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          is_discoverable?: boolean
           logo_url?: string | null
           name?: string
           owner_id?: string
