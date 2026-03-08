@@ -242,8 +242,7 @@ export default function StockPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Scrollable Items List */}
-      <div className="flex-1 overflow-y-auto min-h-0 space-y-3 pb-4">
+
 
       {/* Mobile Card View */}
       <div className="md:hidden space-y-3">
