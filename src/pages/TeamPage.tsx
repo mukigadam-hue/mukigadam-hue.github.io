@@ -345,6 +345,11 @@ export default function TeamPage() {
           </Card>
         </TabsContent>
 
+        {/* Payments Tab */}
+        <TabsContent value="payments" className="mt-4">
+          <WorkerPaymentManager isOwnerOrAdmin={isOwnerOrAdmin} />
+        </TabsContent>
+
         {/* Customers Tab */}
         <TabsContent value="customers" className="space-y-4 mt-4">
           {isOwnerOrAdmin && (
