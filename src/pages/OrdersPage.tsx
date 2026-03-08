@@ -56,6 +56,7 @@ export default function OrdersPage() {
   const existingCategories = [...new Set(activeStock.map(s => s.category).filter(Boolean))];
   const existingQualities = [...new Set(activeStock.map(s => s.quality).filter(Boolean))];
 
+  const [scannerOpen, setScannerOpen] = useState(false);
   const [orderMode, setOrderMode] = useState<'my_order' | 'inbox' | 'request'>('my_order');
 
   function applyCase(field: 'name' | 'category' | 'quality') {
