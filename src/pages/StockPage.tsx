@@ -148,7 +148,7 @@ export default function StockPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="h-full flex flex-col overflow-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <h1 className="text-xl sm:text-2xl font-bold">My Stock</h1>
         <div className="flex gap-2 flex-wrap">
