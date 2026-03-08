@@ -453,6 +453,98 @@ export default function OrdersPage() {
       toast.error(`No stock item found for barcode: ${code}`);
     }
   }
+  function openAllocateDialog(order: Order) {
+    setAllocateOrder(order);
+    const defaultAllocations: Record<number, 'stock' | 'expense'> = {};
+    const defaultCategories: Record<number, string> = {};
+    order.items.forEach((_, i) => {
+      defaultAllocations[i] = 'stock';
+      defaultCategories[i] = 'Other';
+    });
+    setAllocations(defaultAllocations);
+    setExpenseCategory(defaultCategories);
+  }
+
+  async function handleAllocateItems() {
+    if (!allocateOrder || !currentBusiness) return;
+    setAllocating(true);
+    try {
+      for (let i = 0; i < allocateOrder.items.length; i++) {
+        const item = allocateOrder.items[i];
+        const target = allocations[i] || 'stock';
+
+        if (target === 'stock') {
+          // Add to stock (business stock or factory input stock)
+          if (isFactory) {
+            await supabase.from('factory_raw_materials').insert({
+              business_id: currentBusiness.id,
+              name: item.item_name,
+              category: item.category || '',
+              unit_type: 'Pieces',
+              quantity: item.quantity,
+              unit_cost: Number(item.unit_price),
+              min_stock_level: 5,
+              supplier: allocateOrder.customer_name,
+            });
+          } else {
+            // Check if item already exists in stock
+            const existing = activeStock.find(s =>
+              s.name.toLowerCase() === item.item_name.toLowerCase() &&
+              s.category.toLowerCase() === (item.category || '').toLowerCase() &&
+              s.quality.toLowerCase() === (item.quality || '').toLowerCase()
+            );
+            if (existing) {
+              await supabase.from('stock_items').update({
+                quantity: existing.quantity + item.quantity,
+                buying_price: Number(item.unit_price),
+              }).eq('id', existing.id);
+            } else {
+              await supabase.from('stock_items').insert({
+                business_id: currentBusiness.id,
+                name: item.item_name,
+                category: item.category || '',
+                quality: item.quality || '',
+                buying_price: Number(item.unit_price),
+                wholesale_price: Number(item.unit_price),
+                retail_price: Number(item.unit_price),
+                quantity: item.quantity,
+                min_stock_level: 5,
+              });
+            }
+          }
+        } else {
+          // Record as expense
+          const cat = expenseCategory[i] || 'Other';
+          if (isFactory) {
+            await supabase.from('factory_expenses').insert({
+              business_id: currentBusiness.id,
+              category: cat,
+              description: `${item.item_name} × ${item.quantity} from order ${allocateOrder.code}`,
+              amount: Number(item.subtotal),
+              recorded_by: allocateOrder.customer_name || 'Order',
+              expense_date: new Date().toISOString().slice(0, 10),
+              from_order_id: allocateOrder.id,
+            });
+          } else {
+            await addExpense({
+              category: cat,
+              description: `${item.item_name} × ${item.quantity} from order ${allocateOrder.code}`,
+              amount: Number(item.subtotal),
+              recorded_by: allocateOrder.customer_name || 'Order',
+              expense_date: new Date().toISOString().slice(0, 10),
+              from_order_id: allocateOrder.id,
+            });
+          }
+        }
+      }
+      toast.success('Items allocated successfully!');
+      setAllocateOrder(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Allocation failed');
+    } finally {
+      setAllocating(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
