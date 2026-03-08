@@ -73,7 +73,8 @@ Deno.serve(async (req) => {
     }));
     await admin.from("order_items").insert(senderItems);
 
-    // 3. Create recipient's inbox order
+    // 3. Create recipient's inbox order (use a distinct sharing code)
+    const inboxSharingCode = sharingCode ? sharingCode + "-inbox" : null;
     const { data: inboxOrder, error: iErr } = await admin.from("orders").insert({
       business_id: recipientBusinessId,
       type: "inbox",
@@ -81,7 +82,7 @@ Deno.serve(async (req) => {
       grand_total: 0,
       status: "pending",
       code,
-      sharing_code: sharingCode,
+      sharing_code: inboxSharingCode,
     }).select().single();
     if (iErr || !inboxOrder) throw new Error(iErr?.message || "Failed to create inbox order");
 
