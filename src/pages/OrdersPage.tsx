@@ -752,7 +752,7 @@ export default function OrdersPage() {
 
             {orderMode === 'request' && (
               <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground border">
-                <strong>How it works:</strong> List the items you need and send to your supplier. They will set the prices and send back for you to review. Once you approve, you make payment and they confirm receipt.
+                <strong>How it works:</strong> List the items you need → send to your supplier → they set prices → you review & approve → you pay → they confirm → receipt issued.
               </div>
             )}
 
