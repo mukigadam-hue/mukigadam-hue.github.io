@@ -744,8 +744,11 @@ export default function OrdersPage() {
         <Card className="shadow-card">
           <CardContent className="p-4 space-y-4">
             <h2 className="text-base font-semibold">
-              {orderMode === 'my_order' ? 'Create Order for Walk-in Customer' : 'Order Items from a Supplier'}
+              {orderMode === 'my_order' ? '📋 New Order — Walk-in or Inbox' : '📨 Request Items from a Supplier'}
             </h2>
+            {orderMode === 'my_order' && (
+              <p className="text-xs text-muted-foreground">For customers who come to your shop directly, call you, or send their order via WhatsApp/SMS. Add their items one by one, then choose how they pay.</p>
+            )}
 
             {orderMode === 'request' && (
               <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground border">
