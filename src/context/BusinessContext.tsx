@@ -45,6 +45,9 @@ export interface Sale {
   customer_name: string;
   from_order_id: string | null;
   from_order_code: string | null;
+  payment_status: string;
+  amount_paid: number;
+  balance: number;
   created_at: string;
   items: SaleItem[];
 }
