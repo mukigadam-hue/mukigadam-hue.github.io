@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Trash2, Shield, Crown, User, Users, ShoppingBag, MessageCircle, Share2, Send, Calendar, Clock } from 'lucide-react';
+import { UserPlus, Trash2, Shield, Crown, User, Users, ShoppingBag, MessageCircle, Share2, Send, Calendar, Clock, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
+import WorkerPaymentManager from '@/components/business/WorkerPaymentManager';
 
 interface Member {
   user_id: string;
@@ -275,14 +276,18 @@ export default function TeamPage() {
       <RedeemCodeSection onRedeemed={() => { loadMembers(); loadCustomers(); }} />
 
       <Tabs defaultValue="workers" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="workers" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Workers ({members.length})
+            Workers
+          </TabsTrigger>
+          <TabsTrigger value="payments" className="flex items-center gap-2">
+            <Wallet className="h-4 w-4" />
+            Payments
           </TabsTrigger>
           <TabsTrigger value="customers" className="flex items-center gap-2">
             <ShoppingBag className="h-4 w-4" />
-            Customers ({customers.length})
+            Customers
           </TabsTrigger>
         </TabsList>
 
@@ -338,6 +343,11 @@ export default function TeamPage() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Payments Tab */}
+        <TabsContent value="payments" className="mt-4">
+          <WorkerPaymentManager isOwnerOrAdmin={isOwnerOrAdmin} />
         </TabsContent>
 
         {/* Customers Tab */}
