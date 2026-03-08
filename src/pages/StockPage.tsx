@@ -85,7 +85,7 @@ export default function StockPage() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [viewGalleryItem, setViewGalleryItem] = useState<StockItem | null>(null);
   const [form, setForm] = useState({
-    name: '', category: '', quality: '',
+    name: '', category: '', quality: '', barcode: '',
     buying_price: '', wholesale_price: '', retail_price: '', quantity: '', min_stock_level: '5',
   });
 
