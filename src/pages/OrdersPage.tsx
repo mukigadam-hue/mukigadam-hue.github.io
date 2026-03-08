@@ -537,7 +537,7 @@ export default function OrdersPage() {
         toast.success('Payment submitted! Waiting for supplier to confirm.');
       } else if (isB2BInbox) {
         // Supplier issuing receipt after payment confirmed
-        await completeOrderToSale(completeDialog.id, toSentenceCase(completeBuyer.trim()), toSentenceCase(completeSeller.trim()));
+        await completeOrderToSale(completeDialog.id, toTitleCase(completeBuyer.trim()), toTitleCase(completeSeller.trim()));
         
         if (currentBusiness) {
           await saveReceipt({
