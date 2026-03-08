@@ -96,10 +96,39 @@ function BusinessRoleBanner({ userRole, businessName, isFactory }: { userRole: s
   );
 }
 
-function NotificationsPanel() {
+function getNotificationRoute(type: string): string {
+  switch (type) {
+    case 'new_order': return '/orders';
+    case 'order_priced': return '/orders';
+    case 'order_confirmed': return '/orders';
+    case 'order_rejected': return '/orders';
+    case 'new_purchase': return '/purchases';
+    case 'payment_submitted': return '/payments';
+    case 'payment_confirmed': return '/payments';
+    case 'poke': return '/contacts';
+    case 'low_stock': return '/stock';
+    case 'empty_stock': return '/stock';
+    case 'new_sale': return '/sales';
+    case 'new_expense': return '/expenses';
+    case 'new_service': return '/services';
+    case 'team': return '/team';
+    default: return '/';
+  }
+}
+
+function NotificationsPanel({ onNavigate }: { onNavigate?: () => void }) {
   const { notifications, markNotificationRead, markAllNotificationsRead } = useBusiness();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const unread = notifications.filter(n => !n.is_read).length;
+
+  function handleNotificationClick(n: { id: string; type: string; is_read: boolean }) {
+    if (!n.is_read) markNotificationRead(n.id);
+    const route = getNotificationRoute(n.type);
+    setOpen(false);
+    onNavigate?.();
+    navigate(route);
+  }
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -123,11 +152,14 @@ function NotificationsPanel() {
             <p className="text-sm text-muted-foreground text-center py-8">No notifications yet.</p>
           ) : (
             notifications.map(n => (
-              <button key={n.id} onClick={() => markNotificationRead(n.id)}
+              <button key={n.id} onClick={() => handleNotificationClick(n)}
                 className={`w-full text-left p-3 rounded-lg border transition-colors ${n.is_read ? 'bg-muted/30 border-border' : 'bg-warning/5 border-warning/30'}`}>
                 <p className={`text-sm font-medium ${n.is_read ? 'text-muted-foreground' : 'text-foreground'}`}>{n.title}</p>
                 <p className="text-xs text-muted-foreground mt-0.5">{n.message}</p>
-                <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleString()}</p>
+                <div className="flex items-center justify-between mt-1">
+                  <p className="text-xs text-muted-foreground">{new Date(n.created_at).toLocaleString()}</p>
+                  <span className="text-[10px] text-primary underline">View →</span>
+                </div>
                 {!n.is_read && <span className="inline-block mt-1 text-[10px] bg-warning text-warning-foreground px-1.5 py-0.5 rounded-full">NEW</span>}
               </button>
             ))
