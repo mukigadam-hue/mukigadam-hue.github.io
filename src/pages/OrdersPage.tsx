@@ -148,7 +148,7 @@ export default function OrdersPage() {
       category: toSentenceCase(form.category) || stockItem?.category || '',
       quality: toSentenceCase(form.quality) || stockItem?.quality || '',
       quantity: parseInt(form.quantity) || 1,
-      price_type: isRequest ? 'pending' : form.priceType,
+      price_type: form.priceType,
       unit_price: unitPrice,
     }]);
     setForm({ name: '', category: '', quality: '', quantity: '1', priceType: 'retail', unitPrice: '' });
