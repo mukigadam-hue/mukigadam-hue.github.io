@@ -8,7 +8,7 @@ import ImageUpload from '@/components/ImageUpload';
 import QuickAddItem from '@/components/QuickAddItem';
 
 export default function Dashboard() {
-  const { currentBusiness, updateBusiness, stock, sales, services } = useBusiness();
+  const { currentBusiness, updateBusiness, stock, sales, services, purchases } = useBusiness();
   const { fmt } = useCurrency();
 
   const activeStock = stock.filter(s => !s.deleted_at);
