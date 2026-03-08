@@ -1,15 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useBusiness } from '@/context/BusinessContext';
 import { useAuth } from '@/context/AuthContext';
+import { useCurrency } from '@/hooks/useCurrency';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { UserPlus, Trash2, Shield, Crown, User, Users, ShoppingBag, MessageCircle, Share2, Send, Calendar, Clock, Wallet } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { UserPlus, Trash2, Shield, Crown, User, Users, MessageCircle, Share2, Send, Calendar, Clock, Wallet, Plus, Edit2, AlertTriangle, ArrowDownCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import WorkerPaymentManager from '@/components/business/WorkerPaymentManager';
 import AdSpace from '@/components/AdSpace';
+import { toTitleCase, toSentenceCase } from '@/lib/utils';
 
 interface Member {
   user_id: string;
@@ -18,17 +24,28 @@ interface Member {
   full_name: string;
 }
 
-interface Customer {
+interface TeamMember {
   id: string;
-  user_id: string;
-  customer_name: string;
+  business_id: string;
+  full_name: string;
   phone: string;
-  created_at: string;
+  rank: string;
+  salary: number;
+  payment_frequency: string;
+  hire_date: string;
+  next_payment_due: string | null;
+  is_active: boolean;
 }
 
-function ShareButtons({ code, type }: { code: string; type: 'worker' | 'customer' }) {
-  const label = type === 'worker' ? 'Worker' : 'Customer';
-  const message = `Join our business as a ${label}! Use this invite code: ${code}`;
+interface WorkerBalance {
+  totalOwed: number;
+  totalAdvances: number;
+}
+
+const RANKS = ['Supervisor', 'Manager', 'Cashier', 'Security', 'Worker', 'Driver', 'Cleaner'];
+
+function ShareButtons({ code, type }: { code: string; type: 'worker' }) {
+  const message = `Join our business as a Worker! Use this invite code: ${code}`;
   const encoded = encodeURIComponent(message);
 
   const platforms = [
@@ -47,16 +64,6 @@ function ShareButtons({ code, type }: { code: string; type: 'worker' | 'customer
       ),
       url: `https://twitter.com/intent/tweet?text=${encoded}`,
       bg: 'bg-black hover:bg-gray-800 text-white',
-    },
-    {
-      name: 'Facebook',
-      icon: (
-        <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-        </svg>
-      ),
-      url: `https://www.facebook.com/sharer/sharer.php?quote=${encoded}`,
-      bg: 'bg-blue-600 hover:bg-blue-700 text-white',
     },
     {
       name: 'Copy',
@@ -119,7 +126,7 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
           Redeem Invite Code
         </h2>
         <p className="text-sm text-muted-foreground">
-          Have an invite code? Enter it below to join a business as a worker or customer.
+          Have an invite code? Enter it below to join a business.
         </p>
         <div className="flex gap-2">
           <Input
@@ -139,45 +146,67 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
 }
 
 export default function TeamPage() {
-  const { currentBusiness, userRole, generateInviteCode, getMembers, removeMember, updateMemberRole, getCustomers, removeCustomer, memberships } = useBusiness();
+  const { currentBusiness, userRole, generateInviteCode, getMembers, removeMember, updateMemberRole, memberships } = useBusiness();
   const { user } = useAuth();
+  const { fmt } = useCurrency();
   const [members, setMembers] = useState<Member[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
   const [workerCode, setWorkerCode] = useState<string | null>(null);
-  
   const [loading, setLoading] = useState(false);
   const isOwnerOrAdmin = userRole === 'owner' || userRole === 'admin';
 
+  // Team members (business_team_members) for worker management
+  const [teamWorkers, setTeamWorkers] = useState<TeamMember[]>([]);
+  const [workerBalances, setWorkerBalances] = useState<Record<string, WorkerBalance>>({});
+  const [showAddWorker, setShowAddWorker] = useState(false);
+  const [editWorkerId, setEditWorkerId] = useState<string | null>(null);
+  const [workerForm, setWorkerForm] = useState({ full_name: '', rank: 'Worker', salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10) });
+
+  const businessId = currentBusiness?.id;
+
+  const loadTeamWorkers = useCallback(async () => {
+    if (!businessId) return;
+    const [workersRes, paymentsRes, advancesRes] = await Promise.all([
+      supabase.from('business_team_members').select('*').eq('business_id', businessId).order('full_name'),
+      supabase.from('business_worker_payments').select('*').eq('business_id', businessId),
+      supabase.from('business_worker_advances').select('*').eq('business_id', businessId),
+    ]);
+    const workers = (workersRes.data || []) as TeamMember[];
+    setTeamWorkers(workers);
+
+    // Calculate balances
+    const payments = paymentsRes.data || [];
+    const advances = advancesRes.data || [];
+    const balances: Record<string, WorkerBalance> = {};
+    workers.forEach(w => {
+      const pendingPayments = payments.filter((p: any) => p.worker_id === w.id && p.status !== 'completed');
+      const totalOwed = pendingPayments.reduce((sum: number, p: any) => sum + (p.amount_due - p.amount_paid), 0);
+      const activeAdvances = advances.filter((a: any) => a.worker_id === w.id && a.status === 'active');
+      const totalAdvances = activeAdvances.reduce((sum: number, a: any) => sum + a.remaining_balance, 0);
+      balances[w.id] = { totalOwed, totalAdvances };
+    });
+    setWorkerBalances(balances);
+  }, [businessId]);
+
   useEffect(() => {
     loadMembers();
-    loadCustomers();
-  }, [currentBusiness]);
+    loadTeamWorkers();
+  }, [currentBusiness, loadTeamWorkers]);
 
   async function loadMembers() {
     const data = await getMembers();
     setMembers(data);
   }
 
-  async function loadCustomers() {
-    const data = await getCustomers();
-    setCustomers(data);
-  }
-
-  async function handleGenerateCode(type: 'worker' | 'customer') {
+  async function handleGenerateCode() {
     setLoading(true);
-    const code = await generateInviteCode(type);
-    if (type === 'worker') setWorkerCode(code);
+    const code = await generateInviteCode('worker');
+    setWorkerCode(code);
     setLoading(false);
   }
 
   async function handleRemove(userId: string) {
     await removeMember(userId);
     loadMembers();
-  }
-
-  async function handleRemoveCustomer(id: string) {
-    await removeCustomer(id);
-    loadCustomers();
   }
 
   async function handleRoleChange(userId: string, role: string) {
@@ -193,42 +222,74 @@ export default function TeamPage() {
     }
   }
 
-  function InviteSection({ type, code, onGenerate }: { type: 'worker' | 'customer'; code: string | null; onGenerate: () => void }) {
-    const isWorker = type === 'worker';
-    return (
-      <Card className="shadow-card border-dashed">
-        <CardContent className="p-4 space-y-3">
-          <h2 className="text-base font-semibold flex items-center gap-2">
-            <UserPlus className="h-4 w-4" />
-            {isWorker ? 'Invite Workers' : 'Invite Customers'}
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            {isWorker
-              ? 'Generate a code to add team members who can manage stock, sales & orders.'
-              : 'Generate a code for customers so they can place orders through the app.'}
-          </p>
-          {code ? (
-            <div className="space-y-2">
-              <div className="rounded-lg p-3 text-center" style={{ backgroundColor: isWorker ? 'hsl(var(--primary) / 0.08)' : 'hsl(var(--accent) / 0.3)' }}>
-                <span className="text-2xl font-mono font-bold tracking-widest">{code}</span>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {isWorker ? '🔐 Worker Code — Expires in 7 days' : '🛒 Customer Code — Expires in 7 days'}
-                </p>
-              </div>
-              <ShareButtons code={code} type={type} />
-            </div>
-          ) : (
-            <Button onClick={onGenerate} disabled={loading} variant={isWorker ? 'default' : 'secondary'}>
-              <UserPlus className="h-4 w-4 mr-2" />
-              Generate {isWorker ? 'Worker' : 'Customer'} Code
-            </Button>
-          )}
-        </CardContent>
-      </Card>
-    );
+  function resetWorkerForm() {
+    setWorkerForm({ full_name: '', rank: 'Worker', salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10) });
   }
 
-  // Find current user's membership info
+  async function handleAddWorker(e: React.FormEvent) {
+    e.preventDefault();
+    if (!businessId || !workerForm.full_name.trim()) return;
+    const { error } = await supabase.from('business_team_members').insert({
+      business_id: businessId,
+      full_name: toTitleCase(workerForm.full_name.trim()),
+      rank: workerForm.rank,
+      salary: parseFloat(workerForm.salary) || 0,
+      phone: workerForm.phone.trim(),
+      hire_date: workerForm.hire_date,
+      is_active: true,
+      payment_frequency: 'monthly',
+      next_payment_due: new Date().toISOString().slice(0, 10),
+    } as any);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Worker added!');
+    resetWorkerForm();
+    setShowAddWorker(false);
+    loadTeamWorkers();
+  }
+
+  async function handleEditWorker(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editWorkerId) return;
+    const { error } = await supabase.from('business_team_members').update({
+      full_name: toTitleCase(workerForm.full_name.trim()),
+      rank: workerForm.rank,
+      salary: parseFloat(workerForm.salary) || 0,
+      phone: workerForm.phone.trim(),
+      hire_date: workerForm.hire_date,
+    }).eq('id', editWorkerId);
+    if (error) { toast.error(error.message); return; }
+    toast.success('Worker updated!');
+    resetWorkerForm();
+    setEditWorkerId(null);
+    loadTeamWorkers();
+  }
+
+  function openEditWorker(w: TeamMember) {
+    setWorkerForm({ full_name: w.full_name, rank: w.rank, salary: String(w.salary), phone: w.phone, hire_date: w.hire_date });
+    setEditWorkerId(w.id);
+  }
+
+  async function deactivateWorker(id: string) {
+    await supabase.from('business_team_members').update({ is_active: false }).eq('id', id);
+    loadTeamWorkers();
+  }
+
+  async function reactivateWorker(id: string) {
+    await supabase.from('business_team_members').update({ is_active: true }).eq('id', id);
+    loadTeamWorkers();
+  }
+
+  async function deleteWorker(id: string) {
+    await supabase.from('business_team_members').delete().eq('id', id);
+    toast.success('Worker removed');
+    loadTeamWorkers();
+  }
+
+  const activeWorkers = teamWorkers.filter(w => w.is_active);
+  const inactiveWorkers = teamWorkers.filter(w => !w.is_active);
+  const totalSalary = activeWorkers.reduce((sum, w) => sum + Number(w.salary), 0);
+
+  // Current user info
   const myMembership = members.find(m => m.user_id === user?.id);
   const myJoinDate = memberships.find(m => m.business_id === currentBusiness?.id && m.user_id === user?.id)?.created_at;
   const tenure = myJoinDate ? Math.floor((Date.now() - new Date(myJoinDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
@@ -236,11 +297,18 @@ export default function TeamPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Team</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {currentBusiness?.name} — Manage your workers
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="h-6 w-6" /> Team</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            {activeWorkers.length} workers{isOwnerOrAdmin && ` · Monthly salary: ${fmt(totalSalary)}`}
+          </p>
+        </div>
+        {isOwnerOrAdmin && (
+          <Button onClick={() => { resetWorkerForm(); setShowAddWorker(true); }}>
+            <Plus className="h-4 w-4 mr-1" />Add Worker
+          </Button>
+        )}
       </div>
 
       {/* Worker's own profile card (when not owner) */}
@@ -272,38 +340,58 @@ export default function TeamPage() {
         </Card>
       )}
 
-      {/* Redeem Code Section — always visible */}
-      <RedeemCodeSection onRedeemed={() => { loadMembers(); loadCustomers(); }} />
+      <RedeemCodeSection onRedeemed={() => { loadMembers(); loadTeamWorkers(); }} />
 
       <AdSpace variant="banner" />
 
       <Tabs defaultValue="workers" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="workers" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Workers
+            <Users className="h-4 w-4" /> Workers
           </TabsTrigger>
           <TabsTrigger value="payments" className="flex items-center gap-2">
-            <Wallet className="h-4 w-4" />
-            Payments
+            <Wallet className="h-4 w-4" /> Payments
           </TabsTrigger>
         </TabsList>
 
         {/* Workers Tab */}
         <TabsContent value="workers" className="space-y-4 mt-4">
           {isOwnerOrAdmin && (
-            <InviteSection type="worker" code={workerCode} onGenerate={() => handleGenerateCode('worker')} />
+            <Card className="shadow-card border-dashed">
+              <CardContent className="p-4 space-y-3">
+                <h2 className="text-base font-semibold flex items-center gap-2">
+                  <UserPlus className="h-4 w-4" /> Invite App Users
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Generate a code to add team members who can manage stock, sales & orders.
+                </p>
+                {workerCode ? (
+                  <div className="space-y-2">
+                    <div className="rounded-lg p-3 text-center bg-primary/5">
+                      <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
+                      <p className="text-xs text-muted-foreground mt-1">🔐 Worker Code — Expires in 7 days</p>
+                    </div>
+                    <ShareButtons code={workerCode} type="worker" />
+                  </div>
+                ) : (
+                  <Button onClick={handleGenerateCode} disabled={loading}>
+                    <UserPlus className="h-4 w-4 mr-2" /> Generate Worker Code
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
           )}
 
+          {/* App Members */}
           <Card className="shadow-card">
             <CardContent className="p-4">
               <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
-                <Users className="h-4 w-4" /> Team Members
+                <Shield className="h-4 w-4" /> App Members
               </h2>
               {members.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">No team members yet. Generate an invite code to add workers.</p>
+                <p className="text-sm text-muted-foreground text-center py-4">No app members yet.</p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {members.map(member => (
                     <div key={member.user_id} className="flex items-center justify-between p-3 rounded-lg border">
                       <div className="flex items-center gap-3">
@@ -317,9 +405,7 @@ export default function TeamPage() {
                         {isOwnerOrAdmin && member.role !== 'owner' ? (
                           <>
                             <Select value={member.role} onValueChange={v => handleRoleChange(member.user_id, v)}>
-                              <SelectTrigger className="w-28 h-8 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
+                              <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="admin">Admin</SelectItem>
                                 <SelectItem value="worker">Worker</SelectItem>
@@ -330,9 +416,7 @@ export default function TeamPage() {
                             </Button>
                           </>
                         ) : (
-                          <span className="text-xs font-medium capitalize px-2 py-1 rounded-full bg-muted">
-                            {member.role}
-                          </span>
+                          <span className="text-xs font-medium capitalize px-2 py-1 rounded-full bg-muted">{member.role}</span>
                         )}
                       </div>
                     </div>
@@ -341,14 +425,103 @@ export default function TeamPage() {
               )}
             </CardContent>
           </Card>
+
+          {/* Team Workers List */}
+          {activeWorkers.length > 0 && (
+            <Card className="shadow-card">
+              <CardContent className="p-4">
+                <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
+                  <Users className="h-4 w-4" /> Workers ({activeWorkers.length})
+                </h2>
+                <div className="space-y-2">
+                  {activeWorkers.map(w => {
+                    const bal = workerBalances[w.id] || { totalOwed: 0, totalAdvances: 0 };
+                    return (
+                      <div key={w.id} className="flex items-center justify-between p-3 rounded-lg border">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium">{w.full_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {w.rank} · {w.phone && `📞 ${w.phone} · `}Hired: {new Date(w.hire_date).toLocaleDateString()}
+                          </p>
+                          {bal.totalOwed > 0 && (
+                            <p className="text-xs text-destructive mt-0.5">
+                              <AlertTriangle className="inline h-3 w-3 mr-1" />
+                              Business owes: {fmt(bal.totalOwed)}
+                            </p>
+                          )}
+                          {bal.totalAdvances > 0 && (
+                            <p className="text-xs text-warning mt-0.5">
+                              <ArrowDownCircle className="inline h-3 w-3 mr-1" />
+                              Advance given: {fmt(bal.totalAdvances)}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          {isOwnerOrAdmin && <span className="text-sm font-semibold text-success tabular-nums">{fmt(Number(w.salary))}/mo</span>}
+                          {isOwnerOrAdmin && (
+                            <>
+                              <Button variant="ghost" size="icon" onClick={() => openEditWorker(w)}><Edit2 className="h-3.5 w-3.5" /></Button>
+                              <Button variant="ghost" size="icon" onClick={() => deactivateWorker(w.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Inactive Workers */}
+          {inactiveWorkers.length > 0 && (
+            <Card className="shadow-card border-destructive/20">
+              <CardContent className="p-4">
+                <h2 className="text-sm font-semibold text-destructive mb-2">Inactive Workers ({inactiveWorkers.length})</h2>
+                {inactiveWorkers.map(w => (
+                  <div key={w.id} className="flex items-center justify-between p-2 rounded border mb-1">
+                    <span className="text-sm text-muted-foreground">{w.full_name} — {w.rank}</span>
+                    <div className="flex gap-1">
+                      <Button size="sm" variant="outline" onClick={() => reactivateWorker(w.id)}>Reactivate</Button>
+                      <Button size="sm" variant="destructive" onClick={() => deleteWorker(w.id)}>Remove</Button>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Payments Tab */}
         <TabsContent value="payments" className="mt-4">
           <WorkerPaymentManager isOwnerOrAdmin={isOwnerOrAdmin} />
         </TabsContent>
-
       </Tabs>
+
+      {/* Add/Edit Worker Dialog */}
+      <Dialog open={showAddWorker || !!editWorkerId} onOpenChange={o => { if (!o) { setShowAddWorker(false); setEditWorkerId(null); resetWorkerForm(); } }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>{editWorkerId ? 'Edit Worker' : 'Add Worker'}</DialogTitle></DialogHeader>
+          <form onSubmit={editWorkerId ? handleEditWorker : handleAddWorker} className="space-y-3">
+            <div><Label>Full Name *</Label><Input value={workerForm.full_name} onChange={e => setWorkerForm(f => ({ ...f, full_name: e.target.value }))} onBlur={e => setWorkerForm(f => ({ ...f, full_name: toTitleCase(e.target.value) }))} required /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Rank</Label>
+                <Select value={workerForm.rank} onValueChange={v => setWorkerForm(f => ({ ...f, rank: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{RANKS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div><Label>Monthly Salary</Label><Input type="number" min="0" step="0.01" value={workerForm.salary} onChange={e => setWorkerForm(f => ({ ...f, salary: e.target.value }))} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Phone</Label><Input value={workerForm.phone} onChange={e => setWorkerForm(f => ({ ...f, phone: e.target.value }))} /></div>
+              <div><Label>Hire Date</Label><Input type="date" value={workerForm.hire_date} onChange={e => setWorkerForm(f => ({ ...f, hire_date: e.target.value }))} /></div>
+            </div>
+            <Button type="submit" className="w-full">{editWorkerId ? 'Save Changes' : 'Add Worker'}</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
