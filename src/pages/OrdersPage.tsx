@@ -1009,11 +1009,22 @@ export default function OrdersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Complete Order Dialog with Payment */}
+      {/* Complete Order Dialog — adapts based on order type */}
       <Dialog open={!!completeDialog} onOpenChange={o => { if (!o) { setCompleteDialog(null); setProofFile(null); setProofPreview(null); } }}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Complete Order & Pay</DialogTitle></DialogHeader>
-          <p className="text-xs text-muted-foreground">Finalize the agreed order, select payment method, and issue receipt.</p>
+          <DialogHeader>
+            <DialogTitle>
+              {completeDialog?.type === 'request' ? 'Submit Payment' : completeDialog?.type === 'inbox' ? 'Issue Receipt' : 'Complete Order & Pay'}
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground">
+            {completeDialog?.type === 'request'
+              ? 'Submit payment to the supplier. They will confirm receipt and issue a receipt.'
+              : completeDialog?.type === 'inbox'
+              ? 'Payment has been confirmed. Enter names and issue the receipt.'
+              : 'Finalize the order, select payment method, and issue receipt.'
+            }
+          </p>
           
           {completeDialog && (
             <div className="space-y-4">
@@ -1041,95 +1052,123 @@ export default function OrdersPage() {
                 </div>
                 <div>
                   <Label className="text-xs font-semibold text-destructive">Seller Name *</Label>
-                  <Input value={completeSeller} onChange={e => setCompleteSeller(e.target.value)} onBlur={() => setCompleteSeller(toSentenceCase(completeSeller))} placeholder="Your name" />
+                  <Input value={completeSeller} onChange={e => setCompleteSeller(e.target.value)} onBlur={() => setCompleteSeller(toSentenceCase(completeSeller))} placeholder="Seller name" />
                 </div>
               </div>
 
-              {/* Payment Method */}
-              <div>
-                <Label className="text-xs font-semibold mb-2 block">Payment Method</Label>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={() => setPaymentMethod('mobile_money')}
-                    className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left ${
-                      paymentMethod === 'mobile_money'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-muted-foreground/30'
-                    }`}
-                  >
-                    <Smartphone className="h-5 w-5 text-success shrink-0" />
-                    <div>
-                      <p className="font-semibold text-xs">Mobile Money</p>
-                      <p className="text-[10px] text-muted-foreground">Upload proof</p>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod('card')}
-                    className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left ${
-                      paymentMethod === 'card'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-muted-foreground/30'
-                    }`}
-                  >
-                    <CreditCard className="h-5 w-5 text-info shrink-0" />
-                    <div>
-                      <p className="font-semibold text-xs">Card / Cash</p>
-                      <p className="text-[10px] text-muted-foreground">Paid directly</p>
-                    </div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Mobile Money proof upload */}
-              {paymentMethod === 'mobile_money' && (
-                <div className="space-y-2 p-3 bg-muted/40 rounded-lg border">
+              {/* Payment Method — only for request (buyer) and live orders */}
+              {(completeDialog.type === 'request' || completeDialog.type === 'my_order') && (
+                <>
                   <div>
-                    <p className="text-xs font-medium">📱 Send payment to:</p>
-                    <p className="text-xs text-muted-foreground">
-                      {currentBusiness?.contact || 'Contact in settings'} — <span className="font-semibold">{currentBusiness?.name}</span>
-                    </p>
-                    <p className="text-base font-bold text-success mt-1">{fmt(Number(completeDialog.grand_total))}</p>
-                  </div>
-                  <div>
-                    <Label className="text-xs font-semibold text-destructive">Upload Payment Screenshot *</Label>
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="mt-1 border-2 border-dashed rounded-lg p-3 text-center cursor-pointer hover:border-primary/50 transition-colors"
-                    >
-                      {proofPreview ? (
-                        <img src={proofPreview} alt="Payment proof" className="max-h-32 mx-auto rounded-lg" />
-                      ) : (
-                        <div className="space-y-1">
-                          <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
-                          <p className="text-xs text-muted-foreground">Tap to upload screenshot</p>
+                    <Label className="text-xs font-semibold mb-2 block">Payment Method</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => setPaymentMethod('mobile_money')}
+                        className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left ${
+                          paymentMethod === 'mobile_money'
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <Smartphone className="h-5 w-5 text-success shrink-0" />
+                        <div>
+                          <p className="font-semibold text-xs">Mobile Money</p>
+                          <p className="text-[10px] text-muted-foreground">Upload proof</p>
                         </div>
-                      )}
+                      </button>
+                      <button
+                        onClick={() => setPaymentMethod('card')}
+                        className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left ${
+                          paymentMethod === 'card'
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <CreditCard className="h-5 w-5 text-info shrink-0" />
+                        <div>
+                          <p className="font-semibold text-xs">Card / Cash</p>
+                          <p className="text-[10px] text-muted-foreground">Paid directly</p>
+                        </div>
+                      </button>
                     </div>
-                    <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-                    {proofFile && <p className="text-xs text-success mt-1">✓ {proofFile.name}</p>}
                   </div>
-                </div>
+
+                  {paymentMethod === 'mobile_money' && (
+                    <div className="space-y-2 p-3 bg-muted/40 rounded-lg border">
+                      <div>
+                        <p className="text-xs font-medium">📱 Send payment to:</p>
+                        <p className="text-xs text-muted-foreground">
+                          {currentBusiness?.contact || 'Contact in settings'} — <span className="font-semibold">{currentBusiness?.name}</span>
+                        </p>
+                        <p className="text-base font-bold text-success mt-1">{fmt(Number(completeDialog.grand_total))}</p>
+                      </div>
+                      <div>
+                        <Label className="text-xs font-semibold text-destructive">Upload Payment Screenshot *</Label>
+                        <div
+                          onClick={() => fileInputRef.current?.click()}
+                          className="mt-1 border-2 border-dashed rounded-lg p-3 text-center cursor-pointer hover:border-primary/50 transition-colors"
+                        >
+                          {proofPreview ? (
+                            <img src={proofPreview} alt="Payment proof" className="max-h-32 mx-auto rounded-lg" />
+                          ) : (
+                            <div className="space-y-1">
+                              <Upload className="h-6 w-6 mx-auto text-muted-foreground" />
+                              <p className="text-xs text-muted-foreground">Tap to upload screenshot</p>
+                            </div>
+                          )}
+                        </div>
+                        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                        {proofFile && <p className="text-xs text-success mt-1">✓ {proofFile.name}</p>}
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentMethod === 'card' && (
+                    <div className="p-3 bg-info/5 rounded-lg border border-info/20">
+                      <p className="text-xs text-muted-foreground">
+                        💳 Confirm that card/cash payment of <span className="font-bold text-foreground">{fmt(Number(completeDialog.grand_total))}</span> has been made.
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
 
-              {paymentMethod === 'card' && (
-                <div className="p-3 bg-info/5 rounded-lg border border-info/20">
+              {/* Inbox (supplier) — no payment section, just receipt */}
+              {completeDialog.type === 'inbox' && (
+                <div className="p-3 bg-success/5 rounded-lg border border-success/20">
                   <p className="text-xs text-muted-foreground">
-                    💳 Confirm that card/cash payment of <span className="font-bold text-foreground">{fmt(Number(completeDialog.grand_total))}</span> has been received before completing.
+                    ✅ Payment has been confirmed. Fill in the names above and issue the receipt to complete this order.
                   </p>
                 </div>
               )}
 
               <Button
                 className="w-full h-11"
-                disabled={completing || !completeBuyer.trim() || !completeSeller.trim() || (paymentMethod === 'mobile_money' && !proofFile)}
+                disabled={completing || !completeBuyer.trim() || !completeSeller.trim() || (completeDialog.type !== 'inbox' && paymentMethod === 'mobile_money' && !proofFile)}
                 onClick={handleCompleteOrder}
               >
                 {completing ? 'Processing...' : (
-                  <><CheckCircle className="h-4 w-4 mr-2" />Complete Order — {fmt(Number(completeDialog.grand_total))}</>
+                  completeDialog.type === 'request'
+                    ? <><Send className="h-4 w-4 mr-2" />Submit Payment — {fmt(Number(completeDialog.grand_total))}</>
+                    : completeDialog.type === 'inbox'
+                    ? <><ReceiptIcon className="h-4 w-4 mr-2" />Issue Receipt — {fmt(Number(completeDialog.grand_total))}</>
+                    : <><CheckCircle className="h-4 w-4 mr-2" />Complete Order — {fmt(Number(completeDialog.grand_total))}</>
                 )}
               </Button>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Reject Prices Dialog */}
+      <Dialog open={!!rejectingOrder} onOpenChange={o => { if (!o) setRejectingOrder(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Reject Prices</DialogTitle></DialogHeader>
+          <p className="text-xs text-muted-foreground">Tell the supplier why you're rejecting the prices so they can adjust.</p>
+          <Textarea value={rejectComment} onChange={e => setRejectComment(e.target.value)} placeholder="e.g. Prices too high, I expected wholesale rates..." className="min-h-[80px]" />
+          <Button variant="destructive" onClick={() => rejectingOrder && rejectPrices(rejectingOrder)} disabled={syncing} className="w-full">
+            {syncing ? 'Sending...' : '🔄 Reject & Request Re-pricing'}
+          </Button>
         </DialogContent>
       </Dialog>
 
