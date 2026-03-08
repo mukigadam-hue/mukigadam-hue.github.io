@@ -60,7 +60,7 @@ const factoryMoreNav = [
   { to: '/production', label: 'Production', icon: Factory },
   { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
   { to: '/orders', label: 'Orders', icon: ClipboardList },
-  { to: '/checkout', label: 'Checkout', icon: ShoppingBag },
+  
   { to: '/payments', label: 'Verify Payments', icon: ShieldCheck },
   { to: '/services', label: 'Services', icon: Wrench },
   { to: '/expenses', label: 'Expenses', icon: Flame },
