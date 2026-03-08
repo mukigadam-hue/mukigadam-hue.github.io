@@ -69,6 +69,7 @@ export default function OrdersPage() {
   const liveOrders = orders.filter(o => o.type === 'my_order');
   const inboxOrders = orders.filter(o => o.type === 'inbox');
   const myRequests = orders.filter(o => o.type === 'request');
+  const requestsNeedingAction = myRequests.filter(o => o.status === 'priced' || o.status === 'confirmed').length;
 
   const activeStock = stock.filter(s => !s.deleted_at);
   const suggestions = activeStock.map(s => s.name);
@@ -312,7 +313,7 @@ export default function OrdersPage() {
     }
   }
 
-  async function confirmPrices(order: Order) {
+  async function confirmPricesAndPay(order: Order) {
     setSyncing(true);
     try {
       const res = await supabase.functions.invoke('sync-order-prices', {
@@ -321,8 +322,12 @@ export default function OrdersPage() {
       if (res.error || res.data?.error) {
         toast.error(res.data?.error || 'Failed to confirm');
       } else {
-        toast.success('Prices confirmed! You can now submit payment.');
+        toast.success('Prices confirmed! Now submit your payment.');
         await refreshData();
+        // Immediately open payment dialog
+        setCompleteDialog({ ...order, status: 'confirmed' });
+        setCompleteBuyer(order.customer_name);
+        setCompleteSeller('');
       }
     } finally {
       setSyncing(false);
@@ -552,13 +557,13 @@ export default function OrdersPage() {
         )}
         {isRequest && order.status === 'priced' && (
           <div className="bg-accent/10 border border-accent/20 rounded-md px-3 py-2 text-xs flex items-center gap-2">
-            <span>💰 Supplier has priced your order! Review the prices below and <strong>Confirm</strong> or <strong>Reject</strong>.</span>
+            <span>💰 Supplier has priced your order! Review the prices below, then <strong>Accept & Pay</strong> or <strong>Reject & Re-price</strong>.</span>
           </div>
         )}
         {isRequest && order.status === 'confirmed' && (
           <div className="bg-primary/10 border border-primary/20 rounded-md px-3 py-2 text-xs flex items-center gap-2">
             <CreditCard className="h-3.5 w-3.5 text-primary shrink-0" />
-            <span>✅ Prices confirmed! Now <strong>Submit Payment</strong> to complete the order.</span>
+            <span>✅ Prices confirmed! Click <strong>Submit Payment</strong> to complete.</span>
           </div>
         )}
 
@@ -628,8 +633,8 @@ export default function OrdersPage() {
               {/* REQUEST ORDER ACTIONS (Buyer side) */}
               {order.type === 'request' && order.status === 'priced' && (
                 <>
-                  <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => confirmPrices(order)} disabled={syncing}>
-                    <CheckCircle className="h-3.5 w-3.5 mr-1" />{syncing ? 'Confirming...' : 'Confirm Prices'}
+                  <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => confirmPricesAndPay(order)} disabled={syncing}>
+                    <CheckCircle className="h-3.5 w-3.5 mr-1" />{syncing ? 'Processing...' : 'Accept & Pay'}
                   </Button>
                   <Button size="sm" variant="destructive" onClick={() => { setRejectingOrder(order); setRejectComment(''); }} disabled={syncing}>
                     🔄 Reject & Re-price
@@ -1048,9 +1053,14 @@ export default function OrdersPage() {
             📥 From Customers
             {inboxOrders.length > 0 && <span className="ml-0.5 bg-warning text-warning-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold">{inboxOrders.length}</span>}
           </TabsTrigger>
-          <TabsTrigger value="my_requests" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
+          <TabsTrigger value="my_requests" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1 relative">
             📨 To Suppliers
             {myRequests.length > 0 && <span className="ml-0.5 bg-primary-foreground/20 text-[10px] px-1.5 py-0.5 rounded-full">{myRequests.length}</span>}
+            {requestsNeedingAction > 0 && (
+              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full animate-pulse">
+                {requestsNeedingAction}
+              </span>
+            )}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="live_orders" className="space-y-3 mt-4">
