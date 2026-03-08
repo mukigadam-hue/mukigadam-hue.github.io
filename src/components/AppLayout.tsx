@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LayoutDashboard, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Settings, Users, LogOut, Building2, Crown, User, Bell, BellDot, Factory, Flame, Boxes, Menu, Contact, Globe } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { APP_VERSION } from '@/version';
 import { useBusiness } from '@/context/BusinessContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
@@ -280,10 +281,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="p-3 border-t border-sidebar-border">
+          <div className="p-3 border-t border-sidebar-border space-y-1">
             <Button variant="ghost" className="w-full justify-start text-sidebar-foreground text-sm" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-2" />{t('nav.signOut')}
             </Button>
+            <p className="text-[10px] text-sidebar-muted text-center">v{APP_VERSION}</p>
           </div>
         </aside>
 
@@ -356,10 +358,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               })}
             </div>
 
-            <div className="mt-4 pt-3 border-t">
+            <div className="mt-4 pt-3 border-t space-y-1">
               <Button variant="ghost" className="w-full justify-start text-destructive text-sm" onClick={signOut}>
                 <LogOut className="h-4 w-4 mr-2" /> {t('nav.signOut')}
               </Button>
+              <p className="text-[10px] text-muted-foreground text-center">v{APP_VERSION}</p>
             </div>
           </SheetContent>
         </Sheet>
