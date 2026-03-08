@@ -160,6 +160,18 @@ export interface ReceiptRecord {
   created_at: string;
 }
 
+export interface BusinessExpense {
+  id: string;
+  business_id: string;
+  category: string;
+  description: string;
+  amount: number;
+  recorded_by: string;
+  expense_date: string;
+  from_order_id: string | null;
+  created_at: string;
+}
+
 export interface Notification {
   id: string;
   business_id: string;
