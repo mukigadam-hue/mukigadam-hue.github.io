@@ -908,14 +908,18 @@ export default function OrdersPage() {
 
       {/* Orders Lists */}
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="w-full grid grid-cols-2 h-12 rounded-xl bg-muted/60 p-1">
-          <TabsTrigger value="live_orders" className="rounded-lg text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1.5">
+        <TabsList className="w-full grid grid-cols-3 h-12 rounded-xl bg-muted/60 p-1">
+          <TabsTrigger value="live_orders" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
             🛒 My Orders
-            {liveOrders.length > 0 && <span className="ml-1 bg-primary-foreground/20 text-[10px] px-1.5 py-0.5 rounded-full">{liveOrders.length}</span>}
+            {liveOrders.length > 0 && <span className="ml-0.5 bg-primary-foreground/20 text-[10px] px-1.5 py-0.5 rounded-full">{liveOrders.length}</span>}
           </TabsTrigger>
-          <TabsTrigger value="my_requests" className="rounded-lg text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1.5">
+          <TabsTrigger value="inbox" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
+            📥 From Customers
+            {inboxOrders.length > 0 && <span className="ml-0.5 bg-warning text-warning-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold">{inboxOrders.length}</span>}
+          </TabsTrigger>
+          <TabsTrigger value="my_requests" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
             📨 To Suppliers
-            {myRequests.length > 0 && <span className="ml-1 bg-primary-foreground/20 text-[10px] px-1.5 py-0.5 rounded-full">{myRequests.length}</span>}
+            {myRequests.length > 0 && <span className="ml-0.5 bg-primary-foreground/20 text-[10px] px-1.5 py-0.5 rounded-full">{myRequests.length}</span>}
           </TabsTrigger>
         </TabsList>
         <TabsContent value="live_orders" className="space-y-3 mt-4">
@@ -924,10 +928,16 @@ export default function OrdersPage() {
             {liveOrders.length === 0 ? <p className="text-sm text-muted-foreground">No orders yet. Create one using the "New Order" button above.</p> : liveOrders.map(o => <OrderCard key={o.id} order={o} />)}
           </div>
         </TabsContent>
-        <TabsContent value="my_requests" className="space-y-3 mt-4">
-          <p className="text-xs text-muted-foreground mb-2">📨 Orders you sent to your suppliers using this app. They set prices → you review & approve → you pay → they confirm → you get a receipt.</p>
+        <TabsContent value="inbox" className="space-y-3 mt-4">
+          <p className="text-xs text-muted-foreground mb-2">📥 Orders sent to you by other businesses. You set prices → they review & pay → you confirm payment → give receipt.</p>
           <div className="max-h-[500px] overflow-y-auto pr-1 space-y-3">
-            {myRequests.length === 0 ? <p className="text-sm text-muted-foreground">No requests sent yet. Use "Request from Supplier" above to order items.</p> : myRequests.map(o => <OrderCard key={o.id} order={o} />)}
+            {inboxOrders.length === 0 ? <p className="text-sm text-muted-foreground">No orders received yet. When another business sends you an order, it will appear here.</p> : inboxOrders.map(o => <OrderCard key={o.id} order={o} showStockStatus />)}
+          </div>
+        </TabsContent>
+        <TabsContent value="my_requests" className="space-y-3 mt-4">
+          <p className="text-xs text-muted-foreground mb-2">📨 Orders you sent to your suppliers. They set prices → you review & approve → you pay → they confirm → you get a receipt.</p>
+          <div className="max-h-[500px] overflow-y-auto pr-1 space-y-3">
+            {myRequests.length === 0 ? <p className="text-sm text-muted-foreground">No requests sent yet. Use "Order from Supplier" above to order items.</p> : myRequests.map(o => <OrderCard key={o.id} order={o} />)}
           </div>
         </TabsContent>
       </Tabs>
