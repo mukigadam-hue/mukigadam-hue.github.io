@@ -47,6 +47,14 @@ export default function OrdersPage() {
   const [completing, setCompleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Recipient selection for requests
+  const [contacts, setContacts] = useState<{ id: string; contact_business_id: string; nickname: string; business_name?: string; business_code?: string }[]>([]);
+  const [recipientMode, setRecipientMode] = useState<'contact' | 'code'>('contact');
+  const [selectedContactBusinessId, setSelectedContactBusinessId] = useState<string>('');
+  const [recipientCode, setRecipientCode] = useState('');
+  const [recipientLookup, setRecipientLookup] = useState<{ id: string; name: string } | null>(null);
+  const [lookingUp, setLookingUp] = useState(false);
+
   const liveOrders = orders.filter(o => o.type === 'my_order');
   const inboxOrders = orders.filter(o => o.type === 'inbox');
   const myRequests = orders.filter(o => o.type === 'request');
@@ -58,6 +66,52 @@ export default function OrdersPage() {
 
   const [scannerOpen, setScannerOpen] = useState(false);
   const [orderMode, setOrderMode] = useState<'my_order' | 'inbox' | 'request'>('my_order');
+
+  // Load contacts for recipient selection
+  useEffect(() => {
+    if (!currentBusiness) return;
+    async function loadContacts() {
+      const { data } = await supabase
+        .from('business_contacts')
+        .select('id, contact_business_id, nickname')
+        .eq('business_id', currentBusiness!.id);
+      if (data) {
+        // Fetch business names for contacts
+        const contactIds = data.map(c => c.contact_business_id);
+        if (contactIds.length > 0) {
+          const { data: bizData } = await supabase
+            .from('businesses')
+            .select('id, name, business_code')
+            .in('id', contactIds);
+          const enriched = data.map(c => {
+            const biz = bizData?.find(b => b.id === c.contact_business_id);
+            return { ...c, business_name: biz?.name || '', business_code: biz?.business_code || '' };
+          });
+          setContacts(enriched);
+        } else {
+          setContacts(data.map(c => ({ ...c, business_name: '', business_code: '' })));
+        }
+      }
+    }
+    loadContacts();
+  }, [currentBusiness]);
+
+  async function lookupRecipientByCode() {
+    if (!recipientCode.trim()) return;
+    setLookingUp(true);
+    try {
+      const { data } = await supabase.rpc('lookup_business_by_code', { _code: recipientCode.trim().toUpperCase() });
+      if (data && data.length > 0) {
+        setRecipientLookup({ id: data[0].id, name: data[0].name });
+        toast.success(`Found: ${data[0].name}`);
+      } else {
+        setRecipientLookup(null);
+        toast.error('No business found with that code');
+      }
+    } finally {
+      setLookingUp(false);
+    }
+  }
 
   function applyCase(field: 'name' | 'category' | 'quality') {
     setForm(f => ({ ...f, [field]: toSentenceCase(f[field]) }));
