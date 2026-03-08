@@ -41,7 +41,7 @@ export default function FactoryExpenses() {
     if (!form.category || !form.amount) return;
     await addExpense({
       category: form.category,
-      description: form.description.trim(),
+      description: toSentenceCase(form.description.trim()),
       amount: parseFloat(form.amount) || 0,
       recorded_by: toTitleCase(form.recorded_by.trim()) || 'Staff',
       expense_date: form.expense_date,

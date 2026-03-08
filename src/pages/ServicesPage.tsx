@@ -63,7 +63,7 @@ export default function ServicesPage() {
     const newService = await addService(
       {
         service_name: toSentenceCase(form.service_name.trim()),
-        description: form.description.trim(),
+        description: toSentenceCase(form.description.trim()),
         cost: totalCost,
         customer_name: toTitleCase(form.customer_name.trim()),
         seller_name: toTitleCase(form.seller_name.trim()),
