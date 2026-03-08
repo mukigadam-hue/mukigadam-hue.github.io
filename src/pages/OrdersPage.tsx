@@ -723,14 +723,14 @@ export default function OrdersPage() {
 
       {/* Tab selector at top */}
       <div className="flex gap-2 flex-wrap">
-        {(['my_order', 'inbox', 'request'] as const).map(mode => (
+        {(['my_order', 'request'] as const).map(mode => (
           <Button
             key={mode}
             size="sm"
             variant={orderMode === mode ? 'default' : 'outline'}
             onClick={() => { setOrderMode(mode); setItems([]); setCustomerName(''); }}
           >
-            {mode === 'my_order' ? '📋 Live Order' : mode === 'inbox' ? '📥 Inbox' : '📨 My Request'}
+            {mode === 'my_order' ? '📋 New Order (Walk-in)' : '📨 Order from Supplier'}
           </Button>
         ))}
       </div>
