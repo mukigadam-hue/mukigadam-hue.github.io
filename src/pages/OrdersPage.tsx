@@ -433,7 +433,7 @@ export default function OrdersPage() {
 
         // Sync status to supplier's inbox order
         await supabase.functions.invoke('sync-order-prices', {
-          body: { inboxOrderId: completeDialog.id, action: 'submit_payment' },
+          body: { inboxOrderId: completeDialog.id, action: 'submit_payment', paymentMethod, proofUrl },
         });
 
         toast.success('Payment submitted! Waiting for supplier to confirm.');
