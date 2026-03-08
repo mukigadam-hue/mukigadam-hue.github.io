@@ -125,6 +125,9 @@ export interface ServiceRecord {
   cost: number;
   customer_name: string;
   seller_name: string;
+  payment_status: string;
+  amount_paid: number;
+  balance: number;
   created_at: string;
   items_used?: ServiceItemUsed[];
 }
@@ -226,6 +229,7 @@ interface BusinessContextType {
   updateOrder: (id: string, items: OrderItem[], grandTotal: number, status?: string) => Promise<void>;
   completeOrderToSale: (orderId: string, buyerName: string, sellerName: string) => Promise<void>;
   addService: (service: Omit<ServiceRecord, 'id' | 'business_id' | 'created_at' | 'items_used'>, itemsUsed?: { stock_item_id: string; item_name: string; category: string; quality: string; quantity: number; unit_price: number; subtotal: number }[]) => Promise<ServiceRecord | null>;
+  updateServicePayment: (serviceId: string, amountPaid: number, paymentStatus: string) => Promise<void>;
   saveReceipt: (receipt: Omit<ReceiptRecord, 'id' | 'created_at'>) => Promise<void>;
   getReceipts: () => Promise<ReceiptRecord[]>;
   markNotificationRead: (id: string) => Promise<void>;
@@ -952,8 +956,24 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     }).eq('id', saleId);
     if (error) { toast.error(error.message); return; }
     setSales(prev => prev.map(s => s.id === saleId ? { ...s, amount_paid: amountPaid, balance: bal, payment_status: status } : s));
-    toast.success('Payment updated!');
-  }, [sales]);
+    // Auto-archive receipt when fully settled
+    if (status === 'paid' && currentBusiness) {
+      await saveReceipt({
+        business_id: currentBusiness.id,
+        receipt_type: 'sale',
+        transaction_id: saleId,
+        buyer_name: sale.customer_name,
+        seller_name: sale.recorded_by,
+        grand_total: Number(sale.grand_total),
+        items: sale.items.map(i => ({ itemName: i.item_name, category: i.category, quality: i.quality, quantity: i.quantity, priceType: i.price_type, unitPrice: Number(i.unit_price), subtotal: Number(i.subtotal) })),
+        business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
+        code: sale.from_order_code || null,
+      });
+      toast.success('✅ Debt settled! Receipt archived.');
+    } else {
+      toast.success('Payment updated!');
+    }
+  }, [sales, currentBusiness]);
 
   const updatePurchasePayment = useCallback(async (purchaseId: string, amountPaid: number, paymentStatus: string) => {
     const purchase = purchases.find(p => p.id === purchaseId);
@@ -965,8 +985,51 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     } as any).eq('id', purchaseId);
     if (error) { toast.error(error.message); return; }
     setPurchases(prev => prev.map(p => p.id === purchaseId ? { ...p, amount_paid: amountPaid, balance: bal, payment_status: status } : p));
-    toast.success('Payment updated!');
-  }, [purchases]);
+    // Auto-archive receipt when fully settled
+    if (status === 'paid' && currentBusiness) {
+      await saveReceipt({
+        business_id: currentBusiness.id,
+        receipt_type: 'purchase',
+        transaction_id: purchaseId,
+        buyer_name: currentBusiness.name,
+        seller_name: purchase.supplier,
+        grand_total: Number(purchase.grand_total),
+        items: purchase.items.map(i => ({ itemName: i.item_name, category: i.category, quality: i.quality, quantity: i.quantity, priceType: 'purchase', unitPrice: Number(i.unit_price), subtotal: Number(i.subtotal) })),
+        business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
+        code: null,
+      });
+      toast.success('✅ Debt settled! Receipt archived.');
+    } else {
+      toast.success('Payment updated!');
+    }
+  }, [purchases, currentBusiness]);
+
+  const updateServicePayment = useCallback(async (serviceId: string, amountPaid: number, paymentStatus: string) => {
+    const service = services.find(s => s.id === serviceId);
+    if (!service) return;
+    const bal = Math.max(0, Number(service.cost) - amountPaid);
+    const status = bal <= 0 ? 'paid' : (amountPaid > 0 ? 'partial' : 'unpaid');
+    const { error } = await supabase.from('services').update({
+      amount_paid: amountPaid, balance: bal, payment_status: status,
+    }).eq('id', serviceId);
+    if (error) { toast.error(error.message); return; }
+    setServices(prev => prev.map(s => s.id === serviceId ? { ...s, amount_paid: amountPaid, balance: bal, payment_status: status } : s));
+    // Auto-archive receipt when fully settled
+    if (status === 'paid' && currentBusiness) {
+      await saveReceipt({
+        business_id: currentBusiness.id,
+        receipt_type: 'service',
+        transaction_id: serviceId,
+        buyer_name: service.customer_name,
+        seller_name: service.seller_name,
+        grand_total: Number(service.cost),
+        items: [{ itemName: service.service_name, category: 'Service', quality: service.description || '-', quantity: 1, priceType: 'service', unitPrice: Number(service.cost), subtotal: Number(service.cost) }],
+        business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
+        code: null,
+      });
+    }
+    toast.success('Service payment updated!');
+  }, [services, currentBusiness]);
 
   const refreshData = useCallback(async () => {
     await loadBusinessData();
@@ -979,7 +1042,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       setCurrentBusinessId, createBusiness, updateBusiness,
       addStockItem, updateStockItem, deleteStockItem, restoreStockItem, permanentDeleteStockItem,
       addSale, addPurchase, addOrder, updateOrder, completeOrderToSale,
-      addService, saveReceipt, getReceipts,
+      addService, updateServicePayment, saveReceipt, getReceipts,
       addExpense, deleteExpense,
       updateSalePayment, updatePurchasePayment,
       markNotificationRead, markAllNotificationsRead,
