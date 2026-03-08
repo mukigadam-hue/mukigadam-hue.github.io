@@ -276,14 +276,18 @@ export default function TeamPage() {
       <RedeemCodeSection onRedeemed={() => { loadMembers(); loadCustomers(); }} />
 
       <Tabs defaultValue="workers" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="workers" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
-            Workers ({members.length})
+            Workers
+          </TabsTrigger>
+          <TabsTrigger value="payments" className="flex items-center gap-2">
+            <Wallet className="h-4 w-4" />
+            Payments
           </TabsTrigger>
           <TabsTrigger value="customers" className="flex items-center gap-2">
             <ShoppingBag className="h-4 w-4" />
-            Customers ({customers.length})
+            Customers
           </TabsTrigger>
         </TabsList>
 
