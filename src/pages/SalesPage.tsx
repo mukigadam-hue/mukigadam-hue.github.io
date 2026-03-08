@@ -48,6 +48,8 @@ export default function SalesPage() {
   const [selectedPartStock, setSelectedPartStock] = useState('');
   const [partQty, setPartQty] = useState('1');
 
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const [partScannerOpen, setPartScannerOpen] = useState(false);
   const activeStock = stock.filter(s => !s.deleted_at);
   const todaySales = sales.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const previousSales = sales.filter(s => new Date(s.created_at).toDateString() !== new Date().toDateString());
