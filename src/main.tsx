@@ -34,6 +34,7 @@ class ErrorBoundary extends React.Component<
   }
 }
 
+console.log('[BizTrack] App bootstrapping...');
 createRoot(document.getElementById("root")!).render(
   <ErrorBoundary>
     <App />
