@@ -147,7 +147,14 @@ export default function FactoryTeam() {
             {activeMembers.length} active members{isOwnerOrAdmin && ` · Monthly salary: ${fmt(totalSalary)}`}
           </p>
         </div>
-        {isOwnerOrAdmin && <Button onClick={() => { resetForm(); setShowAdd(true); }}><Plus className="h-4 w-4 mr-1" />Add Worker</Button>}
+        {isOwnerOrAdmin && <Button onClick={() => {
+          const activeCount = teamMembers.filter(w => w.is_active).length;
+          if (activeCount >= maxWorkers) {
+            toast.info(`Free plan allows up to ${maxWorkers} workers. Upgrade to Premium ($52/month) for unlimited.`);
+            return;
+          }
+          resetForm(); setShowAdd(true);
+        }}><Plus className="h-4 w-4 mr-1" />Add Worker</Button>}
       </div>
 
       <AdSpace variant="banner" />
