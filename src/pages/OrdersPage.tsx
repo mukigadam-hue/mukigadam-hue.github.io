@@ -201,30 +201,86 @@ export default function OrdersPage() {
     }
   }
 
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) { toast.error('Please upload an image file'); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error('File must be under 5MB'); return; }
+    setProofFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setProofPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  }
+
   async function handleCompleteOrder() {
     if (!completeDialog || !completeBuyer.trim() || !completeSeller.trim()) return;
-    await completeOrderToSale(completeDialog.id, toSentenceCase(completeBuyer.trim()), toSentenceCase(completeSeller.trim()));
-    
-    // Save receipt
-    if (currentBusiness) {
-      await saveReceipt({
-        business_id: currentBusiness.id,
-        receipt_type: 'order',
-        transaction_id: completeDialog.id,
-        buyer_name: toSentenceCase(completeBuyer.trim()),
-        seller_name: toSentenceCase(completeSeller.trim()),
-        grand_total: completeDialog.grand_total,
-        items: completeDialog.items.map(i => ({
-          itemName: i.item_name, category: i.category, quality: i.quality,
-          quantity: i.quantity, priceType: i.price_type, unitPrice: Number(i.unit_price), subtotal: Number(i.subtotal),
-        })),
-        business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
-        code: completeDialog.code,
-      });
+    if (paymentMethod === 'mobile_money' && !proofFile) {
+      toast.error('Please upload payment proof screenshot');
+      return;
     }
-    setCompleteDialog(null);
-    setCompleteBuyer('');
-    setCompleteSeller('');
+
+    setCompleting(true);
+    try {
+      let proofUrl: string | null = null;
+
+      // Upload proof if mobile money
+      if (paymentMethod === 'mobile_money' && proofFile) {
+        const ext = proofFile.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+        const { error: uploadError } = await supabase.storage
+          .from('payment-proofs')
+          .upload(fileName, proofFile);
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from('payment-proofs')
+          .getPublicUrl(fileName);
+        proofUrl = urlData.publicUrl;
+      }
+
+      // Update order with payment info
+      await supabase.from('orders').update({
+        payment_method: paymentMethod,
+        proof_url: proofUrl,
+        status: paymentMethod === 'card' ? 'paid' : 'pending',
+      } as any).eq('id', completeDialog.id);
+
+      // Complete order to sale
+      await completeOrderToSale(completeDialog.id, toSentenceCase(completeBuyer.trim()), toSentenceCase(completeSeller.trim()));
+      
+      // Save receipt
+      if (currentBusiness) {
+        await saveReceipt({
+          business_id: currentBusiness.id,
+          receipt_type: 'order',
+          transaction_id: completeDialog.id,
+          buyer_name: toSentenceCase(completeBuyer.trim()),
+          seller_name: toSentenceCase(completeSeller.trim()),
+          grand_total: completeDialog.grand_total,
+          items: completeDialog.items.map(i => ({
+            itemName: i.item_name, category: i.category, quality: i.quality,
+            quantity: i.quantity, priceType: i.price_type, unitPrice: Number(i.unit_price), subtotal: Number(i.subtotal),
+          })),
+          business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
+          code: completeDialog.code,
+        });
+      }
+
+      toast.success(
+        paymentMethod === 'mobile_money'
+          ? 'Order completed! Payment proof submitted for verification.'
+          : 'Order completed and paid!'
+      );
+      setCompleteDialog(null);
+      setCompleteBuyer('');
+      setCompleteSeller('');
+      setProofFile(null);
+      setProofPreview(null);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to complete order');
+    } finally {
+      setCompleting(false);
+    }
   }
 
   function OrderCard({ order, showStockStatus = false }: { order: Order; showStockStatus?: boolean }) {
