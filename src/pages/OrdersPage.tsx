@@ -463,6 +463,62 @@ export default function OrdersPage() {
               </div>
             )}
 
+            {/* Recipient selector for requests */}
+            {orderMode === 'request' && (
+              <div className="border rounded-lg p-3 space-y-3">
+                <p className="text-xs font-medium flex items-center gap-1"><Building2 className="h-3.5 w-3.5" /> Send To (Recipient Business)</p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant={recipientMode === 'contact' ? 'default' : 'outline'} onClick={() => { setRecipientMode('contact'); setRecipientLookup(null); setRecipientCode(''); }}>
+                    From Contacts
+                  </Button>
+                  <Button size="sm" variant={recipientMode === 'code' ? 'default' : 'outline'} onClick={() => { setRecipientMode('code'); setSelectedContactBusinessId(''); }}>
+                    Enter Business Code
+                  </Button>
+                </div>
+
+                {recipientMode === 'contact' && (
+                  <div>
+                    {contacts.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">No contacts saved. Use a business code instead, or add contacts from the Contacts page.</p>
+                    ) : (
+                      <Select value={selectedContactBusinessId} onValueChange={setSelectedContactBusinessId}>
+                        <SelectTrigger><SelectValue placeholder="Select a contact..." /></SelectTrigger>
+                        <SelectContent>
+                          {contacts.map(c => (
+                            <SelectItem key={c.contact_business_id} value={c.contact_business_id}>
+                              {c.nickname || c.business_name} {c.business_code ? `(${c.business_code})` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                )}
+
+                {recipientMode === 'code' && (
+                  <div className="flex gap-2">
+                    <Input
+                      value={recipientCode}
+                      onChange={e => { setRecipientCode(e.target.value.toUpperCase()); setRecipientLookup(null); }}
+                      placeholder="Enter 8-char business code..."
+                      className="flex-1 uppercase"
+                      maxLength={8}
+                    />
+                    <Button size="sm" variant="outline" onClick={lookupRecipientByCode} disabled={lookingUp || recipientCode.length < 3}>
+                      <Search className="h-3.5 w-3.5 mr-1" />{lookingUp ? 'Looking...' : 'Find'}
+                    </Button>
+                  </div>
+                )}
+
+                {recipientMode === 'code' && recipientLookup && (
+                  <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center gap-2">
+                    <CheckCircle className="h-3.5 w-3.5 text-success" />
+                    <span>Sending to: <strong>{recipientLookup.name}</strong></span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div><Label>Your Name / Customer Name</Label><Input value={customerName} onChange={e => setCustomerName(e.target.value)} onBlur={() => setCustomerName(toSentenceCase(customerName))} placeholder="Name..." /></div>
 
             {orderMode === 'request' && (
