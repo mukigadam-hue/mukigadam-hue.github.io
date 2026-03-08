@@ -908,21 +908,20 @@ export default function OrdersPage() {
 
       {/* Orders Lists */}
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="w-full grid grid-cols-3">
-          <TabsTrigger value="live_orders">🛒 My Orders ({liveOrders.length})</TabsTrigger>
-          <TabsTrigger value="inbox">📥 Inbox ({inboxOrders.length})</TabsTrigger>
-          <TabsTrigger value="my_requests">📨 Sent to Supplier ({myRequests.length})</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-2 h-12 rounded-xl bg-muted/60 p-1">
+          <TabsTrigger value="live_orders" className="rounded-lg text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1.5">
+            🛒 My Orders
+            {liveOrders.length > 0 && <span className="ml-1 bg-primary-foreground/20 text-[10px] px-1.5 py-0.5 rounded-full">{liveOrders.length}</span>}
+          </TabsTrigger>
+          <TabsTrigger value="my_requests" className="rounded-lg text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1.5">
+            📨 To Suppliers
+            {myRequests.length > 0 && <span className="ml-1 bg-primary-foreground/20 text-[10px] px-1.5 py-0.5 rounded-full">{myRequests.length}</span>}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="live_orders" className="space-y-3 mt-4">
-          <p className="text-xs text-muted-foreground mb-2">Orders from walk-in customers, phone calls, or messages received via WhatsApp/SMS. You pack the items → customer pays you → you give a receipt.</p>
+          <p className="text-xs text-muted-foreground mb-2">Orders from walk-in customers, phone calls, or messages (WhatsApp/SMS). You pack items → customer pays → you give a receipt.</p>
           <div className="max-h-[500px] overflow-y-auto pr-1 space-y-3">
             {liveOrders.length === 0 ? <p className="text-sm text-muted-foreground">No orders yet. Create one using the "New Order" button above.</p> : liveOrders.map(o => <OrderCard key={o.id} order={o} />)}
-          </div>
-        </TabsContent>
-        <TabsContent value="inbox" className="space-y-3 mt-4">
-          <p className="text-xs text-muted-foreground mb-2">📥 Orders sent to you by other businesses using this app. You set prices → they review & pay → you confirm you received the money → give receipt.</p>
-          <div className="max-h-[500px] overflow-y-auto pr-1 space-y-3">
-            {inboxOrders.length === 0 ? <p className="text-sm text-muted-foreground">No orders received yet. When another business sends you an order, it will appear here.</p> : inboxOrders.map(o => <OrderCard key={o.id} order={o} showStockStatus />)}
           </div>
         </TabsContent>
         <TabsContent value="my_requests" className="space-y-3 mt-4">
