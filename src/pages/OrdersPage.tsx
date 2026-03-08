@@ -897,8 +897,8 @@ export default function OrdersPage() {
                   </Table>
                 </div>
                 <Button onClick={() => handleCreateOrder(orderMode)} className="w-full">
-                  {orderMode === 'my_order' && <><FileText className="h-4 w-4 mr-2" />Save Live Order — {fmt(grandTotal)}</>}
-                  {orderMode === 'request' && <><Send className="h-4 w-4 mr-2" />Send Request ({items.length} items)</>}
+                  {orderMode === 'my_order' && <><FileText className="h-4 w-4 mr-2" />Save Order — {fmt(grandTotal)}</>}
+                  {orderMode === 'request' && <><Send className="h-4 w-4 mr-2" />Send to Supplier ({items.length} items)</>}
                 </Button>
               </>
             )}
