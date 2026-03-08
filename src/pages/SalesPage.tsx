@@ -44,7 +44,10 @@ export default function SalesPage() {
   const [sellerName, setSellerName] = useState('');
   const [receiptSale, setReceiptSale] = useState<Sale | null>(null);
   const [activeTab, setActiveTab] = useState<'today' | 'previous'>('today');
-
+  const [paymentStatus, setPaymentStatus] = useState<'paid' | 'partial' | 'unpaid'>('paid');
+  const [amountPaid, setAmountPaid] = useState('');
+  const [editPaymentSale, setEditPaymentSale] = useState<Sale | null>(null);
+  const [editAmountPaid, setEditAmountPaid] = useState('');
   // Service parts selection
   const [selectedPartStock, setSelectedPartStock] = useState('');
   const [partQty, setPartQty] = useState('1');
