@@ -281,6 +281,31 @@ export default function PurchasesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Update Payment Dialog */}
+      <Dialog open={!!editPaymentPurchase} onOpenChange={o => { if (!o) setEditPaymentPurchase(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Update Payment — {editPaymentPurchase?.supplier}</DialogTitle></DialogHeader>
+          {editPaymentPurchase && (
+            <div className="space-y-3">
+              <p className="text-sm">Total: <span className="font-bold">{fmt(Number(editPaymentPurchase.grand_total))}</span></p>
+              <p className="text-sm">Previously Paid: <span className="font-bold">{fmt(Number(editPaymentPurchase.amount_paid))}</span></p>
+              <div>
+                <Label>New Total Amount Paid</Label>
+                <Input type="number" min="0" step="0.01" value={editAmountPaid} onChange={e => setEditAmountPaid(e.target.value)} />
+              </div>
+              <p className="text-sm">New Balance: <span className="font-bold text-destructive">{fmt(Number(editPaymentPurchase.grand_total) - (parseFloat(editAmountPaid) || 0))}</span></p>
+              <Button className="w-full" onClick={async () => {
+                const amt = parseFloat(editAmountPaid) || 0;
+                await updatePurchasePayment(editPaymentPurchase.id, amt, amt >= Number(editPaymentPurchase.grand_total) ? 'paid' : amt > 0 ? 'partial' : 'unpaid');
+                setEditPaymentPurchase(null);
+              }}>
+                💰 Save Payment
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
