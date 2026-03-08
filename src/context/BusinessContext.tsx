@@ -956,8 +956,24 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     }).eq('id', saleId);
     if (error) { toast.error(error.message); return; }
     setSales(prev => prev.map(s => s.id === saleId ? { ...s, amount_paid: amountPaid, balance: bal, payment_status: status } : s));
-    toast.success('Payment updated!');
-  }, [sales]);
+    // Auto-archive receipt when fully settled
+    if (status === 'paid' && currentBusiness) {
+      await saveReceipt({
+        business_id: currentBusiness.id,
+        receipt_type: 'sale',
+        transaction_id: saleId,
+        buyer_name: sale.customer_name,
+        seller_name: sale.recorded_by,
+        grand_total: Number(sale.grand_total),
+        items: sale.items.map(i => ({ itemName: i.item_name, category: i.category, quality: i.quality, quantity: i.quantity, priceType: i.price_type, unitPrice: Number(i.unit_price), subtotal: Number(i.subtotal) })),
+        business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
+        code: sale.from_order_code || null,
+      });
+      toast.success('✅ Debt settled! Receipt archived.');
+    } else {
+      toast.success('Payment updated!');
+    }
+  }, [sales, currentBusiness]);
 
   const updatePurchasePayment = useCallback(async (purchaseId: string, amountPaid: number, paymentStatus: string) => {
     const purchase = purchases.find(p => p.id === purchaseId);
