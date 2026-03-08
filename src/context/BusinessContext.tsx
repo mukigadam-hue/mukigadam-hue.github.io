@@ -229,6 +229,7 @@ interface BusinessContextType {
   updateOrder: (id: string, items: OrderItem[], grandTotal: number, status?: string) => Promise<void>;
   completeOrderToSale: (orderId: string, buyerName: string, sellerName: string) => Promise<void>;
   addService: (service: Omit<ServiceRecord, 'id' | 'business_id' | 'created_at' | 'items_used'>, itemsUsed?: { stock_item_id: string; item_name: string; category: string; quality: string; quantity: number; unit_price: number; subtotal: number }[]) => Promise<ServiceRecord | null>;
+  updateServicePayment: (serviceId: string, amountPaid: number, paymentStatus: string) => Promise<void>;
   saveReceipt: (receipt: Omit<ReceiptRecord, 'id' | 'created_at'>) => Promise<void>;
   getReceipts: () => Promise<ReceiptRecord[]>;
   markNotificationRead: (id: string) => Promise<void>;
