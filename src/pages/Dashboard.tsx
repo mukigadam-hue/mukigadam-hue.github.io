@@ -169,6 +169,53 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Debt Summary */}
+      {(totalOwedToYou > 0 || totalYouOwe > 0) && (
+        <Card className="shadow-card border-warning/30 bg-warning/5">
+          <CardContent className="p-4 space-y-3">
+            <h3 className="text-base font-bold flex items-center gap-2">💳 Outstanding Debts</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-lg bg-success/10 border border-success/20">
+                <p className="text-xs text-muted-foreground">Others Owe You</p>
+                <p className="text-lg font-bold text-success">{fmt(totalOwedToYou)}</p>
+                <p className="text-xs text-muted-foreground">{salesDebts.length} unpaid sale(s)</p>
+              </div>
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+                <p className="text-xs text-muted-foreground">You Owe Suppliers</p>
+                <p className="text-lg font-bold text-destructive">{fmt(totalYouOwe)}</p>
+                <p className="text-xs text-muted-foreground">{purchaseDebts.length} unpaid purchase(s)</p>
+              </div>
+            </div>
+            {salesDebts.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">🔴 Customers who owe you:</p>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {salesDebts.map(s => (
+                    <div key={s.id} className="flex justify-between text-sm">
+                      <span>👤 {s.customer_name}</span>
+                      <span className="font-bold text-destructive tabular-nums">{fmt(Number(s.balance))}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {purchaseDebts.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-muted-foreground uppercase mb-1">🔴 What you owe suppliers:</p>
+                <div className="space-y-1 max-h-32 overflow-y-auto">
+                  {purchaseDebts.map(p => (
+                    <div key={p.id} className="flex justify-between text-sm">
+                      <span>🏪 {p.supplier}</span>
+                      <span className="font-bold text-destructive tabular-nums">{fmt(Number(p.balance))}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid md:grid-cols-2 gap-6">
         {/* Top Selling */}
         <Card className="shadow-card">
