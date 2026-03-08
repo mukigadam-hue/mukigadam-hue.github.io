@@ -192,6 +192,7 @@ interface BusinessContextType {
   purchases: Purchase[];
   orders: Order[];
   services: ServiceRecord[];
+  expenses: BusinessExpense[];
   notifications: Notification[];
   loading: boolean;
   setCurrentBusinessId: (id: string) => void;
