@@ -148,7 +148,7 @@ export default function OrdersPage() {
       category: toSentenceCase(form.category) || stockItem?.category || '',
       quality: toSentenceCase(form.quality) || stockItem?.quality || '',
       quantity: parseInt(form.quantity) || 1,
-      price_type: isRequest ? 'pending' : form.priceType,
+      price_type: form.priceType,
       unit_price: unitPrice,
     }]);
     setForm({ name: '', category: '', quality: '', quantity: '1', priceType: 'retail', unitPrice: '' });
@@ -180,7 +180,7 @@ export default function OrdersPage() {
       type, name,
       items.map(item => ({ ...item, subtotal: item.quantity * item.unit_price })),
       grandTotal, type === 'request' ? 'pending' : 'confirmed',
-      recipientBusinessId
+      recipientBusinessId, comment
     );
     setItems([]);
     setCustomerName('');
@@ -666,18 +666,16 @@ export default function OrdersPage() {
                 <datalist id="qual-suggestions">{existingQualities.map(q => <option key={q} value={q} />)}</datalist>
               </div>
               <div className="w-20"><Label>Qty</Label><Input type="number" min="1" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} /></div>
-              {orderMode !== 'request' && (
-                <div className="w-28">
-                  <Label>Price Type</Label>
-                  <Select value={form.priceType} onValueChange={v => setForm(f => ({ ...f, priceType: v }))}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="retail">Retail</SelectItem>
-                      <SelectItem value="wholesale">Wholesale</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              <div className="w-28">
+                <Label>Price Type</Label>
+                <Select value={form.priceType} onValueChange={v => setForm(f => ({ ...f, priceType: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="retail">Retail</SelectItem>
+                    <SelectItem value="wholesale">Wholesale</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               {orderMode !== 'request' && (
                 <div className="w-24"><Label>Price</Label><Input type="number" min="0" step="0.01" value={form.unitPrice} onChange={e => setForm(f => ({ ...f, unitPrice: e.target.value }))} placeholder="Auto" /></div>
               )}
@@ -691,7 +689,7 @@ export default function OrdersPage() {
                     <TableHeader>
                        <TableRow>
                         <TableHead>Item</TableHead><TableHead>Category</TableHead><TableHead>Quality</TableHead>
-                        {orderMode !== 'request' && <TableHead>Type</TableHead>}
+                        <TableHead>Type</TableHead>
                         <TableHead className="text-right">Qty</TableHead>
                         {orderMode !== 'request' && <TableHead className="text-right">Price</TableHead>}
                         {orderMode !== 'request' && <TableHead className="text-right">Subtotal</TableHead>}
@@ -704,7 +702,7 @@ export default function OrdersPage() {
                           <TableCell className="font-medium">{item.item_name}</TableCell>
                           <TableCell>{item.category}</TableCell>
                           <TableCell>{item.quality}</TableCell>
-                          {orderMode !== 'request' && <TableCell className="capitalize text-xs">{item.price_type}</TableCell>}
+                          <TableCell className="capitalize text-xs">{item.price_type}</TableCell>
                           <TableCell className="text-right">{item.quantity}</TableCell>
                           {orderMode !== 'request' && <TableCell className="text-right tabular-nums">{fmt(item.unit_price)}</TableCell>}
                           {orderMode !== 'request' && <TableCell className="text-right font-semibold tabular-nums">{fmt(item.quantity * item.unit_price)}</TableCell>}
