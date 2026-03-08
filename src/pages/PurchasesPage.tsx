@@ -30,6 +30,10 @@ export default function PurchasesPage() {
     unit_price: '', wholesale_price: '', retail_price: '',
   });
   const [activeTab, setActiveTab] = useState<'today' | 'previous'>('today');
+  const [paymentStatus, setPaymentStatus] = useState<'paid' | 'partial' | 'unpaid'>('paid');
+  const [amountPaid, setAmountPaid] = useState('');
+  const [editPaymentPurchase, setEditPaymentPurchase] = useState<typeof purchases[0] | null>(null);
+  const [editAmountPaid, setEditAmountPaid] = useState('');
 
   const [scannerOpen, setScannerOpen] = useState(false);
   const activeStock = stock.filter(s => !s.deleted_at);
