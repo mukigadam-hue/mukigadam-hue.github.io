@@ -13,6 +13,7 @@ import Receipt from '@/components/Receipt';
 import type { ReceiptRecord } from '@/context/BusinessContext';
 import { supabase } from '@/integrations/supabase/client';
 import AdSpace from '@/components/AdSpace';
+import LanguageSelector from '@/components/LanguageSelector';
 
 function toSentenceCase(str: string): string {
   if (!str) return str;
@@ -376,6 +377,15 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Language Settings */}
+      <Card className="shadow-card">
+        <CardContent className="p-4">
+          <LanguageSelector variant="full" />
+        </CardContent>
+      </Card>
+
+      <AdSpace variant="inline" />
 
       {/* Financial Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
