@@ -1396,11 +1396,11 @@ export default function OrdersPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs font-semibold text-destructive">Buyer Name *</Label>
-                  <Input value={completeBuyer} onChange={e => setCompleteBuyer(e.target.value)} onBlur={() => setCompleteBuyer(toSentenceCase(completeBuyer))} placeholder="Customer name" />
+                  <Input value={completeBuyer} onChange={e => setCompleteBuyer(e.target.value)} onBlur={() => setCompleteBuyer(toTitleCase(completeBuyer))} placeholder="Customer name" />
                 </div>
                 <div>
                   <Label className="text-xs font-semibold text-destructive">Seller Name *</Label>
-                  <Input value={completeSeller} onChange={e => setCompleteSeller(e.target.value)} onBlur={() => setCompleteSeller(toSentenceCase(completeSeller))} placeholder="Seller name" />
+                  <Input value={completeSeller} onChange={e => setCompleteSeller(e.target.value)} onBlur={() => setCompleteSeller(toTitleCase(completeSeller))} placeholder="Seller name" />
                 </div>
               </div>
 
