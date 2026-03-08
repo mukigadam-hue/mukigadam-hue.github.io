@@ -309,16 +309,29 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
                             </span>
                           )}
                         </div>
-                        {balance.totalOwed > 0 && (
+                        {/* Salary breakdown with auto-calculation */}
+                        {balance.totalAdvances > 0 && (
+                          <div className="mt-1.5 p-2 rounded bg-muted/50 text-xs space-y-0.5">
+                            <div className="flex justify-between">
+                              <span>Salary</span>
+                              <span className="font-medium">{fmt(worker.salary)}</span>
+                            </div>
+                            <div className="flex justify-between text-warning">
+                              <span>− Advance</span>
+                              <span className="font-medium">{fmt(balance.totalAdvances)}</span>
+                            </div>
+                            <div className="border-t border-border pt-0.5 flex justify-between font-semibold">
+                              <span>Net Pay</span>
+                              <span className={worker.salary - balance.totalAdvances > 0 ? 'text-success' : 'text-destructive'}>
+                                {fmt(Math.max(0, worker.salary - balance.totalAdvances))}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        {balance.totalAdvances <= 0 && balance.totalOwed > 0 && (
                           <p className="text-xs text-destructive mt-1">
                             <AlertTriangle className="inline h-3 w-3 mr-1" />
                             Business owes: {fmt(balance.totalOwed)}
-                          </p>
-                        )}
-                        {balance.totalAdvances > 0 && (
-                          <p className="text-xs text-warning mt-1">
-                            <ArrowDownCircle className="inline h-3 w-3 mr-1" />
-                            Advance given: {fmt(balance.totalAdvances)}
                           </p>
                         )}
                       </div>
