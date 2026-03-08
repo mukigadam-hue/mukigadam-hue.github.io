@@ -368,7 +368,11 @@ export default function ContactsPage() {
         </Card>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
-          {sortedContacts.map(contact => {
+          {sortedContacts.filter(c => {
+            const q = filterQuery.toLowerCase();
+            if (!q) return true;
+            return (c.nickname || '').toLowerCase().includes(q) || (c.profile?.name || '').toLowerCase().includes(q) || (c.profile?.contact || '').toLowerCase().includes(q);
+          }).map(contact => {
             const interaction = getInteractionLabel(contact.lastInteraction);
             return (
               <Card key={contact.id} className="hover:shadow-md transition-shadow">

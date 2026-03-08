@@ -797,20 +797,70 @@ export default function OrdersPage() {
                 </div>
 
                 {recipientMode === 'contact' && (
-                  <div>
+                  <div className="space-y-2">
                     {contacts.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No contacts saved. Use a business code instead, or add contacts from the Contacts page.</p>
                     ) : (
-                      <Select value={selectedContactBusinessId} onValueChange={setSelectedContactBusinessId}>
-                        <SelectTrigger><SelectValue placeholder="Select a contact..." /></SelectTrigger>
-                        <SelectContent>
-                          {contacts.map(c => (
-                            <SelectItem key={c.contact_business_id} value={c.contact_business_id}>
-                              {c.nickname || c.business_name} {c.business_code ? `(${c.business_code})` : ''}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <>
+                        {selectedContactBusinessId ? (
+                          <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center justify-between">
+                            <span className="flex items-center gap-2">
+                              <CheckCircle className="h-3.5 w-3.5 text-success" />
+                              Sending to: <strong>{contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.nickname || contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.business_name}</strong>
+                            </span>
+                            <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setSelectedContactBusinessId(''); setContactPickerOpen(true); }}>Change</Button>
+                          </div>
+                        ) : (
+                          <Button size="sm" variant="outline" className="w-full justify-start gap-2" onClick={() => { setContactPickerOpen(true); setContactSearch(''); }}>
+                            <Search className="h-3.5 w-3.5" /> Select a contact...
+                          </Button>
+                        )}
+
+                        <Dialog open={contactPickerOpen} onOpenChange={setContactPickerOpen}>
+                          <DialogContent className="max-w-sm">
+                            <DialogHeader><DialogTitle>Choose Contact</DialogTitle></DialogHeader>
+                            <div className="space-y-3">
+                              <Input
+                                value={contactSearch}
+                                onChange={e => setContactSearch(e.target.value)}
+                                placeholder="Search contacts..."
+                                autoFocus
+                              />
+                              <div className="max-h-60 overflow-y-auto space-y-1">
+                                {contacts
+                                  .filter(c => {
+                                    const q = contactSearch.toLowerCase();
+                                    return !q || (c.nickname || '').toLowerCase().includes(q) || (c.business_name || '').toLowerCase().includes(q) || (c.business_code || '').toLowerCase().includes(q);
+                                  })
+                                  .map(c => (
+                                    <button
+                                      key={c.contact_business_id}
+                                      className="w-full text-left p-2.5 rounded-md hover:bg-accent transition-colors flex items-center gap-3"
+                                      onClick={() => {
+                                        setSelectedContactBusinessId(c.contact_business_id);
+                                        setContactPickerOpen(false);
+                                      }}
+                                    >
+                                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm">🏪</div>
+                                      <div>
+                                        <p className="text-sm font-medium">{c.nickname || c.business_name || 'Unknown'}</p>
+                                        {c.nickname && c.business_name && <p className="text-[10px] text-muted-foreground">{c.business_name}</p>}
+                                        {c.business_code && <p className="text-[10px] text-muted-foreground font-mono">{c.business_code}</p>}
+                                      </div>
+                                    </button>
+                                  ))
+                                }
+                                {contacts.filter(c => {
+                                  const q = contactSearch.toLowerCase();
+                                  return !q || (c.nickname || '').toLowerCase().includes(q) || (c.business_name || '').toLowerCase().includes(q) || (c.business_code || '').toLowerCase().includes(q);
+                                }).length === 0 && (
+                                  <p className="text-xs text-center text-muted-foreground py-4">No contacts match your search</p>
+                                )}
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </>
                     )}
                   </div>
                 )}
