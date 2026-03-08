@@ -166,12 +166,7 @@ export default function StockPage() {
               </DialogTrigger>
               <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
-                  <div className="flex items-center justify-between">
-                    <DialogTitle>{editItem ? 'Edit Item' : 'Add New Item'}</DialogTitle>
-                    <Button type="button" variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => { setOpen(false); resetForm(); }}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  <DialogTitle>{editItem ? 'Edit Item' : 'Add New Item'}</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-3">
                   <div>
