@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authErr } = await anonClient.auth.getUser();
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { inboxOrderId, action, items, grandTotal, comment } = await req.json();
+    const { inboxOrderId, action, items, grandTotal, comment, paymentMethod, proofUrl } = await req.json();
     // action: "send_prices" (supplier sends priced order back to requester)
     //         "confirm_prices" (requester confirms the prices)
     //         "reject_prices" (requester rejects, sends back to supplier)
