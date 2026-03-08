@@ -1060,7 +1060,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     <BusinessContext.Provider value={{
       currentBusiness, businesses, memberships, userRole,
       stock, sales, purchases, orders, services, expenses, notifications, loading,
-      setCurrentBusinessId, createBusiness, updateBusiness,
+      setCurrentBusinessId, createBusiness, deleteBusiness, updateBusiness,
       addStockItem, updateStockItem, deleteStockItem, restoreStockItem, permanentDeleteStockItem,
       addSale, addPurchase, addOrder, updateOrder, completeOrderToSale,
       addService, updateServicePayment, saveReceipt, getReceipts,
