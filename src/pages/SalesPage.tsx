@@ -288,8 +288,8 @@ export default function SalesPage() {
           </div>
 
           {/* Service Items */}
-          <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">🔧 Services (Optional)</p>
+          <div className="border rounded-lg p-3 space-y-3">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">🔧 Services (Optional)</p>
             <div className="flex flex-wrap gap-3 items-end">
               <div className="flex-1 min-w-[150px]">
                 <Label>Service Name</Label>
@@ -307,13 +307,11 @@ export default function SalesPage() {
                 <Wrench className="h-4 w-4 mr-1" />Add Service
               </Button>
             </div>
-          </div>
 
-          {/* Parts Used from Stock for Services */}
-          {(serviceItems.length > 0 || serviceParts.length > 0) && (
-            <div className="border rounded-lg p-3 space-y-2">
+            {/* Parts Used from Stock - always visible */}
+            <div className="bg-muted/30 rounded-lg p-3 space-y-2">
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                <Package className="h-3.5 w-3.5" /> Items/Parts Used from Stock (for services)
+                <Package className="h-3.5 w-3.5" /> Items/Parts Used from Stock
               </p>
               <div className="flex flex-wrap gap-2 items-end">
                 <div className="flex-1 min-w-[180px]">
@@ -347,7 +345,7 @@ export default function SalesPage() {
               {serviceParts.length > 0 && (
                 <div className="space-y-1 mt-2">
                   {serviceParts.map((part, i) => (
-                    <div key={i} className="flex items-center justify-between text-sm bg-muted/30 rounded px-2 py-1">
+                    <div key={i} className="flex items-center justify-between text-sm bg-background rounded px-2 py-1">
                       <span>
                         {part.item_name} × {part.quantity}
                         {part.category && <span className="text-xs text-muted-foreground ml-1">· {part.category}</span>}
@@ -364,7 +362,8 @@ export default function SalesPage() {
                 </div>
               )}
             </div>
-          )}
+          </div>
+
 
           {(items.length > 0 || serviceItems.length > 0 || serviceParts.length > 0) && (
             <>
