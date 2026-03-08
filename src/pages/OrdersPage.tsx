@@ -543,6 +543,48 @@ export default function OrdersPage() {
           </div>
         )}
 
+        {/* B2B Status guidance banner for request orders */}
+        {isRequest && order.status === 'pending' && (
+          <div className="bg-warning/10 border border-warning/20 rounded-md px-3 py-2 text-xs flex items-center gap-2">
+            <Clock className="h-3.5 w-3.5 text-warning shrink-0" />
+            <span>⏳ Waiting for supplier to tag prices on your order...</span>
+          </div>
+        )}
+        {isRequest && order.status === 'priced' && (
+          <div className="bg-accent/10 border border-accent/20 rounded-md px-3 py-2 text-xs flex items-center gap-2">
+            <span>💰 Supplier has priced your order! Review the prices below and <strong>Confirm</strong> or <strong>Reject</strong>.</span>
+          </div>
+        )}
+        {isRequest && order.status === 'confirmed' && (
+          <div className="bg-primary/10 border border-primary/20 rounded-md px-3 py-2 text-xs flex items-center gap-2">
+            <CreditCard className="h-3.5 w-3.5 text-primary shrink-0" />
+            <span>✅ Prices confirmed! Now <strong>Submit Payment</strong> to complete the order.</span>
+          </div>
+        )}
+
+        {/* B2B Status guidance for inbox orders (supplier side) */}
+        {order.type === 'inbox' && order.status === 'pending' && (
+          <div className="bg-warning/10 border border-warning/20 rounded-md px-3 py-2 text-xs flex items-center gap-2">
+            <span>📋 New order from buyer. <strong>Tag Prices</strong> on each item and send back.</span>
+          </div>
+        )}
+        {order.type === 'inbox' && order.status === 'priced' && (
+          <div className="bg-accent/10 border border-accent/20 rounded-md px-3 py-2 text-xs flex items-center gap-2">
+            <Clock className="h-3.5 w-3.5 text-accent shrink-0" />
+            <span>💰 Prices sent. Waiting for buyer to confirm or reject...</span>
+          </div>
+        )}
+        {order.type === 'inbox' && order.status === 'confirmed' && (
+          <div className="bg-primary/10 border border-primary/20 rounded-md px-3 py-2 text-xs flex items-center gap-2">
+            <span>✅ Buyer confirmed prices. Waiting for payment submission...</span>
+          </div>
+        )}
+        {order.type === 'inbox' && order.status === 'payment_submitted' && (
+          <div className="bg-success/10 border border-success/20 rounded-md px-3 py-2 text-xs flex items-center gap-2">
+            <span>💳 Buyer submitted payment! Review and <strong>Confirm Payment Received</strong>.</span>
+          </div>
+        )}
+
         <div className="text-sm text-muted-foreground space-y-1 max-h-40 overflow-y-auto">
           {order.items.map((item, i) => {
             const status = showStockStatus ? getStockStatus(item.item_name, item.category, item.quality) : 'ok';
