@@ -702,7 +702,7 @@ export default function OrdersPage() {
                           <TableCell className="font-medium">{item.item_name}</TableCell>
                           <TableCell>{item.category}</TableCell>
                           <TableCell>{item.quality}</TableCell>
-                          {orderMode !== 'request' && <TableCell className="capitalize text-xs">{item.price_type}</TableCell>}
+                          <TableCell className="capitalize text-xs">{item.price_type}</TableCell>
                           <TableCell className="text-right">{item.quantity}</TableCell>
                           {orderMode !== 'request' && <TableCell className="text-right tabular-nums">{fmt(item.unit_price)}</TableCell>}
                           {orderMode !== 'request' && <TableCell className="text-right font-semibold tabular-nums">{fmt(item.quantity * item.unit_price)}</TableCell>}
