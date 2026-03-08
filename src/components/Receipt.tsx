@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useCurrency } from '@/hooks/useCurrency';
 import ReceiptActions from '@/components/ReceiptActions';
+import { usePremium } from '@/hooks/usePremium';
 
 interface ReceiptItem {
   itemName: string;
