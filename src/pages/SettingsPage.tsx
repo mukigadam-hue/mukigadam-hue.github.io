@@ -82,6 +82,119 @@ function AddBusinessDialog({ onCreated, defaultType = 'business' }: { onCreated:
   );
 }
 
+function DiscoverVisibilityCard({ businessId }: { businessId: string }) {
+  const [isDiscoverable, setIsDiscoverable] = useState(true);
+  const [blocks, setBlocks] = useState<{ id: string; blocked_business_id: string; name: string }[]>([]);
+  const [blockCode, setBlockCode] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const loadSettings = useCallback(async () => {
+    if (!businessId) return;
+    const { data: biz } = await supabase.from('businesses').select('is_discoverable').eq('id', businessId).single();
+    if (biz) setIsDiscoverable((biz as any).is_discoverable ?? true);
+
+    const { data: blockData } = await supabase.from('business_blocks').select('id, blocked_business_id').eq('business_id', businessId);
+    if (blockData && blockData.length > 0) {
+      const ids = blockData.map(b => b.blocked_business_id);
+      const { data: names } = await supabase.rpc('search_businesses', { _query: '', _limit: 100, _offset: 0 });
+      // Fetch names via direct query through the function or just show codes
+      const blocksWithNames = await Promise.all(blockData.map(async (b) => {
+        const { data: bizInfo } = await supabase.from('businesses').select('name').eq('id', b.blocked_business_id).single();
+        return { ...b, name: bizInfo?.name || 'Unknown' };
+      }));
+      setBlocks(blocksWithNames);
+    } else {
+      setBlocks([]);
+    }
+  }, [businessId]);
+
+  useEffect(() => { loadSettings(); }, [loadSettings]);
+
+  async function toggleDiscoverable(checked: boolean) {
+    setIsDiscoverable(checked);
+    await supabase.from('businesses').update({ is_discoverable: checked } as any).eq('id', businessId);
+    toast.success(checked ? 'Business is now visible in Discover' : 'Business hidden from Discover');
+  }
+
+  async function addBlock() {
+    if (!blockCode.trim()) return;
+    setLoading(true);
+    try {
+      const { data } = await supabase.rpc('lookup_business_by_code', { _code: blockCode.trim() });
+      if (!data || data.length === 0) { toast.error('Business not found'); return; }
+      const target = data[0];
+      if (target.id === businessId) { toast.error("You can't block your own business"); return; }
+      const { error } = await supabase.from('business_blocks').insert({ business_id: businessId, blocked_business_id: target.id });
+      if (error) {
+        if (error.code === '23505') toast.error('Already blocked');
+        else throw error;
+        return;
+      }
+      toast.success(`Blocked ${target.name}`);
+      setBlockCode('');
+      loadSettings();
+    } catch { toast.error('Failed to block'); } finally { setLoading(false); }
+  }
+
+  async function removeBlock(blockId: string) {
+    await supabase.from('business_blocks').delete().eq('id', blockId);
+    toast.success('Unblocked');
+    loadSettings();
+  }
+
+  return (
+    <Card className="shadow-card">
+      <CardContent className="p-4 space-y-4">
+        <h2 className="text-base font-semibold flex items-center gap-2">
+          <Eye className="h-4 w-4" /> Discovery Visibility
+        </h2>
+
+        {/* Toggle */}
+        <div className="flex items-center justify-between p-3 rounded-lg border bg-muted/30">
+          <div>
+            <p className="text-sm font-medium">Visible in Discover</p>
+            <p className="text-xs text-muted-foreground">
+              {isDiscoverable ? 'Other businesses can find you' : 'Your business is hidden from search'}
+            </p>
+          </div>
+          <Switch checked={isDiscoverable} onCheckedChange={toggleDiscoverable} />
+        </div>
+
+        {/* Blocklist */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium flex items-center gap-1.5">
+            <ShieldBan className="h-3.5 w-3.5" /> Block Specific Businesses
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Blocked businesses won't see your business in Discover even when you're visible.
+          </p>
+          <div className="flex gap-2">
+            <Input placeholder="Enter business code..." value={blockCode} onChange={e => setBlockCode(e.target.value.toUpperCase())}
+              className="font-mono text-sm" maxLength={8}
+              onKeyDown={e => e.key === 'Enter' && addBlock()} />
+            <Button size="sm" onClick={addBlock} disabled={loading || !blockCode.trim()}>
+              <ShieldBan className="h-3.5 w-3.5 mr-1" />Block
+            </Button>
+          </div>
+
+          {blocks.length > 0 && (
+            <div className="space-y-1.5 mt-2">
+              {blocks.map(b => (
+                <div key={b.id} className="flex items-center justify-between p-2 rounded-lg border bg-card text-sm">
+                  <span className="truncate">{b.name}</span>
+                  <Button size="sm" variant="ghost" className="shrink-0 h-7 text-xs text-destructive hover:text-destructive" onClick={() => removeBlock(b.id)}>
+                    <X className="h-3 w-3 mr-1" />Unblock
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function SettingsPage() {
   const { currentBusiness, updateBusiness, stock, sales, purchases, services, businesses, memberships, setCurrentBusinessId, userRole, getReceipts, restoreStockItem, permanentDeleteStockItem } = useBusiness();
   const { currency, setCurrency, fmt } = useCurrency();
