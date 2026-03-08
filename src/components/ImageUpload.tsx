@@ -16,9 +16,11 @@ interface ImageUploadProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
   label?: string;
+  /** If true, gates this behind premium. Used for product/item photos. */
+  premiumOnly?: boolean;
 }
 
-export default function ImageUpload({ bucket, path, currentUrl, onUploaded, onRemoved, className = '', size = 'md', label }: ImageUploadProps) {
+export default function ImageUpload({ bucket, path, currentUrl, onUploaded, onRemoved, className = '', size = 'md', label, premiumOnly = false }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [webcamOpen, setWebcamOpen] = useState(false);
