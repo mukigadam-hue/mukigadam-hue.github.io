@@ -503,15 +503,22 @@ export default function OrdersPage() {
 
   function OrderCard({ order, showStockStatus = false }: { order: Order; showStockStatus?: boolean }) {
     const isRequest = order.type === 'request';
+    const rejectionNotification = order.status === 'rejected' 
+      ? notifications.find(n => n.type === 'order_rejected' && n.message.includes(order.code))
+      : null;
+    const rejectionReason = rejectionNotification?.message?.match(/Reason: "([^"]+)"/)?.[1] || null;
+
     return (
-      <div className="border rounded-lg p-3 space-y-2">
+      <div className={`border rounded-lg p-3 space-y-2 ${order.status === 'rejected' ? 'border-destructive/40 bg-destructive/5' : ''}`}>
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               {getStatusIcon(order.status)}
               <span className="font-medium text-sm">{order.customer_name}</span>
               {order.transferred_to_sale && <span className="text-xs bg-success/10 text-success px-1.5 py-0.5 rounded-full">Sold</span>}
-              <span className="text-xs bg-muted px-1.5 py-0.5 rounded-full capitalize">{order.status}</span>
+              <span className={`text-xs px-1.5 py-0.5 rounded-full capitalize ${
+                order.status === 'rejected' ? 'bg-destructive/10 text-destructive font-semibold' : 'bg-muted'
+              }`}>{order.status === 'rejected' ? '❌ Rejected — Re-price' : order.status}</span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">Code: {order.code} · {new Date(order.created_at).toLocaleString()}</p>
           </div>
@@ -519,6 +526,15 @@ export default function OrdersPage() {
             {isRequest && order.grand_total === 0 ? 'Price Pending' : <span className="text-success bg-success/10 px-2 py-0.5 rounded-md">{fmt(Number(order.grand_total))}</span>}
           </span>
         </div>
+
+        {/* Rejection reason banner */}
+        {order.status === 'rejected' && rejectionReason && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-md px-3 py-2 text-xs">
+            <p className="font-semibold text-destructive">💬 Buyer's comment:</p>
+            <p className="text-foreground mt-0.5">"{rejectionReason}"</p>
+          </div>
+        )}
+
         <div className="text-sm text-muted-foreground space-y-1 max-h-40 overflow-y-auto">
           {order.items.map((item, i) => {
             const status = showStockStatus ? getStockStatus(item.item_name, item.category, item.quality) : 'ok';
@@ -548,8 +564,10 @@ export default function OrdersPage() {
               )}
 
               {/* INBOX ORDER ACTIONS (Supplier side) */}
-              {order.type === 'inbox' && order.status === 'pending' && (
-                <Button size="sm" variant="outline" onClick={() => openPricing(order)}>💰 Tag Prices</Button>
+              {order.type === 'inbox' && (order.status === 'pending' || order.status === 'rejected') && (
+                <Button size="sm" variant={order.status === 'rejected' ? 'default' : 'outline'} onClick={() => openPricing(order)}>
+                  💰 {order.status === 'rejected' ? 'Re-price Items' : 'Tag Prices'}
+                </Button>
               )}
               {order.type === 'inbox' && order.status === 'payment_submitted' && (
                 <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => confirmPaymentReceived(order)} disabled={syncing}>
