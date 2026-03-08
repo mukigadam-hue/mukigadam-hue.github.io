@@ -1,81 +1,87 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Settings, Users, LogOut, Building2, Crown, User, Bell, BellDot, Factory, Flame, Boxes, ShoppingBag, Menu, Contact, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { LayoutDashboard, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Settings, Users, LogOut, Building2, Crown, User, Bell, BellDot, Factory, Flame, Boxes, Menu, Contact, Globe } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useBusiness } from '@/context/BusinessContext';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
-const businessNavItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/stock', label: 'My Stock', icon: Package },
-  { to: '/sales', label: 'Sales', icon: TrendingUp },
-  { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
-  { to: '/orders', label: 'Orders', icon: ClipboardList },
-  { to: '/services', label: 'Services', icon: Wrench },
-  { to: '/expenses', label: 'Expenses', icon: Flame },
-  { to: '/contacts', label: 'Contacts', icon: Contact },
-  { to: '/discover', label: 'Discover', icon: Globe },
-  { to: '/team', label: 'Team', icon: Users },
-  { to: '/settings', label: 'Settings', icon: Settings },
-];
-
-const factoryNavItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/input-stock', label: 'Input Stock', icon: Boxes },
-  { to: '/product-stock', label: 'Product Stock', icon: Package },
-  { to: '/production', label: 'Production', icon: Factory },
-  { to: '/sales', label: 'Sales', icon: TrendingUp },
-  { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
-  { to: '/orders', label: 'Orders', icon: ClipboardList },
-  { to: '/services', label: 'Services', icon: Wrench },
-  { to: '/expenses', label: 'Expenses', icon: Flame },
-  { to: '/contacts', label: 'Contacts', icon: Contact },
-  { to: '/discover', label: 'Discover', icon: Globe },
-  { to: '/team', label: 'Team', icon: Users },
-  { to: '/settings', label: 'Settings', icon: Settings },
-];
-
-const businessMobileNav = [
-  { to: '/', label: 'Home', icon: LayoutDashboard },
-  { to: '/stock', label: 'Stock', icon: Package },
-  { to: '/sales', label: 'Sales', icon: TrendingUp },
-];
-
-const businessMoreNav = [
-  { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
-  { to: '/orders', label: 'Orders', icon: ClipboardList },
-  { to: '/services', label: 'Services', icon: Wrench },
-  { to: '/expenses', label: 'Expenses', icon: Flame },
-  { to: '/contacts', label: 'Contacts', icon: Contact },
-  { to: '/discover', label: 'Discover', icon: Globe },
-  { to: '/team', label: 'Team', icon: Users },
-  { to: '/settings', label: 'Settings', icon: Settings },
-];
-
-const factoryMobileNav = [
-  { to: '/', label: 'Home', icon: LayoutDashboard },
-  { to: '/product-stock', label: 'Products', icon: Package },
-  { to: '/sales', label: 'Sales', icon: TrendingUp },
-];
-
-const factoryMoreNav = [
-  { to: '/input-stock', label: 'Input Stock', icon: Boxes },
-  { to: '/production', label: 'Production', icon: Factory },
-  { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
-  { to: '/orders', label: 'Orders', icon: ClipboardList },
+function useNavItems() {
+  const { t } = useTranslation();
   
-  
-  { to: '/services', label: 'Services', icon: Wrench },
-  { to: '/expenses', label: 'Expenses', icon: Flame },
-  { to: '/contacts', label: 'Contacts', icon: Contact },
-  { to: '/discover', label: 'Discover', icon: Globe },
-  { to: '/team', label: 'Team', icon: Users },
-  { to: '/settings', label: 'Settings', icon: Settings },
-];
+  const businessNavItems = [
+    { to: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { to: '/stock', label: t('nav.stock'), icon: Package },
+    { to: '/sales', label: t('nav.sales'), icon: TrendingUp },
+    { to: '/purchases', label: t('nav.purchases'), icon: ShoppingCart },
+    { to: '/orders', label: t('nav.orders'), icon: ClipboardList },
+    { to: '/services', label: t('nav.services'), icon: Wrench },
+    { to: '/expenses', label: t('nav.expenses'), icon: Flame },
+    { to: '/contacts', label: t('nav.contacts'), icon: Contact },
+    { to: '/discover', label: t('nav.discover'), icon: Globe },
+    { to: '/team', label: t('nav.team'), icon: Users },
+    { to: '/settings', label: t('nav.settings'), icon: Settings },
+  ];
+
+  const factoryNavItems = [
+    { to: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { to: '/input-stock', label: t('nav.inputStock'), icon: Boxes },
+    { to: '/product-stock', label: t('nav.productStock'), icon: Package },
+    { to: '/production', label: t('nav.production'), icon: Factory },
+    { to: '/sales', label: t('nav.sales'), icon: TrendingUp },
+    { to: '/purchases', label: t('nav.purchases'), icon: ShoppingCart },
+    { to: '/orders', label: t('nav.orders'), icon: ClipboardList },
+    { to: '/services', label: t('nav.services'), icon: Wrench },
+    { to: '/expenses', label: t('nav.expenses'), icon: Flame },
+    { to: '/contacts', label: t('nav.contacts'), icon: Contact },
+    { to: '/discover', label: t('nav.discover'), icon: Globe },
+    { to: '/team', label: t('nav.team'), icon: Users },
+    { to: '/settings', label: t('nav.settings'), icon: Settings },
+  ];
+
+  const businessMobileNav = [
+    { to: '/', label: t('nav.home'), icon: LayoutDashboard },
+    { to: '/stock', label: t('nav.stock'), icon: Package },
+    { to: '/sales', label: t('nav.sales'), icon: TrendingUp },
+  ];
+
+  const businessMoreNav = [
+    { to: '/purchases', label: t('nav.purchases'), icon: ShoppingCart },
+    { to: '/orders', label: t('nav.orders'), icon: ClipboardList },
+    { to: '/services', label: t('nav.services'), icon: Wrench },
+    { to: '/expenses', label: t('nav.expenses'), icon: Flame },
+    { to: '/contacts', label: t('nav.contacts'), icon: Contact },
+    { to: '/discover', label: t('nav.discover'), icon: Globe },
+    { to: '/team', label: t('nav.team'), icon: Users },
+    { to: '/settings', label: t('nav.settings'), icon: Settings },
+  ];
+
+  const factoryMobileNav = [
+    { to: '/', label: t('nav.home'), icon: LayoutDashboard },
+    { to: '/product-stock', label: t('nav.products'), icon: Package },
+    { to: '/sales', label: t('nav.sales'), icon: TrendingUp },
+  ];
+
+  const factoryMoreNav = [
+    { to: '/input-stock', label: t('nav.inputStock'), icon: Boxes },
+    { to: '/production', label: t('nav.production'), icon: Factory },
+    { to: '/purchases', label: t('nav.purchases'), icon: ShoppingCart },
+    { to: '/orders', label: t('nav.orders'), icon: ClipboardList },
+    { to: '/services', label: t('nav.services'), icon: Wrench },
+    { to: '/expenses', label: t('nav.expenses'), icon: Flame },
+    { to: '/contacts', label: t('nav.contacts'), icon: Contact },
+    { to: '/discover', label: t('nav.discover'), icon: Globe },
+    { to: '/team', label: t('nav.team'), icon: Users },
+    { to: '/settings', label: t('nav.settings'), icon: Settings },
+  ];
+
+  return { businessNavItems, factoryNavItems, businessMobileNav, businessMoreNav, factoryMobileNav, factoryMoreNav };
+}
 
 function BusinessRoleBanner({ userRole, businessName, isFactory }: { userRole: string | null; businessName: string; isFactory: boolean }) {
+  const { t } = useTranslation();
   if (!userRole) return null;
   const isOwner = userRole === 'owner';
   const isAdmin = userRole === 'admin';
@@ -89,9 +95,9 @@ function BusinessRoleBanner({ userRole, businessName, isFactory }: { userRole: s
     }`}>
       {isFactory && <Factory className="h-3.5 w-3.5" />}
       {isOwner ? (
-        <><Crown className="h-3.5 w-3.5" /> 👔 You own <span className="font-bold">{businessName}</span> <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded-full ml-1">{typeLabel}</span></>
+        <><Crown className="h-3.5 w-3.5" /> 👔 {t('nav.owner')} — <span className="font-bold">{businessName}</span> <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded-full ml-1">{typeLabel}</span></>
       ) : (
-        <><User className="h-3.5 w-3.5" /> 🏢 Employed at <span className="font-bold">{businessName}</span> — {userRole} <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded-full ml-1">{typeLabel}</span></>
+        <><User className="h-3.5 w-3.5" /> 🏢 {t('nav.employed')} — <span className="font-bold">{businessName}</span> — {userRole} <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded-full ml-1">{typeLabel}</span></>
       )}
     </div>
   );
@@ -118,6 +124,7 @@ function getNotificationRoute(type: string): string {
 }
 
 function NotificationsPanel({ onNavigate, variant = 'desktop' }: { onNavigate?: () => void; variant?: 'desktop' | 'mobile' }) {
+  const { t } = useTranslation();
   const { notifications, markNotificationRead, markAllNotificationsRead } = useBusiness();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -137,7 +144,7 @@ function NotificationsPanel({ onNavigate, variant = 'desktop' }: { onNavigate?: 
         {variant === 'mobile' ? (
           <button className="relative flex flex-col items-center justify-center gap-0.5 text-[11px] text-muted-foreground min-h-[44px] min-w-[44px]">
             {unread > 0 ? <BellDot className="h-5 w-5 text-warning" /> : <Bell className="h-5 w-5" />}
-            <span>Alerts</span>
+            <span>{t('nav.alerts')}</span>
             {unread > 0 && (
               <span className="absolute top-0 right-0 h-3.5 w-3.5 rounded-full bg-warning text-warning-foreground text-[9px] flex items-center justify-center font-bold">
                 {unread > 9 ? '9+' : unread}
@@ -157,12 +164,12 @@ function NotificationsPanel({ onNavigate, variant = 'desktop' }: { onNavigate?: 
       </SheetTrigger>
       <SheetContent side={variant === 'mobile' ? 'bottom' : 'right'} className={variant === 'mobile' ? 'rounded-t-2xl max-h-[70vh] overflow-y-auto' : 'w-80 max-h-screen overflow-y-auto'}>
         <SheetHeader className="flex flex-row items-center justify-between">
-          <SheetTitle>Notifications {unread > 0 && `(${unread} new)`}</SheetTitle>
-          {unread > 0 && <Button size="sm" variant="ghost" onClick={markAllNotificationsRead} className="text-xs">Mark all read</Button>}
+          <SheetTitle>{t('common.notifications')} {unread > 0 && `(${unread} ${t('common.new').toLowerCase()})`}</SheetTitle>
+          {unread > 0 && <Button size="sm" variant="ghost" onClick={markAllNotificationsRead} className="text-xs">{t('common.markAllRead')}</Button>}
         </SheetHeader>
         <div className="mt-4 space-y-2">
           {notifications.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No notifications yet.</p>
+            <p className="text-sm text-muted-foreground text-center py-8">{t('common.noNotifications')}</p>
           ) : (
             notifications.map(n => (
               <button key={n.id} onClick={() => handleNotificationClick(n)}
@@ -171,9 +178,9 @@ function NotificationsPanel({ onNavigate, variant = 'desktop' }: { onNavigate?: 
                 <p className="text-xs text-muted-foreground mt-0.5">{n.message}</p>
                 <div className="flex items-center justify-between mt-1">
                   <p className="text-xs text-muted-foreground">{new Date(n.created_at).toLocaleString()}</p>
-                  <span className="text-[10px] text-primary underline">View →</span>
+                  <span className="text-[10px] text-primary underline">{t('common.view')}</span>
                 </div>
-                {!n.is_read && <span className="inline-block mt-1 text-[10px] bg-warning text-warning-foreground px-1.5 py-0.5 rounded-full">NEW</span>}
+                {!n.is_read && <span className="inline-block mt-1 text-[10px] bg-warning text-warning-foreground px-1.5 py-0.5 rounded-full">{t('common.new')}</span>}
               </button>
             ))
           )}
@@ -184,12 +191,14 @@ function NotificationsPanel({ onNavigate, variant = 'desktop' }: { onNavigate?: 
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { t } = useTranslation();
   const { pathname } = useLocation();
   const { signOut } = useAuth();
   const { businesses, currentBusiness, setCurrentBusinessId, userRole, memberships, notifications } = useBusiness();
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const isFactory = (currentBusiness as any)?.business_type === 'factory';
+  const { businessNavItems, factoryNavItems, businessMobileNav, factoryMobileNav, businessMoreNav, factoryMoreNav } = useNavItems();
   const navItems = isFactory ? factoryNavItems : businessNavItems;
   const mobileMainNav = isFactory ? factoryMobileNav : businessMobileNav;
   const mobileMoreNav = isFactory ? factoryMoreNav : businessMoreNav;
@@ -211,9 +220,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   function getRoleLabel(role: string) {
-    if (role === 'owner') return 'Owner';
-    if (role === 'admin') return 'Admin';
-    return 'Employed';
+    if (role === 'owner') return t('nav.owner');
+    if (role === 'admin') return t('nav.admin');
+    return t('nav.employed');
   }
 
   return (
@@ -228,17 +237,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <h1 className="text-xl font-bold text-sidebar-accent-foreground tracking-tight">
                 {isFactory ? '🏭 BizTrack' : '📦 BizTrack'}
               </h1>
-              <p className="text-xs text-sidebar-muted mt-1">{isFactory ? 'Factory Manager' : 'Business Manager'}</p>
+              <p className="text-xs text-sidebar-muted mt-1">{isFactory ? t('nav.factoryManager') : t('nav.businessManager')}</p>
             </div>
             <NotificationsPanel />
           </div>
 
-          {/* Business Switcher */}
           <div className="px-3 pt-3">
             <Select value={currentBusiness?.id || ''} onValueChange={setCurrentBusinessId}>
               <SelectTrigger className="w-full bg-sidebar-accent/30 border-sidebar-border text-sidebar-foreground text-xs h-9">
                 <Building2 className="h-3 w-3 mr-1" />
-                <SelectValue placeholder="Select business" />
+                <SelectValue placeholder={t('nav.switchBusiness')} />
               </SelectTrigger>
               <SelectContent>
                 {businesses.map(b => {
@@ -273,12 +281,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
           <div className="p-3 border-t border-sidebar-border">
             <Button variant="ghost" className="w-full justify-start text-sidebar-foreground text-sm" onClick={signOut}>
-              <LogOut className="h-4 w-4 mr-2" />Sign Out
+              <LogOut className="h-4 w-4 mr-2" />{t('nav.signOut')}
             </Button>
           </div>
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
           <div className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto animate-fade-in">{children}</div>
         </main>
@@ -295,25 +302,22 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           );
         })}
 
-        {/* Alerts - reuse NotificationsPanel which has its own Sheet */}
         <NotificationsPanel variant="mobile" />
 
-        {/* More Menu - contains all other pages + business switcher */}
         <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
           <SheetTrigger asChild>
             <button className="flex flex-col items-center justify-center gap-0.5 text-[11px] text-muted-foreground min-h-[44px] min-w-[44px] transition-colors">
               <Menu className="h-5 w-5" />
-              <span>More</span>
+              <span>{t('nav.more')}</span>
             </button>
           </SheetTrigger>
           <SheetContent side="bottom" className="rounded-t-2xl max-h-[80vh] overflow-y-auto">
             <SheetHeader>
-              <SheetTitle className="text-left">Menu</SheetTitle>
+              <SheetTitle className="text-left">{t('nav.menu')}</SheetTitle>
             </SheetHeader>
 
-            {/* Business Switcher - scrollable list */}
             <div className="mt-3 mb-2">
-              <p className="text-xs text-muted-foreground font-medium mb-2 px-1">Switch Business</p>
+              <p className="text-xs text-muted-foreground font-medium mb-2 px-1">{t('nav.switchBusiness')}</p>
               <div className="max-h-40 overflow-y-auto space-y-1.5 rounded-lg border border-border p-1.5">
                 {businesses.map(b => {
                   const role = getRoleForBusiness(b.id);
@@ -329,14 +333,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                         <p className="font-medium text-sm truncate">{b.name}</p>
                         <p className="text-[11px] text-muted-foreground">{getRoleBadge(role)} {getRoleLabel(role)}</p>
                       </div>
-                      {isActive && <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full shrink-0">Active</span>}
+                      {isActive && <span className="text-[10px] bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full shrink-0">{t('nav.active')}</span>}
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* All other nav items */}
             <div className="grid grid-cols-3 gap-2 mt-3">
               {mobileMoreNav.map(({ to, label, icon: Icon }) => {
                 const active = pathname === to;
@@ -352,10 +355,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               })}
             </div>
 
-            {/* Sign Out */}
             <div className="mt-4 pt-3 border-t">
               <Button variant="ghost" className="w-full justify-start text-destructive text-sm" onClick={signOut}>
-                <LogOut className="h-4 w-4 mr-2" /> Sign Out
+                <LogOut className="h-4 w-4 mr-2" /> {t('nav.signOut')}
               </Button>
             </div>
           </SheetContent>
