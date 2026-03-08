@@ -415,6 +415,7 @@ export type Database = {
           business_code: string | null
           business_type: string
           contact: string
+          country_code: string
           created_at: string
           email: string
           id: string
@@ -431,6 +432,7 @@ export type Database = {
           business_code?: string | null
           business_type?: string
           contact?: string
+          country_code?: string
           created_at?: string
           email?: string
           id?: string
@@ -447,6 +449,7 @@ export type Database = {
           business_code?: string | null
           business_type?: string
           contact?: string
+          country_code?: string
           created_at?: string
           email?: string
           id?: string
@@ -1523,20 +1526,41 @@ export type Database = {
           name: string
         }[]
       }
-      search_businesses: {
-        Args: { _limit?: number; _offset?: number; _query?: string }
-        Returns: {
-          address: string
-          business_code: string
-          business_type: string
-          contact: string
-          email: string
-          id: string
-          logo_url: string
-          name: string
-          products_description: string
-        }[]
-      }
+      search_businesses:
+        | {
+            Args: { _limit?: number; _offset?: number; _query?: string }
+            Returns: {
+              address: string
+              business_code: string
+              business_type: string
+              contact: string
+              email: string
+              id: string
+              logo_url: string
+              name: string
+              products_description: string
+            }[]
+          }
+        | {
+            Args: {
+              _country_code?: string
+              _limit?: number
+              _offset?: number
+              _query?: string
+            }
+            Returns: {
+              address: string
+              business_code: string
+              business_type: string
+              contact: string
+              country_code: string
+              email: string
+              id: string
+              logo_url: string
+              name: string
+              products_description: string
+            }[]
+          }
     }
     Enums: {
       business_role: "owner" | "admin" | "worker"
