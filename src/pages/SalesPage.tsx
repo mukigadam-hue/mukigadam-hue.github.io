@@ -238,18 +238,23 @@ export default function SalesPage() {
             <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-3 sm:items-end">
               <div className="w-full sm:flex-1 sm:min-w-[200px]">
                 <Label>Item</Label>
-                <Select value={selectedStock} onValueChange={setSelectedStock}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select item..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {activeStock.filter(s => s.quantity > 0).map(s => (
-                      <SelectItem key={s.id} value={s.id}>
-                        {s.name}{s.category ? ` · ${s.category}` : ''}{s.quality ? ` · ${s.quality}` : ''} (qty: {s.quantity})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="flex gap-1.5">
+                  <Select value={selectedStock} onValueChange={setSelectedStock}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Select item..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {activeStock.filter(s => s.quantity > 0).map(s => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name}{s.category ? ` · ${s.category}` : ''}{s.quality ? ` · ${s.quality}` : ''} (qty: {s.quantity})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setScannerOpen(true)} title="Scan barcode">
+                    <ScanLine className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-2 sm:contents">
                 <div className="sm:w-20"><Label>Qty</Label><Input type="number" min="1" value={quantity} onChange={e => setQuantity(e.target.value)} /></div>
