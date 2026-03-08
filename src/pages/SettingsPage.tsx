@@ -591,6 +591,174 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
+      {/* ===== DEBT TRACKING SECTION ===== */}
+      {(() => {
+        const salesDebts = sales.filter(s => s.payment_status !== 'paid' && Number(s.balance) > 0);
+        const serviceDebts = services.filter(s => s.payment_status !== 'paid' && Number(s.balance) > 0);
+        const purchaseDebts = purchases.filter(p => p.payment_status !== 'paid' && Number(p.balance) > 0);
+        const totalOwedToYou = salesDebts.reduce((sum, s) => sum + Number(s.balance), 0) + serviceDebts.reduce((sum, s) => sum + Number(s.balance), 0);
+        const totalYouOwe = purchaseDebts.reduce((sum, p) => sum + Number(p.balance), 0);
+        const totalDebt = totalOwedToYou + totalYouOwe;
+
+        const THREE_DAYS = 3 * 24 * 60 * 60 * 1000;
+        const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+        const overdueSales = salesDebts.filter(s => (Date.now() - new Date(s.created_at).getTime()) > THREE_DAYS);
+        const overdueServices = serviceDebts.filter(s => (Date.now() - new Date(s.created_at).getTime()) > THREE_DAYS);
+        const overduePurchases = purchaseDebts.filter(p => (Date.now() - new Date(p.created_at).getTime()) > THREE_DAYS);
+        const criticalSales = salesDebts.filter(s => (Date.now() - new Date(s.created_at).getTime()) > SEVEN_DAYS);
+        const criticalServices = serviceDebts.filter(s => (Date.now() - new Date(s.created_at).getTime()) > SEVEN_DAYS);
+        const criticalPurchases = purchaseDebts.filter(p => (Date.now() - new Date(p.created_at).getTime()) > SEVEN_DAYS);
+
+        const hasCritical = criticalSales.length > 0 || criticalServices.length > 0 || criticalPurchases.length > 0;
+        const hasOverdue = overdueSales.length > 0 || overdueServices.length > 0 || overduePurchases.length > 0;
+
+        if (totalDebt === 0 && salesDebts.length === 0 && purchaseDebts.length === 0 && serviceDebts.length === 0) return null;
+
+        return (
+          <Card className={`shadow-card border-2 ${hasCritical ? 'border-destructive bg-destructive/5 animate-pulse' : hasOverdue ? 'border-warning bg-warning/5' : 'border-orange-300 bg-orange-50/50 dark:bg-orange-950/20'}`}>
+            <CardContent className="p-4 space-y-4">
+              <h2 className={`text-lg font-bold flex items-center gap-2 ${hasCritical ? 'text-destructive' : hasOverdue ? 'text-warning' : 'text-orange-600 dark:text-orange-400'}`}>
+                {hasCritical ? '🚨' : hasOverdue ? '⚠️' : '💳'} Outstanding Debts
+                {hasCritical && <span className="text-xs font-normal bg-destructive text-destructive-foreground px-2 py-0.5 rounded-full ml-2">CRITICAL</span>}
+              </h2>
+
+              {/* Summary Cards */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className={`p-3 rounded-lg border-2 ${totalOwedToYou > 0 ? 'bg-success/10 border-success/30' : 'bg-muted/30 border-border'}`}>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">Owed TO You</p>
+                  <p className={`text-xl font-bold tabular-nums ${totalOwedToYou > 0 ? 'text-success' : ''}`}>{fmt(totalOwedToYou)}</p>
+                  <p className="text-[10px] text-muted-foreground">{salesDebts.length} sale(s), {serviceDebts.length} service(s)</p>
+                </div>
+                <div className={`p-3 rounded-lg border-2 ${totalYouOwe > 0 ? 'bg-destructive/10 border-destructive/30' : 'bg-muted/30 border-border'}`}>
+                  <p className="text-xs text-muted-foreground font-semibold uppercase">You OWE Others</p>
+                  <p className={`text-xl font-bold tabular-nums ${totalYouOwe > 0 ? 'text-destructive' : ''}`}>{fmt(totalYouOwe)}</p>
+                  <p className="text-[10px] text-muted-foreground">{purchaseDebts.length} purchase(s)</p>
+                </div>
+              </div>
+
+              {/* Critical Debts (7+ days) */}
+              {hasCritical && (
+                <div className="p-3 rounded-lg bg-destructive/10 border-2 border-destructive/40 space-y-2">
+                  <p className="text-sm font-bold text-destructive flex items-center gap-1.5">🚨 CRITICAL — Over 7 Days Unpaid</p>
+                  <p className="text-xs text-destructive/80">These debts are severely overdue. Immediate action required!</p>
+                  {criticalSales.map(s => (
+                    <div key={s.id} className="flex justify-between items-center text-sm p-2 rounded bg-destructive/5">
+                      <div>
+                        <span className="font-medium">👤 {s.customer_name || 'Unknown'}</span>
+                        <span className="text-xs text-muted-foreground ml-2">(Sale · {new Date(s.created_at).toLocaleDateString()})</span>
+                      </div>
+                      <span className="font-bold text-destructive tabular-nums">{fmt(Number(s.balance))}</span>
+                    </div>
+                  ))}
+                  {criticalServices.map(s => (
+                    <div key={s.id} className="flex justify-between items-center text-sm p-2 rounded bg-destructive/5">
+                      <div>
+                        <span className="font-medium">👤 {s.customer_name || 'Unknown'}</span>
+                        <span className="text-xs text-muted-foreground ml-2">(Service: {s.service_name} · {new Date(s.created_at).toLocaleDateString()})</span>
+                      </div>
+                      <span className="font-bold text-destructive tabular-nums">{fmt(Number(s.balance))}</span>
+                    </div>
+                  ))}
+                  {criticalPurchases.map(p => (
+                    <div key={p.id} className="flex justify-between items-center text-sm p-2 rounded bg-destructive/5">
+                      <div>
+                        <span className="font-medium">🏪 {p.supplier || 'Unknown'}</span>
+                        <span className="text-xs text-muted-foreground ml-2">(Purchase · {new Date(p.created_at).toLocaleDateString()})</span>
+                      </div>
+                      <span className="font-bold text-destructive tabular-nums">{fmt(Number(p.balance))}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Overdue Debts (3-7 days) */}
+              {(() => {
+                const warnSales = overdueSales.filter(s => (Date.now() - new Date(s.created_at).getTime()) <= SEVEN_DAYS);
+                const warnServices = overdueServices.filter(s => (Date.now() - new Date(s.created_at).getTime()) <= SEVEN_DAYS);
+                const warnPurchases = overduePurchases.filter(p => (Date.now() - new Date(p.created_at).getTime()) <= SEVEN_DAYS);
+                if (warnSales.length === 0 && warnServices.length === 0 && warnPurchases.length === 0) return null;
+                return (
+                  <div className="p-3 rounded-lg bg-warning/10 border-2 border-warning/30 space-y-2">
+                    <p className="text-sm font-bold text-warning flex items-center gap-1.5">⚠️ OVERDUE — 3-7 Days Unpaid</p>
+                    {warnSales.map(s => (
+                      <div key={s.id} className="flex justify-between items-center text-sm p-2 rounded bg-warning/5">
+                        <div>
+                          <span className="font-medium">👤 {s.customer_name || 'Unknown'}</span>
+                          <span className="text-xs text-muted-foreground ml-2">(Sale · {new Date(s.created_at).toLocaleDateString()})</span>
+                        </div>
+                        <span className="font-bold text-warning tabular-nums">{fmt(Number(s.balance))}</span>
+                      </div>
+                    ))}
+                    {warnServices.map(s => (
+                      <div key={s.id} className="flex justify-between items-center text-sm p-2 rounded bg-warning/5">
+                        <div>
+                          <span className="font-medium">👤 {s.customer_name || 'Unknown'}</span>
+                          <span className="text-xs text-muted-foreground ml-2">(Service: {s.service_name} · {new Date(s.created_at).toLocaleDateString()})</span>
+                        </div>
+                        <span className="font-bold text-warning tabular-nums">{fmt(Number(s.balance))}</span>
+                      </div>
+                    ))}
+                    {warnPurchases.map(p => (
+                      <div key={p.id} className="flex justify-between items-center text-sm p-2 rounded bg-warning/5">
+                        <div>
+                          <span className="font-medium">🏪 {p.supplier || 'Unknown'}</span>
+                          <span className="text-xs text-muted-foreground ml-2">(Purchase · {new Date(p.created_at).toLocaleDateString()})</span>
+                        </div>
+                        <span className="font-bold text-warning tabular-nums">{fmt(Number(p.balance))}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              {/* Recent/Normal Debts (under 3 days) */}
+              {(() => {
+                const recentSales = salesDebts.filter(s => (Date.now() - new Date(s.created_at).getTime()) <= THREE_DAYS);
+                const recentServices = serviceDebts.filter(s => (Date.now() - new Date(s.created_at).getTime()) <= THREE_DAYS);
+                const recentPurchases = purchaseDebts.filter(p => (Date.now() - new Date(p.created_at).getTime()) <= THREE_DAYS);
+                if (recentSales.length === 0 && recentServices.length === 0 && recentPurchases.length === 0) return null;
+                return (
+                  <div className="p-3 rounded-lg bg-muted/30 border space-y-2">
+                    <p className="text-sm font-bold flex items-center gap-1.5">💳 Recent (Under 3 Days)</p>
+                    {recentSales.map(s => (
+                      <div key={s.id} className="flex justify-between items-center text-sm p-2 rounded bg-background/80">
+                        <div>
+                          <span className="font-medium">👤 {s.customer_name || 'Unknown'}</span>
+                          <span className="text-xs text-muted-foreground ml-2">(Sale · {new Date(s.created_at).toLocaleDateString()})</span>
+                        </div>
+                        <span className="font-bold tabular-nums">{fmt(Number(s.balance))}</span>
+                      </div>
+                    ))}
+                    {recentServices.map(s => (
+                      <div key={s.id} className="flex justify-between items-center text-sm p-2 rounded bg-background/80">
+                        <div>
+                          <span className="font-medium">👤 {s.customer_name || 'Unknown'}</span>
+                          <span className="text-xs text-muted-foreground ml-2">(Service: {s.service_name} · {new Date(s.created_at).toLocaleDateString()})</span>
+                        </div>
+                        <span className="font-bold tabular-nums">{fmt(Number(s.balance))}</span>
+                      </div>
+                    ))}
+                    {recentPurchases.map(p => (
+                      <div key={p.id} className="flex justify-between items-center text-sm p-2 rounded bg-background/80">
+                        <div>
+                          <span className="font-medium">🏪 {p.supplier || 'Unknown'}</span>
+                          <span className="text-xs text-muted-foreground ml-2">(Purchase · {new Date(p.created_at).toLocaleDateString()})</span>
+                        </div>
+                        <span className="font-bold tabular-nums">{fmt(Number(p.balance))}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+
+              <p className="text-[10px] text-muted-foreground text-center italic">
+                💡 Figures update automatically when payments are recorded in Sales, Services, or Purchases pages.
+              </p>
+            </CardContent>
+          </Card>
+        );
+      })()}
+
       {/* Settings Password */}
       <Card className="shadow-card">
         <CardContent className="p-4 space-y-3">
