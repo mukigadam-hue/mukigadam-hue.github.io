@@ -310,7 +310,8 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
                             className="h-7 text-xs flex-1"
                             onClick={() => { 
                               setSelectedWorker(worker); 
-                              setPayForm({ amount: String(worker.salary), notes: '' });
+                              const netPay = Math.max(0, worker.salary - balance.totalAdvances);
+                              setPayForm({ amount: String(netPay), notes: '' });
                               setShowPayDialog(true); 
                             }}
                           >
