@@ -56,6 +56,8 @@ export default function FactoryTeam() {
       phone: form.phone.trim(),
       hire_date: form.hire_date,
       is_active: true,
+      payment_frequency: 'monthly',
+      next_payment_due: new Date().toISOString().slice(0, 10),
     });
     resetForm(); setShowAdd(false);
   }
