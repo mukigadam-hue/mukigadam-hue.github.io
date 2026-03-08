@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_contacts: {
+        Row: {
+          business_id: string
+          contact_business_id: string
+          created_at: string
+          id: string
+          nickname: string
+          notes: string
+        }
+        Insert: {
+          business_id: string
+          contact_business_id: string
+          created_at?: string
+          id?: string
+          nickname?: string
+          notes?: string
+        }
+        Update: {
+          business_id?: string
+          contact_business_id?: string
+          created_at?: string
+          id?: string
+          nickname?: string
+          notes?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_contacts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_contacts_contact_business_id_fkey"
+            columns: ["contact_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_customers: {
         Row: {
           business_id: string
@@ -963,6 +1005,18 @@ export type Database = {
       is_owner_or_admin: {
         Args: { _business_id: string; _user_id: string }
         Returns: boolean
+      }
+      lookup_business_by_code: {
+        Args: { _code: string }
+        Returns: {
+          address: string
+          business_type: string
+          contact: string
+          email: string
+          id: string
+          logo_url: string
+          name: string
+        }[]
       }
     }
     Enums: {
