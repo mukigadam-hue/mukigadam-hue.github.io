@@ -278,7 +278,7 @@ export default function TeamPage() {
       <AdSpace variant="banner" />
 
       <Tabs defaultValue="workers" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="workers" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Workers
@@ -286,10 +286,6 @@ export default function TeamPage() {
           <TabsTrigger value="payments" className="flex items-center gap-2">
             <Wallet className="h-4 w-4" />
             Payments
-          </TabsTrigger>
-          <TabsTrigger value="customers" className="flex items-center gap-2">
-            <ShoppingBag className="h-4 w-4" />
-            Customers
           </TabsTrigger>
         </TabsList>
 
