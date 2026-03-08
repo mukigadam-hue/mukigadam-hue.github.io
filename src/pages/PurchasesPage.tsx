@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Trash2, Package } from 'lucide-react';
+import { Plus, Trash2, Package, ScanLine } from 'lucide-react';
+import BarcodeScanner from '@/components/BarcodeScanner';
+import { toast } from 'sonner';
 
 function toSentenceCase(str: string): string {
   if (!str) return str;
