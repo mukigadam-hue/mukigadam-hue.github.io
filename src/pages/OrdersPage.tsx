@@ -544,8 +544,8 @@ export default function OrdersPage() {
             business_id: currentBusiness.id,
             receipt_type: 'order',
             transaction_id: completeDialog.id,
-            buyer_name: toSentenceCase(completeBuyer.trim()),
-            seller_name: toSentenceCase(completeSeller.trim()),
+            buyer_name: toTitleCase(completeBuyer.trim()),
+            seller_name: toTitleCase(completeSeller.trim()),
             grand_total: completeDialog.grand_total,
             items: completeDialog.items.map(i => ({
               itemName: i.item_name, category: i.category, quality: i.quality,
