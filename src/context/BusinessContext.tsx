@@ -373,6 +373,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     }
 
     setServices((servicesRes.data || []) as ServiceRecord[]);
+    setExpenses((expensesRes.data || []) as any[]);
   }
 
   function setupRealtimeSubscriptions() {
