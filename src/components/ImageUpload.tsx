@@ -1,11 +1,12 @@
 import React, { useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Camera, Upload, X, Loader2 } from 'lucide-react';
+import { Camera, Upload, X, Loader2, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import WebcamCapture from '@/components/WebcamCapture';
 import { compressImage } from '@/lib/compressImage';
+import { usePremium } from '@/hooks/usePremium';
 
 interface ImageUploadProps {
   bucket: string;
