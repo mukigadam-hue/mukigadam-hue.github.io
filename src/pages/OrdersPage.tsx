@@ -23,9 +23,16 @@ function toSentenceCase(str: string): string {
 }
 
 export default function OrdersPage() {
-  const { stock, orders, addOrder, updateOrder, completeOrderToSale, saveReceipt, currentBusiness, addStockItem, addExpense, refreshData, notifications } = useBusiness();
+  const { stock, orders, addOrder, updateOrder, completeOrderToSale, saveReceipt, currentBusiness, addStockItem, addExpense, refreshData, notifications, userRole } = useBusiness();
   const { fmt } = useCurrency();
   const [tab, setTab] = useState('live_orders');
+  const isAdmin = userRole === 'owner' || userRole === 'admin';
+
+  // Payment verification state
+  const [verifyFilter, setVerifyFilter] = useState<'pending' | 'paid' | 'all'>('pending');
+  const [viewingProof, setViewingProof] = useState<string | null>(null);
+  const [checkoutOrders, setCheckoutOrders] = useState<any[]>([]);
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
   const [customerName, setCustomerName] = useState('');
   const [sellerName, setSellerName] = useState('');
   const [items, setItems] = useState<{ item_name: string; category: string; quality: string; quantity: number; price_type: string; unit_price: number }[]>([]);
