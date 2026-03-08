@@ -250,6 +250,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [services, setServices] = useState<ServiceRecord[]>([]);
+  const [expenses, setExpenses] = useState<BusinessExpense[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
