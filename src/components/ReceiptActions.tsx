@@ -22,9 +22,12 @@ import {
 interface ReceiptActionsProps {
   receiptRef: React.RefObject<HTMLDivElement>;
   fileName?: string;
+  canShare?: boolean;
+  canDownload?: boolean;
+  canPrint?: boolean;
 }
 
-export default function ReceiptActions({ receiptRef, fileName = 'receipt' }: ReceiptActionsProps) {
+export default function ReceiptActions({ receiptRef, fileName = 'receipt', canShare = true, canDownload = true, canPrint = true }: ReceiptActionsProps) {
   const [busy, setBusy] = useState(false);
   const [shareDialog, setShareDialog] = useState<{ blob: Blob; name: string; type: 'image' | 'pdf' } | null>(null);
 
