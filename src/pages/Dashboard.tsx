@@ -68,27 +68,26 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="gradient-primary rounded-xl p-6 text-primary-foreground">
-        <div className="flex items-start gap-4">
-          {/* Business Logo */}
+      <div className="gradient-primary rounded-xl p-4 sm:p-6 text-primary-foreground">
+        <div className="flex items-start gap-3 sm:gap-4">
           <div className="shrink-0">
             {currentBusiness?.logo_url ? (
               <div className="relative cursor-pointer" onClick={() => setShowLogoUpload(v => !v)}>
-                <img src={currentBusiness.logo_url} alt="Logo" className="h-16 w-16 rounded-xl object-cover border-2 border-primary-foreground/30" />
+                <img src={currentBusiness.logo_url} alt="Logo" className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl object-cover border-2 border-primary-foreground/30" />
               </div>
             ) : (
               <button onClick={() => setShowLogoUpload(v => !v)}
-                className="h-16 w-16 rounded-xl border-2 border-dashed border-primary-foreground/40 flex items-center justify-center hover:border-primary-foreground/70 transition-colors">
-                <Camera className="h-6 w-6 opacity-60" />
+                className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl border-2 border-dashed border-primary-foreground/40 flex items-center justify-center hover:border-primary-foreground/70 transition-colors">
+                <Camera className="h-5 w-5 sm:h-6 sm:w-6 opacity-60" />
               </button>
             )}
           </div>
-          <div className="flex-1">
-            <h1 className="text-2xl font-bold">{currentBusiness?.name || 'My Business'}</h1>
-            <div className="flex flex-wrap gap-4 mt-2 text-sm opacity-90">
-              {currentBusiness?.address && <span>📍 {currentBusiness.address}</span>}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold truncate">{currentBusiness?.name || 'My Business'}</h1>
+            <div className="flex flex-wrap gap-2 sm:gap-4 mt-1 sm:mt-2 text-xs sm:text-sm opacity-90">
+              {currentBusiness?.address && <span className="truncate max-w-[150px] sm:max-w-none">📍 {currentBusiness.address}</span>}
               {currentBusiness?.contact && <span>📞 {currentBusiness.contact}</span>}
-              {currentBusiness?.email && <span>✉️ {currentBusiness.email}</span>}
+              {currentBusiness?.email && <span className="truncate max-w-[150px] sm:max-w-none">✉️ {currentBusiness.email}</span>}
             </div>
           </div>
         </div>
