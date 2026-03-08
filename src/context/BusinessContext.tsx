@@ -411,17 +411,16 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   function setupRealtimeSubscriptions() {
     if (!currentBusinessId) return;
 
-    // Use debounced reload to avoid multiple rapid reloads
-    let reloadTimer: ReturnType<typeof setTimeout> | null = null;
-    const debouncedReload = () => {
-      if (reloadTimer) clearTimeout(reloadTimer);
-      reloadTimer = setTimeout(() => loadBusinessData(), 300);
+    // Targeted debounced reloaders — only reload the specific table that changed
+    const timers: Record<string, ReturnType<typeof setTimeout>> = {};
+    const debounce = (key: string, fn: () => void) => {
+      if (timers[key]) clearTimeout(timers[key]);
+      timers[key] = setTimeout(fn, 400);
     };
 
     const channel = supabase
       .channel(`business-${currentBusinessId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items', filter: `business_id=eq.${currentBusinessId}` }, (payload) => {
-        // Optimistic: update stock in-place for simple updates
         if (payload.eventType === 'UPDATE' && payload.new) {
           setStock(prev => prev.map(s => s.id === (payload.new as any).id ? { ...s, ...payload.new } as StockItem : s));
         } else if (payload.eventType === 'INSERT' && payload.new) {
@@ -430,11 +429,17 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
           setStock(prev => prev.filter(s => s.id !== (payload.old as any).id));
         }
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'sales', filter: `business_id=eq.${currentBusinessId}` }, debouncedReload)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases', filter: `business_id=eq.${currentBusinessId}` }, debouncedReload)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `business_id=eq.${currentBusinessId}` }, debouncedReload)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'services', filter: `business_id=eq.${currentBusinessId}` }, debouncedReload)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'business_expenses', filter: `business_id=eq.${currentBusinessId}` }, debouncedReload)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sales', filter: `business_id=eq.${currentBusinessId}` }, () => debounce('sales', reloadSales))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'purchases', filter: `business_id=eq.${currentBusinessId}` }, () => debounce('purchases', reloadPurchases))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `business_id=eq.${currentBusinessId}` }, () => debounce('orders', reloadOrders))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'services', filter: `business_id=eq.${currentBusinessId}` }, () => debounce('services', async () => {
+        const { data } = await supabase.from('services').select('*').eq('business_id', currentBusinessId).order('created_at', { ascending: false });
+        setServices((data || []) as ServiceRecord[]);
+      }))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'business_expenses', filter: `business_id=eq.${currentBusinessId}` }, () => debounce('expenses', async () => {
+        const { data } = await supabase.from('business_expenses').select('*').eq('business_id', currentBusinessId).order('created_at', { ascending: false });
+        setExpenses((data || []) as any[]);
+      }))
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `business_id=eq.${currentBusinessId}` }, (payload) => {
         const notif = payload.new as Notification;
         setNotifications(prev => [notif, ...prev]);
@@ -443,7 +448,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       .subscribe();
 
     return () => {
-      if (reloadTimer) clearTimeout(reloadTimer);
+      Object.values(timers).forEach(t => clearTimeout(t));
       supabase.removeChannel(channel);
     };
   }
