@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useBusiness } from '@/context/BusinessContext';
 import { useCurrency } from '@/hooks/useCurrency';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,8 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Wallet, AlertTriangle, Clock, CheckCircle2, Plus, 
-  Calendar, ArrowDownCircle, History, Bell, User, Trash2
+  Wallet, AlertTriangle, Clock, CheckCircle2, 
+  Calendar, ArrowDownCircle, History, Bell, User
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -72,10 +72,8 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
   const [selectedWorker, setSelectedWorker] = useState<BusinessTeamMember | null>(null);
   const [showPayDialog, setShowPayDialog] = useState(false);
   const [showAdvanceDialog, setShowAdvanceDialog] = useState(false);
-  const [showAddWorkerDialog, setShowAddWorkerDialog] = useState(false);
   const [payForm, setPayForm] = useState({ amount: '', notes: '' });
   const [advanceForm, setAdvanceForm] = useState({ amount: '', reason: '' });
-  const [workerForm, setWorkerForm] = useState({ full_name: '', phone: '', rank: 'worker', salary: '', payment_frequency: 'monthly' });
   
   const businessId = currentBusiness?.id;
 
@@ -95,14 +93,12 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
 
   const activeMembers = teamMembers.filter(m => m.is_active);
   
-  // Calculate due payments
   const today = new Date().toISOString().slice(0, 10);
   const overdue = activeMembers.filter(w => w.next_payment_due && w.next_payment_due < today);
   const dueToday = activeMembers.filter(w => w.next_payment_due === today);
   const threeDaysLater = new Date(Date.now() + 3 * 86400000).toISOString().slice(0, 10);
   const dueSoon = activeMembers.filter(w => w.next_payment_due && w.next_payment_due > today && w.next_payment_due <= threeDaysLater);
 
-  // Get balance for a worker
   function getWorkerBalance(workerId: string) {
     const pendingPayments = workerPayments.filter(p => p.worker_id === workerId && p.status !== 'completed');
     const totalOwed = pendingPayments.reduce((sum, p) => sum + (p.amount_due - p.amount_paid), 0);
@@ -126,38 +122,7 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
     else if (frequency === 'monthly') start.setMonth(start.getMonth() - 1);
     return { start: start.toISOString().slice(0, 10), end: end.toISOString().slice(0, 10) };
   }
-  
-  // Add team member
-  async function handleAddWorker() {
-    if (!businessId || !workerForm.full_name.trim()) {
-      toast.error('Enter worker name');
-      return;
-    }
-    const { error } = await supabase.from('business_team_members').insert({
-      business_id: businessId,
-      full_name: workerForm.full_name,
-      phone: workerForm.phone,
-      rank: workerForm.rank,
-      salary: parseFloat(workerForm.salary) || 0,
-      payment_frequency: workerForm.payment_frequency,
-      next_payment_due: getNextPaymentDate(workerForm.payment_frequency),
-    } as any);
-    if (error) { toast.error(error.message); return; }
-    toast.success('Worker added!');
-    setShowAddWorkerDialog(false);
-    setWorkerForm({ full_name: '', phone: '', rank: 'worker', salary: '', payment_frequency: 'monthly' });
-    loadData();
-  }
 
-  // Delete team member
-  async function handleDeleteWorker(id: string) {
-    const { error } = await supabase.from('business_team_members').delete().eq('id', id);
-    if (error) { toast.error(error.message); return; }
-    toast.success('Worker removed');
-    loadData();
-  }
-
-  // Pay worker
   async function handlePayWorker() {
     if (!selectedWorker || !businessId) return;
     const amountPaid = parseFloat(payForm.amount) || 0;
@@ -203,7 +168,6 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
     loadData();
   }
   
-  // Give advance
   async function handleGiveAdvance() {
     if (!selectedWorker || !businessId) return;
     const amount = parseFloat(advanceForm.amount) || 0;
@@ -226,7 +190,6 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
     loadData();
   }
   
-  // Mark payment complete
   async function markPaymentComplete(payment: BusinessWorkerPayment) {
     await supabase.from('business_worker_payments').update({
       amount_paid: payment.amount_due,
@@ -237,7 +200,6 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
     loadData();
   }
   
-  // Update frequency
   async function updateFrequency(worker: BusinessTeamMember, frequency: string) {
     await supabase.from('business_team_members').update({
       payment_frequency: frequency,
@@ -246,7 +208,6 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
     loadData();
   }
   
-  // Clear advance
   async function clearAdvance(advanceId: string) {
     await supabase.from('business_worker_advances').update({
       status: 'fully_deducted',
@@ -313,13 +274,6 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
         </Card>
       )}
       
-      {/* Add Worker Button */}
-      <div className="flex justify-end">
-        <Button size="sm" onClick={() => setShowAddWorkerDialog(true)}>
-          <Plus className="h-4 w-4 mr-1" /> Add Worker
-        </Button>
-      </div>
-      
       <Tabs defaultValue="workers" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="workers">Workers</TabsTrigger>
@@ -329,7 +283,7 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
         
         <TabsContent value="workers" className="space-y-3 mt-3">
           {activeMembers.length === 0 ? (
-            <Card><CardContent className="p-4 text-center text-muted-foreground">No workers yet. Add workers to manage payments.</CardContent></Card>
+            <Card><CardContent className="p-4 text-center text-muted-foreground">No workers yet. Add workers from the Team tab first.</CardContent></Card>
           ) : (
             activeMembers.map(worker => {
               const balance = getWorkerBalance(worker.id);
@@ -355,16 +309,16 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
                             </span>
                           )}
                         </div>
-                        {balance.totalAdvances > 0 && (
-                          <p className="text-xs text-warning mt-1">
-                            <ArrowDownCircle className="inline h-3 w-3 mr-1" />
-                            Advance owed: {fmt(balance.totalAdvances)}
-                          </p>
-                        )}
                         {balance.totalOwed > 0 && (
                           <p className="text-xs text-destructive mt-1">
                             <AlertTriangle className="inline h-3 w-3 mr-1" />
-                            Unpaid balance: {fmt(balance.totalOwed)}
+                            Business owes: {fmt(balance.totalOwed)}
+                          </p>
+                        )}
+                        {balance.totalAdvances > 0 && (
+                          <p className="text-xs text-warning mt-1">
+                            <ArrowDownCircle className="inline h-3 w-3 mr-1" />
+                            Advance given: {fmt(balance.totalAdvances)}
                           </p>
                         )}
                       </div>
@@ -385,9 +339,6 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
                             <Wallet className="h-3 w-3 mr-1" />Pay
                           </Button>
                         </div>
-                        <Button size="sm" variant="ghost" className="h-6 text-xs text-destructive" onClick={() => handleDeleteWorker(worker.id)}>
-                          <Trash2 className="h-3 w-3 mr-1" />Remove
-                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -417,12 +368,22 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
                           <Badge variant={payment.status === 'partial' ? 'outline' : 'secondary'}>
                             {payment.status === 'partial' ? `Partial (${fmt(payment.amount_paid)})` : 'Pending'}
                           </Badge>
-                          <span className="text-sm font-semibold text-destructive">Owes: {fmt(remaining)}</span>
+                          <span className="text-sm font-semibold text-destructive">
+                            Balance: {fmt(remaining)}
+                          </span>
                         </div>
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => markPaymentComplete(payment)}>
-                        <CheckCircle2 className="h-4 w-4 mr-1" />Complete
-                      </Button>
+                      <div className="flex flex-col gap-1">
+                        <Button size="sm" variant="outline" onClick={() => {
+                          const w = teamMembers.find(m => m.id === payment.worker_id);
+                          if (w) { setSelectedWorker(w); setPayForm({ amount: String(remaining), notes: '' }); setShowPayDialog(true); }
+                        }}>
+                          <Wallet className="h-4 w-4 mr-1" />Top Up
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => markPaymentComplete(payment)}>
+                          <CheckCircle2 className="h-4 w-4 mr-1" />Complete
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -491,52 +452,6 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
           )}
         </TabsContent>
       </Tabs>
-      
-      {/* Add Worker Dialog */}
-      <Dialog open={showAddWorkerDialog} onOpenChange={setShowAddWorkerDialog}>
-        <DialogContent>
-          <DialogHeader><DialogTitle>Add Worker</DialogTitle></DialogHeader>
-          <div className="space-y-3">
-            <div>
-              <Label>Full Name</Label>
-              <Input value={workerForm.full_name} onChange={e => setWorkerForm(f => ({ ...f, full_name: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Phone</Label>
-              <Input value={workerForm.phone} onChange={e => setWorkerForm(f => ({ ...f, phone: e.target.value }))} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Rank</Label>
-                <Select value={workerForm.rank} onValueChange={v => setWorkerForm(f => ({ ...f, rank: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="worker">Worker</SelectItem>
-                    <SelectItem value="supervisor">Supervisor</SelectItem>
-                    <SelectItem value="manager">Manager</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Payment</Label>
-                <Select value={workerForm.payment_frequency} onValueChange={v => setWorkerForm(f => ({ ...f, payment_frequency: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="daily">Daily</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label>Salary Amount</Label>
-              <Input type="number" value={workerForm.salary} onChange={e => setWorkerForm(f => ({ ...f, salary: e.target.value }))} placeholder="0" />
-            </div>
-            <Button className="w-full" onClick={handleAddWorker}>Add Worker</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
       
       {/* Pay Dialog */}
       <Dialog open={showPayDialog} onOpenChange={setShowPayDialog}>
