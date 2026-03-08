@@ -162,9 +162,9 @@ Deno.serve(async (req) => {
     }
 
     if (action === "reject_prices") {
-      // Requester rejects → both go back to 'pending' for re-pricing
+      // Requester rejects → request goes back to 'pending', inbox goes to 'rejected'
       await admin.from("orders").update({ status: "pending" }).eq("id", inboxOrderId);
-      await admin.from("orders").update({ status: "pending" }).eq("id", linkedOrder.id);
+      await admin.from("orders").update({ status: "rejected" }).eq("id", linkedOrder.id);
 
       const commentMsg = comment ? ` — Reason: "${comment}"` : "";
       await admin.from("notifications").insert({
