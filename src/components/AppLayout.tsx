@@ -70,6 +70,7 @@ const factoryMoreNav = [
   { to: '/services', label: 'Services', icon: Wrench },
   { to: '/expenses', label: 'Expenses', icon: Flame },
   { to: '/contacts', label: 'Contacts', icon: Contact },
+  { to: '/discover', label: 'Discover', icon: Globe },
   { to: '/team', label: 'Team', icon: Users },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];

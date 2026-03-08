@@ -1,0 +1,172 @@
+import { useState, useEffect, useCallback } from 'react';
+import { Search, MapPin, Phone, Mail, Building2, Factory, Store, Copy, Check } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface DiscoveredBusiness {
+  id: string;
+  name: string;
+  business_type: string;
+  address: string;
+  contact: string;
+  email: string;
+  logo_url: string | null;
+  business_code: string | null;
+  products_description: string;
+}
+
+export default function DiscoverPage() {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState<DiscoveredBusiness[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const searchBusinesses = useCallback(async (searchQuery: string) => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('search_businesses', {
+        _query: searchQuery,
+        _limit: 30,
+        _offset: 0,
+      });
+      if (error) throw error;
+      setResults((data as DiscoveredBusiness[]) || []);
+      setHasSearched(true);
+    } catch (err) {
+      console.error('Search error:', err);
+      toast.error('Failed to search businesses');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Load all on mount
+  useEffect(() => {
+    searchBusinesses('');
+  }, [searchBusinesses]);
+
+  // Debounced search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      searchBusinesses(query.trim());
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [query, searchBusinesses]);
+
+  function copyCode(code: string) {
+    navigator.clipboard.writeText(code);
+    setCopiedCode(code);
+    toast.success('Business code copied!');
+    setTimeout(() => setCopiedCode(null), 2000);
+  }
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h1 className="text-2xl font-bold">🔍 Discover Businesses</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Find businesses selling products you need — search by name, location, or product type
+        </p>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search e.g. 'agricultural inputs', 'electronics', 'Kampala'..."
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          className="pl-10 h-11"
+        />
+      </div>
+
+      {/* Results */}
+      {loading ? (
+        <div className="text-center py-12 text-muted-foreground">Searching...</div>
+      ) : results.length === 0 && hasSearched ? (
+        <div className="text-center py-12">
+          <Building2 className="h-12 w-12 mx-auto text-muted-foreground/40 mb-3" />
+          <p className="text-muted-foreground">No businesses found for "{query}"</p>
+          <p className="text-xs text-muted-foreground mt-1">Try different keywords like product names or locations</p>
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {results.map(biz => (
+            <Card key={biz.id} className="overflow-hidden hover:shadow-md transition-shadow">
+              <CardContent className="p-4 space-y-3">
+                {/* Header */}
+                <div className="flex items-start gap-3">
+                  {biz.logo_url ? (
+                    <img src={biz.logo_url} alt={biz.name} className="h-10 w-10 rounded-lg object-cover border" />
+                  ) : (
+                    <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center text-lg">
+                      {biz.business_type === 'factory' ? '🏭' : '🏪'}
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm truncate">{biz.name}</h3>
+                    <Badge variant="secondary" className="text-[10px] mt-0.5">
+                      {biz.business_type === 'factory' ? (
+                        <><Factory className="h-3 w-3 mr-1" />Factory</>
+                      ) : (
+                        <><Store className="h-3 w-3 mr-1" />Business</>
+                      )}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Description */}
+                {biz.products_description && (
+                  <p className="text-xs text-muted-foreground line-clamp-2">{biz.products_description}</p>
+                )}
+
+                {/* Details */}
+                <div className="space-y-1.5 text-xs text-muted-foreground">
+                  {biz.address && (
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{biz.address}</span>
+                    </div>
+                  )}
+                  {biz.contact && (
+                    <div className="flex items-center gap-1.5">
+                      <Phone className="h-3 w-3 shrink-0" />
+                      <span>{biz.contact}</span>
+                    </div>
+                  )}
+                  {biz.email && (
+                    <div className="flex items-center gap-1.5">
+                      <Mail className="h-3 w-3 shrink-0" />
+                      <span className="truncate">{biz.email}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Business Code */}
+                {biz.business_code && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs font-mono gap-2"
+                    onClick={() => copyCode(biz.business_code!)}
+                  >
+                    {copiedCode === biz.business_code ? (
+                      <><Check className="h-3 w-3 text-green-500" />Copied!</>
+                    ) : (
+                      <><Copy className="h-3 w-3" />Code: {biz.business_code}</>
+                    )}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
