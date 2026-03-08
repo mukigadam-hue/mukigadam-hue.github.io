@@ -20,6 +20,7 @@ import TeamPage from "./pages/TeamPage";
 import NotFound from "./pages/NotFound";
 import ContactsPage from "./pages/ContactsPage";
 import BusinessExpenses from "./pages/BusinessExpenses";
+import DiscoverPage from "./pages/DiscoverPage";
 
 
 
