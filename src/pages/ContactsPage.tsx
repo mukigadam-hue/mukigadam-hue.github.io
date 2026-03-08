@@ -52,6 +52,7 @@ export default function ContactsPage() {
   const [viewProfile, setViewProfile] = useState<BusinessProfile | null>(null);
   const [pokingId, setPokingId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'recent' | 'name'>('recent');
+  const [filterQuery, setFilterQuery] = useState('');
 
   const businessId = currentBusiness?.id;
 
