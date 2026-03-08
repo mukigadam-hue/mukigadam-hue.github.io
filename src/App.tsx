@@ -18,7 +18,7 @@ import ServicesPage from "./pages/ServicesPage";
 import SettingsPage from "./pages/SettingsPage";
 import TeamPage from "./pages/TeamPage";
 import NotFound from "./pages/NotFound";
-import CheckoutPage from "./pages/CheckoutPage";
+
 import PaymentVerificationPage from "./pages/PaymentVerificationPage";
 
 // Factory pages
