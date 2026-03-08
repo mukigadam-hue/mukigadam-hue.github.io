@@ -78,7 +78,7 @@ export default function OrdersPage() {
   const myRequests = orders.filter(o => o.type === 'request');
   const requestsNeedingAction = myRequests.filter(o => o.status === 'priced' || o.status === 'confirmed').length;
 
-  // Load checkout orders for payment verification tab
+  // Load orders for payment verification tab (all types with payment activity)
   async function loadCheckoutOrders() {
     if (!currentBusiness) return;
     setLoadingCheckout(true);
@@ -86,13 +86,23 @@ export default function OrdersPage() {
       .from('orders')
       .select('*')
       .eq('business_id', currentBusiness.id)
-      .eq('type', 'checkout')
       .order('created_at', { ascending: false });
-    if (verifyFilter !== 'all') {
-      query = query.eq('status', verifyFilter);
+
+    if (verifyFilter === 'pending') {
+      // Show orders awaiting payment verification
+      query = query.in('status', ['pending', 'payment_submitted']);
+      query = query.neq('payment_method', 'pending');
+    } else if (verifyFilter === 'paid') {
+      query = query.eq('status', 'paid');
     }
+    // 'all' → no extra filter, shows everything
+
     const { data } = await query;
-    setCheckoutOrders(data || []);
+    // For 'all', filter to only show orders that have payment activity (not raw pending orders with no payment)
+    const filtered = verifyFilter === 'all'
+      ? (data || []).filter((o: any) => o.payment_method !== 'pending' || o.status === 'paid' || o.status === 'payment_submitted' || o.status === 'cancelled')
+      : (data || []);
+    setCheckoutOrders(filtered);
     setLoadingCheckout(false);
   }
 
@@ -1153,26 +1163,32 @@ export default function OrdersPage() {
                               <span className="font-semibold text-sm">👤 {order.customer_name}</span>
                               <span className={`text-xs px-2 py-0.5 rounded-full ${
                                 order.status === 'paid' ? 'bg-success/10 text-success' :
+                                order.status === 'payment_submitted' ? 'bg-info/10 text-info' :
                                 order.status === 'cancelled' ? 'bg-destructive/10 text-destructive' :
                                 'bg-warning/10 text-warning'
-                              }`}>{order.status}</span>
-                              <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                {order.payment_method === 'mobile_money' ? <Smartphone className="h-3 w-3" /> : <CreditCard className="h-3 w-3" />}
-                                {order.payment_method === 'mobile_money' ? 'M-Money' : 'Card'}
+                              }`}>{order.status === 'payment_submitted' ? 'awaiting verification' : order.status}</span>
+                              <span className={`text-[10px] px-1.5 py-0.5 rounded-full bg-muted`}>
+                                {order.type === 'checkout' ? '🛒 Checkout' : order.type === 'request' ? '📨 Supplier' : order.type === 'inbox' ? '📥 Customer' : '📋 Order'}
                               </span>
+                              {order.payment_method && order.payment_method !== 'pending' && (
+                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  {order.payment_method === 'mobile_money' ? <Smartphone className="h-3 w-3" /> : <CreditCard className="h-3 w-3" />}
+                                  {order.payment_method === 'mobile_money' ? 'M-Money' : order.payment_method === 'card' ? 'Card/Cash' : order.payment_method}
+                                </span>
+                              )}
                             </div>
                             <p className="text-xs text-muted-foreground mt-0.5">
                               Code: <span className="font-mono">{order.code}</span> · {new Date(order.created_at).toLocaleString()}
                             </p>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-bold text-success tabular-nums">{fmt(Number(order.grand_total))}</span>
                             {order.proof_url && (
                               <Button size="sm" variant="outline" onClick={() => setViewingProof(order.proof_url)}>
                                 <Eye className="h-3.5 w-3.5 mr-1" /> Proof
                               </Button>
                             )}
-                            {order.status === 'pending' && (
+                            {(order.status === 'pending' || order.status === 'payment_submitted') && (
                               <>
                                 <Button size="sm" onClick={() => updateCheckoutStatus(order.id, 'paid')} className="bg-success hover:bg-success/90 text-success-foreground">
                                   <CheckCircle className="h-3.5 w-3.5 mr-1" /> Verify
