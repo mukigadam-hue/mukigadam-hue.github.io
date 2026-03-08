@@ -67,7 +67,7 @@ export default function FactoryTeam() {
     e.preventDefault();
     if (!editId) return;
     await updateTeamMember(editId, {
-      full_name: toSentenceCase(form.full_name.trim()),
+      full_name: toTitleCase(form.full_name.trim()),
       rank: form.rank,
       salary: parseFloat(form.salary) || 0,
       phone: form.phone.trim(),
