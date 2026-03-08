@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit2, Trash2, Users, UserPlus, Send, Calendar, Clock, User, Wallet } from 'lucide-react';
 import WorkerPaymentManager from '@/components/factory/WorkerPaymentManager';
+import AdSpace from '@/components/AdSpace';
 
 function toSentenceCase(str: string) { return str ? str.charAt(0).toUpperCase() + str.slice(1).toLowerCase() : str; }
 
