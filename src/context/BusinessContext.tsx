@@ -329,51 +329,83 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
     setStock((stockRes.data || []) as StockItem[]);
     setNotifications((notifRes.data || []) as Notification[]);
-    
-    // Load sale items
-    const salesData = (salesRes.data || []) as any[];
-    if (salesData.length > 0) {
-      const saleIds = salesData.map(s => s.id);
-      const { data: saleItemsData } = await supabase.from('sale_items').select('*').in('sale_id', saleIds);
-      const salesWithItems = salesData.map(s => ({
-        ...s,
-        items: (saleItemsData || []).filter((si: any) => si.sale_id === s.id),
-      }));
-      setSales(salesWithItems as Sale[]);
-    } else {
-      setSales([]);
-    }
-
-    // Load purchase items
-    const purchasesData = (purchasesRes.data || []) as any[];
-    if (purchasesData.length > 0) {
-      const purchaseIds = purchasesData.map(p => p.id);
-      const { data: purchaseItemsData } = await supabase.from('purchase_items').select('*').in('purchase_id', purchaseIds);
-      const purchasesWithItems = purchasesData.map(p => ({
-        ...p,
-        items: (purchaseItemsData || []).filter((pi: any) => pi.purchase_id === p.id),
-      }));
-      setPurchases(purchasesWithItems as Purchase[]);
-    } else {
-      setPurchases([]);
-    }
-
-    // Load order items
-    const ordersData = (ordersRes.data || []) as any[];
-    if (ordersData.length > 0) {
-      const orderIds = ordersData.map(o => o.id);
-      const { data: orderItemsData } = await supabase.from('order_items').select('*').in('order_id', orderIds);
-      const ordersWithItems = ordersData.map(o => ({
-        ...o,
-        items: (orderItemsData || []).filter((oi: any) => oi.order_id === o.id),
-      }));
-      setOrders(ordersWithItems as Order[]);
-    } else {
-      setOrders([]);
-    }
-
     setServices((servicesRes.data || []) as ServiceRecord[]);
     setExpenses((expensesRes.data || []) as any[]);
+
+    // Load all item sub-tables in PARALLEL (not sequential)
+    const salesData = (salesRes.data || []) as any[];
+    const purchasesData = (purchasesRes.data || []) as any[];
+    const ordersData = (ordersRes.data || []) as any[];
+
+    const [saleItemsRes, purchaseItemsRes, orderItemsRes] = await Promise.all([
+      salesData.length > 0
+        ? supabase.from('sale_items').select('*').in('sale_id', salesData.map(s => s.id))
+        : Promise.resolve({ data: [] }),
+      purchasesData.length > 0
+        ? supabase.from('purchase_items').select('*').in('purchase_id', purchasesData.map(p => p.id))
+        : Promise.resolve({ data: [] }),
+      ordersData.length > 0
+        ? supabase.from('order_items').select('*').in('order_id', ordersData.map(o => o.id))
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    const saleItemsMap = new Map<string, any[]>();
+    (saleItemsRes.data || []).forEach((si: any) => {
+      if (!saleItemsMap.has(si.sale_id)) saleItemsMap.set(si.sale_id, []);
+      saleItemsMap.get(si.sale_id)!.push(si);
+    });
+    setSales(salesData.map(s => ({ ...s, items: saleItemsMap.get(s.id) || [] })) as Sale[]);
+
+    const purchaseItemsMap = new Map<string, any[]>();
+    (purchaseItemsRes.data || []).forEach((pi: any) => {
+      if (!purchaseItemsMap.has(pi.purchase_id)) purchaseItemsMap.set(pi.purchase_id, []);
+      purchaseItemsMap.get(pi.purchase_id)!.push(pi);
+    });
+    setPurchases(purchasesData.map(p => ({ ...p, items: purchaseItemsMap.get(p.id) || [] })) as Purchase[]);
+
+    const orderItemsMap = new Map<string, any[]>();
+    (orderItemsRes.data || []).forEach((oi: any) => {
+      if (!orderItemsMap.has(oi.order_id)) orderItemsMap.set(oi.order_id, []);
+      orderItemsMap.get(oi.order_id)!.push(oi);
+    });
+    setOrders(ordersData.map(o => ({ ...o, items: orderItemsMap.get(o.id) || [] })) as Order[]);
+  }
+
+  // Targeted loaders for realtime — only reload the specific table that changed
+  async function reloadSales() {
+    if (!currentBusinessId) return;
+    const { data: salesData } = await supabase.from('sales').select('*').eq('business_id', currentBusinessId).order('created_at', { ascending: false });
+    const sd = (salesData || []) as any[];
+    if (sd.length > 0) {
+      const { data: items } = await supabase.from('sale_items').select('*').in('sale_id', sd.map(s => s.id));
+      const map = new Map<string, any[]>();
+      (items || []).forEach((i: any) => { if (!map.has(i.sale_id)) map.set(i.sale_id, []); map.get(i.sale_id)!.push(i); });
+      setSales(sd.map(s => ({ ...s, items: map.get(s.id) || [] })) as Sale[]);
+    } else { setSales([]); }
+  }
+
+  async function reloadPurchases() {
+    if (!currentBusinessId) return;
+    const { data: pd } = await supabase.from('purchases').select('*').eq('business_id', currentBusinessId).order('created_at', { ascending: false });
+    const pdata = (pd || []) as any[];
+    if (pdata.length > 0) {
+      const { data: items } = await supabase.from('purchase_items').select('*').in('purchase_id', pdata.map(p => p.id));
+      const map = new Map<string, any[]>();
+      (items || []).forEach((i: any) => { if (!map.has(i.purchase_id)) map.set(i.purchase_id, []); map.get(i.purchase_id)!.push(i); });
+      setPurchases(pdata.map(p => ({ ...p, items: map.get(p.id) || [] })) as Purchase[]);
+    } else { setPurchases([]); }
+  }
+
+  async function reloadOrders() {
+    if (!currentBusinessId) return;
+    const { data: od } = await supabase.from('orders').select('*').eq('business_id', currentBusinessId).order('created_at', { ascending: false });
+    const odata = (od || []) as any[];
+    if (odata.length > 0) {
+      const { data: items } = await supabase.from('order_items').select('*').in('order_id', odata.map(o => o.id));
+      const map = new Map<string, any[]>();
+      (items || []).forEach((i: any) => { if (!map.has(i.order_id)) map.set(i.order_id, []); map.get(i.order_id)!.push(i); });
+      setOrders(odata.map(o => ({ ...o, items: map.get(o.id) || [] })) as Order[]);
+    } else { setOrders([]); }
   }
 
   function setupRealtimeSubscriptions() {
