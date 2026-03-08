@@ -490,6 +490,8 @@ export default function SalesPage() {
         </CardContent>
       </Card>
 
+      <AdSpace variant="banner" />
+
       {/* Sales History Tabs */}
       <div className="flex gap-2">
         <button

@@ -250,6 +250,8 @@ export default function PurchasesPage() {
         </CardContent>
       </Card>
 
+      <AdSpace variant="banner" />
+
       {/* Purchase History Tabs */}
       <div className="flex gap-2">
         <button
