@@ -78,45 +78,60 @@ export default function WorkerPaymentManager({ isOwnerOrAdmin }: Props) {
     }
     
     const balance = getWorkerBalance(selectedWorker.id);
+    const advanceDeduction = Math.min(balance.totalAdvances, selectedWorker.salary);
     const period = getPaymentPeriod(selectedWorker.payment_frequency || 'monthly');
     
-    // Check if there's an existing pending payment for this period
     const existingPayment = workerPayments.find(
       p => p.worker_id === selectedWorker.id && p.status !== 'completed'
     );
     
     if (existingPayment) {
-      // Update existing payment
       const newPaid = existingPayment.amount_paid + amountPaid;
       const newStatus = newPaid >= existingPayment.amount_due ? 'completed' : 'partial';
       await updateWorkerPayment(existingPayment.id, {
         amount_paid: newPaid,
+        advance_deducted: existingPayment.advance_deducted + advanceDeduction,
         status: newStatus as any,
         paid_at: newStatus === 'completed' ? new Date().toISOString() : null,
         notes: payForm.notes || existingPayment.notes,
       });
     } else {
-      // Create new payment record
       const amountDue = selectedWorker.salary;
-      const status = amountPaid >= amountDue ? 'completed' : 'partial';
+      const totalSettled = amountPaid + advanceDeduction;
+      const status = totalSettled >= amountDue ? 'completed' : 'partial';
       await addWorkerPayment({
         worker_id: selectedWorker.id,
         period_start: period.start,
         period_end: period.end,
         amount_due: amountDue,
         amount_paid: amountPaid,
-        advance_deducted: 0,
+        advance_deducted: advanceDeduction,
         status: status as any,
         paid_at: status === 'completed' ? new Date().toISOString() : null,
-        notes: payForm.notes,
+        notes: payForm.notes || (advanceDeduction > 0 ? `Advance deducted: ${advanceDeduction}` : ''),
       });
     }
+
+    // Auto-deduct from active advances
+    if (advanceDeduction > 0) {
+      let remaining = advanceDeduction;
+      for (const adv of balance.activeAdvances) {
+        if (remaining <= 0) break;
+        const deductFromThis = Math.min(remaining, adv.remaining_balance);
+        const newBal = adv.remaining_balance - deductFromThis;
+        await updateWorkerAdvance(adv.id, {
+          remaining_balance: newBal,
+          status: newBal <= 0 ? 'fully_deducted' : 'active',
+        });
+        remaining -= deductFromThis;
+      }
+    }
     
-    // Update next payment due date
     await updateTeamMember(selectedWorker.id, {
       next_payment_due: getNextPaymentDate(selectedWorker.payment_frequency || 'monthly'),
     });
     
+    toast.success(`Payment recorded!${advanceDeduction > 0 ? ` (advance deducted)` : ''}`);
     setShowPayDialog(false);
     setPayForm({ amount: '', notes: '' });
     setSelectedWorker(null);
