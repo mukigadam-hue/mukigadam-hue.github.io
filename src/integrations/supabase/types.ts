@@ -91,6 +91,57 @@ export type Database = {
           },
         ]
       }
+      business_expenses: {
+        Row: {
+          amount: number
+          business_id: string
+          category: string
+          created_at: string
+          description: string
+          expense_date: string
+          from_order_id: string | null
+          id: string
+          recorded_by: string
+        }
+        Insert: {
+          amount?: number
+          business_id: string
+          category?: string
+          created_at?: string
+          description?: string
+          expense_date?: string
+          from_order_id?: string | null
+          id?: string
+          recorded_by?: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          category?: string
+          created_at?: string
+          description?: string
+          expense_date?: string
+          from_order_id?: string | null
+          id?: string
+          recorded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_expenses_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_expenses_from_order_id_fkey"
+            columns: ["from_order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_memberships: {
         Row: {
           business_id: string
