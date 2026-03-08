@@ -136,7 +136,7 @@ export default function StockPage() {
   function openEdit(item: StockItem) {
     setEditItem(item);
     setForm({
-      name: item.name, category: item.category, quality: item.quality,
+      name: item.name, category: item.category, quality: item.quality, barcode: item.barcode || '',
       buying_price: String(item.buying_price), wholesale_price: String(item.wholesale_price), retail_price: String(item.retail_price),
       quantity: String(item.quantity), min_stock_level: String(item.min_stock_level),
     });
