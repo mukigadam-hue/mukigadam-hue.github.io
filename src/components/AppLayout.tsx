@@ -281,10 +281,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             })}
           </nav>
 
-          <div className="p-3 border-t border-sidebar-border">
+          <div className="p-3 border-t border-sidebar-border space-y-1">
             <Button variant="ghost" className="w-full justify-start text-sidebar-foreground text-sm" onClick={signOut}>
               <LogOut className="h-4 w-4 mr-2" />{t('nav.signOut')}
             </Button>
+            <p className="text-[10px] text-sidebar-muted text-center">v{APP_VERSION}</p>
           </div>
         </aside>
 
