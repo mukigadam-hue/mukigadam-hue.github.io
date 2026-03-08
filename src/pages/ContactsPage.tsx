@@ -272,7 +272,12 @@ export default function ContactsPage() {
           if (!open) { setFoundBusiness(null); setSearchCode(''); setNickname(''); setContactNotes(''); }
         }}>
           <DialogTrigger asChild>
-            <Button size="sm"><Plus className="h-4 w-4 mr-1" /> Add Contact</Button>
+            <Button size="sm" onClick={(e) => {
+              if (contacts.length >= maxContacts) {
+                e.preventDefault();
+                toast.info(`Free plan allows up to ${maxContacts} contacts. Upgrade to Premium ($52/month) for unlimited.`);
+              }
+            }}><Plus className="h-4 w-4 mr-1" /> Add Contact</Button>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader><DialogTitle>Find & Add Business</DialogTitle></DialogHeader>
