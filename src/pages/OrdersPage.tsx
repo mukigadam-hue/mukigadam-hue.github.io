@@ -1211,14 +1211,17 @@ export default function OrdersPage() {
       </Tabs>
 
       {/* Proof viewer dialog */}
-      <Dialog open={!!viewingProof} onOpenChange={o => { if (!o) setViewingProof(null); }}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Payment Proof</DialogTitle></DialogHeader>
-          {viewingProof && (
-            <img src={viewingProof} alt="Payment proof" className="w-full rounded-lg" />
-          )}
-        </DialogContent>
-      </Dialog>
+      {viewingProof && (
+        <Dialog open={true} onOpenChange={o => { if (!o) setViewingProof(null); }}>
+          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto z-[100]">
+            <DialogHeader>
+              <DialogTitle>Payment Proof</DialogTitle>
+              <p className="text-sm text-muted-foreground">Screenshot submitted by the customer</p>
+            </DialogHeader>
+            <img src={viewingProof} alt="Payment proof" className="w-full rounded-lg border" />
+          </DialogContent>
+        </Dialog>
+      )}
 
       {/* Edit Order Dialog — allows adding items + changing qty/price */}
       <Dialog open={!!editingOrder} onOpenChange={o => { if (!o) setEditingOrder(null); }}>
