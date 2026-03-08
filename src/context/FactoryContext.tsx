@@ -110,7 +110,7 @@ interface FactoryContextType {
   addWorkerAdvance: (advance: Omit<WorkerAdvance, 'id' | 'business_id' | 'created_at'>) => Promise<void>;
   updateWorkerAdvance: (id: string, updates: Partial<WorkerAdvance>) => Promise<void>;
   deleteWorkerAdvance: (id: string) => Promise<void>;
-  getWorkerBalance: (workerId: string) => { totalAdvances: number; totalOwed: number; pendingPayments: WorkerPayment[] };
+  getWorkerBalance: (workerId: string) => { totalAdvances: number; totalOwed: number; pendingPayments: WorkerPayment[]; activeAdvances: WorkerAdvance[] };
   getDuePayments: () => { overdue: FactoryTeamMember[]; dueToday: FactoryTeamMember[]; dueSoon: FactoryTeamMember[] };
   refreshFactory: () => Promise<void>;
 }
