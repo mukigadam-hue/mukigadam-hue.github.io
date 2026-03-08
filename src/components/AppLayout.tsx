@@ -40,14 +40,35 @@ const businessMobileNav = [
   { to: '/', label: 'Home', icon: LayoutDashboard },
   { to: '/stock', label: 'Stock', icon: Package },
   { to: '/sales', label: 'Sales', icon: TrendingUp },
+];
+
+const businessMoreNav = [
+  { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
   { to: '/orders', label: 'Orders', icon: ClipboardList },
+  { to: '/checkout', label: 'Checkout', icon: ShoppingBag },
+  { to: '/payments', label: 'Verify Payments', icon: ShieldCheck },
+  { to: '/services', label: 'Services', icon: Wrench },
+  { to: '/team', label: 'Team', icon: Users },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
 const factoryMobileNav = [
   { to: '/', label: 'Home', icon: LayoutDashboard },
-  { to: '/input-stock', label: 'Inputs', icon: Boxes },
   { to: '/product-stock', label: 'Products', icon: Package },
   { to: '/sales', label: 'Sales', icon: TrendingUp },
+];
+
+const factoryMoreNav = [
+  { to: '/input-stock', label: 'Input Stock', icon: Boxes },
+  { to: '/production', label: 'Production', icon: Factory },
+  { to: '/purchases', label: 'Purchases', icon: ShoppingCart },
+  { to: '/orders', label: 'Orders', icon: ClipboardList },
+  { to: '/checkout', label: 'Checkout', icon: ShoppingBag },
+  { to: '/payments', label: 'Verify Payments', icon: ShieldCheck },
+  { to: '/services', label: 'Services', icon: Wrench },
+  { to: '/expenses', label: 'Expenses', icon: Flame },
+  { to: '/team', label: 'Team', icon: Users },
+  { to: '/settings', label: 'Settings', icon: Settings },
 ];
 
 function BusinessRoleBanner({ userRole, businessName, isFactory }: { userRole: string | null; businessName: string; isFactory: boolean }) {
