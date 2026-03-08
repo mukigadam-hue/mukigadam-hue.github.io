@@ -8,8 +8,9 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Plus, Trash2, ShoppingCart, Receipt as ReceiptIcon, Wrench, Package } from 'lucide-react';
+import { Plus, Trash2, ShoppingCart, Receipt as ReceiptIcon, Wrench, Package, ScanLine } from 'lucide-react';
 import Receipt from '@/components/Receipt';
+import BarcodeScanner from '@/components/BarcodeScanner';
 import type { Sale } from '@/context/BusinessContext';
 
 function toSentenceCase(str: string): string {
