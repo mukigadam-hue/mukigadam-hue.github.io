@@ -73,6 +73,21 @@ export default function BarcodeScanner({ open, onOpenChange, onScan }: BarcodeSc
     };
   }, [open]);
 
+  if (!canUseScanner && open) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-xs text-center">
+          <div className="py-6 space-y-3">
+            <Lock className="h-8 w-8 mx-auto text-amber-500" />
+            <p className="font-semibold">Premium Feature</p>
+            <p className="text-sm text-muted-foreground">Barcode scanning is available on the Premium plan ($52/month).</p>
+            <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) stopScanner(); onOpenChange(o); }}>
       <DialogContent className="max-w-sm p-0 overflow-hidden">
