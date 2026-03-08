@@ -985,8 +985,24 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     } as any).eq('id', purchaseId);
     if (error) { toast.error(error.message); return; }
     setPurchases(prev => prev.map(p => p.id === purchaseId ? { ...p, amount_paid: amountPaid, balance: bal, payment_status: status } : p));
-    toast.success('Payment updated!');
-  }, [purchases]);
+    // Auto-archive receipt when fully settled
+    if (status === 'paid' && currentBusiness) {
+      await saveReceipt({
+        business_id: currentBusiness.id,
+        receipt_type: 'purchase',
+        transaction_id: purchaseId,
+        buyer_name: currentBusiness.name,
+        seller_name: purchase.supplier,
+        grand_total: Number(purchase.grand_total),
+        items: purchase.items.map(i => ({ itemName: i.item_name, category: i.category, quality: i.quality, quantity: i.quantity, priceType: 'purchase', unitPrice: Number(i.unit_price), subtotal: Number(i.subtotal) })),
+        business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
+        code: null,
+      });
+      toast.success('✅ Debt settled! Receipt archived.');
+    } else {
+      toast.success('Payment updated!');
+    }
+  }, [purchases, currentBusiness]);
 
   const updateServicePayment = useCallback(async (serviceId: string, amountPaid: number, paymentStatus: string) => {
     const service = services.find(s => s.id === serviceId);
