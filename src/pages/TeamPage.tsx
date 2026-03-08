@@ -144,7 +144,7 @@ export default function TeamPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [workerCode, setWorkerCode] = useState<string | null>(null);
-  const [customerCode, setCustomerCode] = useState<string | null>(null);
+  
   const [loading, setLoading] = useState(false);
   const isOwnerOrAdmin = userRole === 'owner' || userRole === 'admin';
 
@@ -167,7 +167,6 @@ export default function TeamPage() {
     setLoading(true);
     const code = await generateInviteCode(type);
     if (type === 'worker') setWorkerCode(code);
-    else setCustomerCode(code);
     setLoading(false);
   }
 
@@ -238,9 +237,9 @@ export default function TeamPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Team & Customers</h1>
+        <h1 className="text-2xl font-bold">Team</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          {currentBusiness?.name} — Manage your workers and customers
+          {currentBusiness?.name} — Manage your workers
         </p>
       </div>
 
@@ -279,7 +278,7 @@ export default function TeamPage() {
       <AdSpace variant="banner" />
 
       <Tabs defaultValue="workers" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="workers" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Workers
@@ -287,10 +286,6 @@ export default function TeamPage() {
           <TabsTrigger value="payments" className="flex items-center gap-2">
             <Wallet className="h-4 w-4" />
             Payments
-          </TabsTrigger>
-          <TabsTrigger value="customers" className="flex items-center gap-2">
-            <ShoppingBag className="h-4 w-4" />
-            Customers
           </TabsTrigger>
         </TabsList>
 
@@ -353,42 +348,6 @@ export default function TeamPage() {
           <WorkerPaymentManager isOwnerOrAdmin={isOwnerOrAdmin} />
         </TabsContent>
 
-        {/* Customers Tab */}
-        <TabsContent value="customers" className="space-y-4 mt-4">
-          {isOwnerOrAdmin && (
-            <InviteSection type="customer" code={customerCode} onGenerate={() => handleGenerateCode('customer')} />
-          )}
-
-          <Card className="shadow-card">
-            <CardContent className="p-4">
-              <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
-                <ShoppingBag className="h-4 w-4" /> Customer List
-              </h2>
-              {customers.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-6">No customers yet. Generate an invite code to add customers.</p>
-              ) : (
-                <div className="space-y-3">
-                  {customers.map(customer => (
-                    <div key={customer.id} className="flex items-center justify-between p-3 rounded-lg border">
-                      <div className="flex items-center gap-3">
-                        <ShoppingBag className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium text-sm">{customer.customer_name || 'Unknown'}</p>
-                          <p className="text-xs text-muted-foreground">{customer.phone || 'No phone'}</p>
-                        </div>
-                      </div>
-                      {isOwnerOrAdmin && (
-                        <Button variant="ghost" size="icon" onClick={() => handleRemoveCustomer(customer.id)}>
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
