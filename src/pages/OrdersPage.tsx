@@ -740,12 +740,12 @@ export default function OrdersPage() {
         <Card className="shadow-card">
           <CardContent className="p-4 space-y-4">
             <h2 className="text-base font-semibold">
-              {orderMode === 'my_order' ? 'Create Live Order' : 'Send Request Order'}
+              {orderMode === 'my_order' ? 'Create Order for Walk-in Customer' : 'Order Items from a Supplier'}
             </h2>
 
             {orderMode === 'request' && (
               <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground border">
-                <strong>My Request:</strong> You are ordering without setting prices. The supplier will fill in prices and send back for your approval.
+                <strong>How it works:</strong> List the items you need and send to your supplier. They will set the prices and send back for you to review. Once you approve, you make payment and they confirm receipt.
               </div>
             )}
 
