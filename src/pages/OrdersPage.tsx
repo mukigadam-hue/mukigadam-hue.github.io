@@ -1306,7 +1306,7 @@ export default function OrdersPage() {
 
               <Button
                 className="w-full h-11"
-                disabled={completing || !completeBuyer.trim() || !completeSeller.trim() || (completeDialog.type !== 'inbox' && paymentMethod === 'mobile_money' && !proofFile)}
+                disabled={completing || !completeBuyer.trim() || !completeSeller.trim() || (completeDialog.type === 'request' && paymentMethod === 'mobile_money' && !proofFile)}
                 onClick={handleCompleteOrder}
               >
                 {completing ? 'Processing...' : (
