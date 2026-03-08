@@ -125,6 +125,9 @@ export interface ServiceRecord {
   cost: number;
   customer_name: string;
   seller_name: string;
+  payment_status: string;
+  amount_paid: number;
+  balance: number;
   created_at: string;
   items_used?: ServiceItemUsed[];
 }
