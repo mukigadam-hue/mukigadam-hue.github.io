@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { APP_VERSION } from '@/version';
 import { getCountryFlag } from '@/lib/countries';
 import { useTranslation } from 'react-i18next';
 import { useBusiness } from '@/context/BusinessContext';
