@@ -206,6 +206,7 @@ interface BusinessContextType {
   loading: boolean;
   setCurrentBusinessId: (id: string) => void;
   createBusiness: (name: string, address: string, contact: string, email: string) => Promise<void>;
+  deleteBusiness: (businessId: string, reason: string) => Promise<boolean>;
   updateBusiness: (updates: Partial<Business>) => Promise<void>;
   addStockItem: (item: Omit<StockItem, 'id' | 'business_id' | 'created_at' | 'updated_at' | 'deleted_at'>) => Promise<void>;
   updateStockItem: (id: string, updates: Partial<StockItem>) => Promise<void>;
