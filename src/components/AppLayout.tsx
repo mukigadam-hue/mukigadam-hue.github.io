@@ -295,7 +295,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         })}
 
         {/* Alerts - reuse NotificationsPanel which has its own Sheet */}
-        <NotificationsPanel onNavigate={() => {}} />
+        <NotificationsPanel variant="mobile" />
 
         {/* More Menu - contains all other pages + business switcher */}
         <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
