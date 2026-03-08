@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { APP_VERSION } from '@/version';
 import { getCountryFlag } from '@/lib/countries';
 import { useTranslation } from 'react-i18next';
 import { useBusiness } from '@/context/BusinessContext';
@@ -84,7 +85,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Language Selector - compact on dashboard header */}
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between">
+        <span className="text-[10px] text-muted-foreground font-mono">v{APP_VERSION}</span>
         <LanguageSelector variant="compact" />
       </div>
 
@@ -161,8 +163,8 @@ export default function Dashboard() {
         <Card className="shadow-card">
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-success/10"><DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-success" /></div>
-              <div className="min-w-0"><p className="text-[10px] sm:text-xs text-muted-foreground">{t('dashboard.todayRevenue')}</p><p className="text-base sm:text-xl font-bold text-success truncate">{fmt(todayRevenue)}</p></div>
+              <div className="p-1.5 sm:p-2 rounded-lg bg-success/10"><TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-success" /></div>
+              <div><p className="text-[10px] sm:text-xs text-muted-foreground">{t('dashboard.totalSales')}</p><p className="text-lg sm:text-xl font-bold">{sales.length}</p></div>
             </div>
           </CardContent>
         </Card>
