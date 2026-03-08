@@ -86,6 +86,19 @@ export default function StockPage() {
   const [showRecycleBin, setShowRecycleBin] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [viewGalleryItem, setViewGalleryItem] = useState<StockItem | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const mainEl = document.querySelector('main');
+    if (!mainEl) return;
+    const handleScroll = () => setShowScrollTop(mainEl.scrollTop > 400);
+    mainEl.addEventListener('scroll', handleScroll, { passive: true });
+    return () => mainEl.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  function scrollToTop() {
+    document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
+  }
   const [form, setForm] = useState({
     name: '', category: '', quality: '', barcode: '',
     buying_price: '', wholesale_price: '', retail_price: '', quantity: '', min_stock_level: '5',
