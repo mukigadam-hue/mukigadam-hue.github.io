@@ -70,6 +70,9 @@ export interface Purchase {
   grand_total: number;
   supplier: string;
   recorded_by: string;
+  payment_status: string;
+  amount_paid: number;
+  balance: number;
   created_at: string;
   items: PurchaseItem[];
 }
