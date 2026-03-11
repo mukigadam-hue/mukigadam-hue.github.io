@@ -278,7 +278,7 @@ export default function FactoryTeam() {
                                   <SelectItem value="worker">Worker</SelectItem>
                                 </SelectContent>
                               </Select>
-                              <Button variant="ghost" size="icon" onClick={() => removeMember(member.user_id).then(loadAppMembers)}>
+                              <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon">
                                 <Trash2 className="h-3.5 w-3.5 text-destructive" />
                               </Button>
                             </>
