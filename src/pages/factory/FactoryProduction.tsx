@@ -119,6 +119,7 @@ export default function FactoryProduction() {
 
     setForm({
       product_name: '', product_stock_id: '', quantity_produced: '',
+      wholesale_price: '', retail_price: '',
       waste_quantity: '0', waste_unit: 'Pieces',
       production_date: new Date().toISOString().slice(0, 10),
       expiry_date: '', recorded_by: '', notes: '', batch_number: generateBatchNumber(),
