@@ -622,7 +622,8 @@ export default function PropertyTeam() {
         </Card>
       )}
 
-      <RedeemCodeSection onRedeemed={() => { loadMembers(); loadTeamWorkers(); }} />
+      {/* Workers/non-owners see join section, owners don't need it */}
+      {!isOwnerOrAdmin && <WorkerJoinSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />}
       <AdSpace variant="banner" />
 
       {/* ========= TENANT VIEW ========= */}
