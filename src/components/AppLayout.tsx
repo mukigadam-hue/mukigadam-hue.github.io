@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LayoutDashboard, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Settings, Users, LogOut, Building2, Crown, User, Bell, BellDot, Factory, Flame, Boxes, Menu, Contact, Globe, Home, CalendarCheck, MessageSquare, Search, AlertTriangle } from 'lucide-react';
+import ProofVideoButton from '@/components/ProofVideoButton';
 import { useAuth } from '@/context/AuthContext';
 import { APP_VERSION } from '@/version';
 import { useBusiness } from '@/context/BusinessContext';
@@ -342,6 +343,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto animate-fade-in">{children}</div>
         </main>
       </div>
+
+      {/* Proof Video Floating Button - visible on all screens */}
+      <ProofVideoButton />
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center py-1.5 pb-safe">
