@@ -558,7 +558,7 @@ export default function PropertyTeam() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="h-6 w-6" /> Property Team</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage your property relationships — tenants, landlords & staff</p>
+        <p className="text-sm text-muted-foreground mt-1">Manage your property relationships — tenants, asset owners & staff</p>
       </div>
 
       {/* VIEW MODE SELECTOR */}
