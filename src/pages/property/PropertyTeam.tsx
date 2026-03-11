@@ -879,7 +879,7 @@ export default function PropertyTeam() {
             )}
 
             {/* Start & End dates — for tenant and landlord */}
-            {(addType === 'tenant' || addType === 'landlord') && (
+            {(addType === 'tenant' || addType === 'owner') && (
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Start Date *</Label><Input type="date" value={workerForm.hire_date} onChange={e => setWorkerForm(f => ({ ...f, hire_date: e.target.value }))} required /></div>
                 <div><Label>End / Expiry Date</Label><Input type="date" value={workerForm.rental_end_date} onChange={e => setWorkerForm(f => ({ ...f, rental_end_date: e.target.value }))} /></div>
