@@ -924,6 +924,27 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     const { error } = await supabase.from('business_memberships').delete()
       .eq('user_id', userId).eq('business_id', currentBusinessId);
     if (error) { toast.error(error.message); return; }
+
+    // Also look up the user's profile name and deactivate matching team member records
+    const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', userId).single();
+    if (profile?.full_name) {
+      const name = profile.full_name.toLowerCase();
+      // Deactivate in business_team_members
+      const { data: btm } = await supabase.from('business_team_members')
+        .select('id, full_name').eq('business_id', currentBusinessId).eq('is_active', true);
+      const matchBtm = (btm || []).find((m: any) => m.full_name.toLowerCase() === name);
+      if (matchBtm) {
+        await supabase.from('business_team_members').update({ is_active: false }).eq('id', matchBtm.id);
+      }
+      // Deactivate in factory_team_members
+      const { data: ftm } = await supabase.from('factory_team_members')
+        .select('id, full_name').eq('business_id', currentBusinessId).eq('is_active', true);
+      const matchFtm = (ftm || []).find((m: any) => m.full_name.toLowerCase() === name);
+      if (matchFtm) {
+        await supabase.from('factory_team_members').update({ is_active: false }).eq('id', matchFtm.id);
+      }
+    }
+
     toast.success('Member removed');
   }, [currentBusinessId]);
 
