@@ -256,15 +256,22 @@ export default function ContactsPage() {
     return nameA.localeCompare(nameB);
   });
 
+  const isProperty = (currentBusiness as any)?.business_type === 'property';
+  const contactLabel = isProperty ? 'Partners & Contacts' : 'Business Contacts';
+  const contactDesc = isProperty
+    ? 'Connect with landlords, tenants, agents and service providers using their Code'
+    : 'Connect with other businesses using their Business Code';
+  const codeLabel = isProperty ? 'Your Property Code' : 'Your Business Code';
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Building2 className="h-6 w-6" /> Business Contacts
+            <Building2 className="h-6 w-6" /> {contactLabel}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Connect with other businesses using their Business Code
+            {contactDesc}
           </p>
         </div>
 
