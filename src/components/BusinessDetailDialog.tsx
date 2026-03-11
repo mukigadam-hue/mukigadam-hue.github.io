@@ -145,7 +145,13 @@ export default function BusinessDetailDialog({ business, open, onOpenChange, onO
   const typeLabel = isProperty ? 'Property' : isFactory ? 'Factory' : 'Business';
 
   function handleAction() {
-    if (!business?.business_code) {
+    if (!business) return;
+    if (onOrderOrBook) {
+      onOrderOrBook(business);
+      onOpenChange(false);
+      return;
+    }
+    if (!business.business_code) {
       toast.error('This business has no code yet');
       return;
     }
