@@ -333,7 +333,7 @@ export default function PropertyTeam() {
   const [teamWorkers, setTeamWorkers] = useState<TeamMember[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editWorkerId, setEditWorkerId] = useState<string | null>(null);
-  const [addType, setAddType] = useState<'staff' | 'tenant' | 'landlord'>('tenant');
+  const [addType, setAddType] = useState<'staff' | 'tenant' | 'owner'>('tenant');
   const [workerForm, setWorkerForm] = useState({
     full_name: '', rank: 'Tenant', salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10),
     occupation: '', rental_purpose: '', gender: '', age: '', rental_end_date: '', agreed_amount: '',
