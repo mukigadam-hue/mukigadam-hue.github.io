@@ -115,7 +115,7 @@ function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => void }) {
     const success = await redeemInviteCode(code.trim());
     if (success) {
       setCode('');
-      onJoined();
+      await onJoined();
     }
     setLoading(false);
   }
