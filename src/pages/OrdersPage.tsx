@@ -317,6 +317,9 @@ export default function OrdersPage() {
     setSelectedContactBusinessId('');
     setRecipientCode('');
     setRecipientLookup(null);
+    setFromDiscover(false);
+    setPrefilledSupplierName('');
+    setSupplierProducts([]);
   }
 
   function openEditOrder(order: Order) {
