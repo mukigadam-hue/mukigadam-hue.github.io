@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useProperty } from '@/context/PropertyContext';
 import { useBusiness } from '@/context/BusinessContext';
@@ -69,7 +70,7 @@ function CheckInDialog({ bookingId, businessId, onClose }: { bookingId: string; 
   );
 }
 
-function BookNowDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+function BookNowDialog({ open, onClose, prefilledPropertyId, prefilledPropertyName }: { open: boolean; onClose: () => void; prefilledPropertyId?: string; prefilledPropertyName?: string }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { fmt } = useCurrency();
@@ -85,6 +86,31 @@ function BookNowDialog({ open, onClose }: { open: boolean; onClose: () => void }
   const [durationType, setDurationType] = useState('daily');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  
+  // Property assets list for direct selection (from Discover)
+  const [propertyAssets, setPropertyAssets] = useState<any[]>([]);
+  const [loadingAssets, setLoadingAssets] = useState(false);
+
+  // Load property assets when coming from Discover
+  useEffect(() => {
+    if (open && prefilledPropertyId) {
+      setLoadingAssets(true);
+      supabase
+        .from('property_assets')
+        .select('*')
+        .eq('business_id', prefilledPropertyId)
+        .eq('is_available', true)
+        .is('deleted_at', null)
+        .then(({ data }) => {
+          setPropertyAssets(data || []);
+          setLoadingAssets(false);
+        });
+    }
+  }, [open, prefilledPropertyId]);
+
+  function selectPropertyAsset(asset: any) {
+    setFoundAsset({ ...asset, businesses: { name: prefilledPropertyName || 'Owner' } });
+  }
 
   async function searchAsset() {
     if (!assetCode.trim()) return;
@@ -162,17 +188,61 @@ function BookNowDialog({ open, onClose }: { open: boolean; onClose: () => void }
           <DialogTitle className="flex items-center gap-2"><Plus className="h-5 w-5" /> Book Now</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
-          {/* Asset Code Search */}
-          <div>
-            <Label>Asset Code *</Label>
-            <div className="flex gap-2 mt-1">
-              <Input value={assetCode} onChange={e => setAssetCode(e.target.value.toUpperCase())} 
-                placeholder="e.g. AST-XXXXXX" className="font-mono tracking-wider" maxLength={12}
-                onKeyDown={e => e.key === 'Enter' && searchAsset()} />
-              <Button onClick={searchAsset} disabled={searching} size="sm"><Search className="h-4 w-4" /></Button>
+          {/* Property assets list from Discover or Asset Code Search */}
+          {!foundAsset && prefilledPropertyId ? (
+            <div>
+              <p className="text-sm font-medium mb-2">🏠 Select an asset from <span className="text-primary">{prefilledPropertyName}</span>:</p>
+              {loadingAssets ? (
+                <p className="text-sm text-muted-foreground text-center py-4">Loading assets...</p>
+              ) : propertyAssets.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">No available assets from this property</p>
+              ) : (
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {propertyAssets.map(asset => (
+                    <button key={asset.id} className="w-full text-left p-3 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-colors"
+                      onClick={() => selectPropertyAsset(asset)}>
+                      <div className="flex items-center gap-3">
+                        {asset.image_url_1 ? (
+                          <img src={asset.image_url_1} alt="" className="h-12 w-12 rounded-lg object-cover border" />
+                        ) : (
+                          <div className="h-12 w-12 rounded-lg bg-muted flex items-center justify-center text-lg">🏠</div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-sm truncate">{asset.name}</p>
+                          <p className="text-xs text-muted-foreground">📍 {asset.location} · {asset.category}</p>
+                          <div className="flex gap-2 mt-0.5">
+                            {asset.daily_price > 0 && <span className="text-xs font-medium text-primary">{fmt(asset.daily_price)}/day</span>}
+                            {asset.monthly_price > 0 && <span className="text-xs font-medium text-primary">{fmt(asset.monthly_price)}/mo</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              <div className="relative mt-3">
+                <div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div>
+                <div className="relative flex justify-center text-xs"><span className="bg-background px-2 text-muted-foreground">or enter code manually</span></div>
+              </div>
+              <div className="flex gap-2 mt-2">
+                <Input value={assetCode} onChange={e => setAssetCode(e.target.value.toUpperCase())} 
+                  placeholder="AST-XXXXXX" className="font-mono tracking-wider flex-1" maxLength={12}
+                  onKeyDown={e => e.key === 'Enter' && searchAsset()} />
+                <Button onClick={searchAsset} disabled={searching} size="sm"><Search className="h-4 w-4" /></Button>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Paste the asset code from Browse</p>
-          </div>
+          ) : !foundAsset ? (
+            <div>
+              <Label>Asset Code *</Label>
+              <div className="flex gap-2 mt-1">
+                <Input value={assetCode} onChange={e => setAssetCode(e.target.value.toUpperCase())} 
+                  placeholder="e.g. AST-XXXXXX" className="font-mono tracking-wider" maxLength={12}
+                  onKeyDown={e => e.key === 'Enter' && searchAsset()} />
+                <Button onClick={searchAsset} disabled={searching} size="sm"><Search className="h-4 w-4" /></Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Paste the asset code from Browse</p>
+            </div>
+          ) : null}
 
           {foundAsset && (
             <>
@@ -291,11 +361,27 @@ export default function PropertyBookings() {
   const { bookings, assets, updateBooking } = useProperty();
   const { userRole, currentBusiness } = useBusiness();
   const { fmt } = useCurrency();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [checkInBooking, setCheckInBooking] = useState<string | null>(null);
   const [bookNowOpen, setBookNowOpen] = useState(false);
   const [paymentDialog, setPaymentDialog] = useState<any>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
+  
+  // Pre-filled property from Discover page
+  const [prefilledPropertyId, setPrefilledPropertyId] = useState('');
+  const [prefilledPropertyName, setPrefilledPropertyName] = useState('');
 
+  // Auto-open BookNow when coming from Discover
+  useEffect(() => {
+    const propId = searchParams.get('property_id');
+    const propName = searchParams.get('property_name');
+    if (propId) {
+      setPrefilledPropertyId(propId);
+      setPrefilledPropertyName(propName ? decodeURIComponent(propName) : '');
+      setBookNowOpen(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
   const isOwnerOrAdmin = userRole === 'owner' || userRole === 'admin';
 
   const pending = bookings.filter(b => b.status === 'pending');
@@ -457,7 +543,8 @@ export default function PropertyBookings() {
       </Tabs>
 
       {/* Book Now Dialog */}
-      <BookNowDialog open={bookNowOpen} onClose={() => setBookNowOpen(false)} />
+      <BookNowDialog open={bookNowOpen} onClose={() => { setBookNowOpen(false); setPrefilledPropertyId(''); setPrefilledPropertyName(''); }} 
+        prefilledPropertyId={prefilledPropertyId} prefilledPropertyName={prefilledPropertyName} />
 
       {/* Check-In Dialog */}
       <Dialog open={!!checkInBooking} onOpenChange={() => setCheckInBooking(null)}>

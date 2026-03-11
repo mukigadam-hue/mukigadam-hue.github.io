@@ -54,9 +54,10 @@ interface Props {
   business: BusinessInfo | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onOrderOrBook?: (biz: BusinessInfo) => void;
 }
 
-export default function BusinessDetailDialog({ business, open, onOpenChange }: Props) {
+export default function BusinessDetailDialog({ business, open, onOpenChange, onOrderOrBook }: Props) {
   const { user } = useAuth();
   const { currentBusiness } = useBusiness();
   const { fmt } = useCurrency();
@@ -144,7 +145,13 @@ export default function BusinessDetailDialog({ business, open, onOpenChange }: P
   const typeLabel = isProperty ? 'Property' : isFactory ? 'Factory' : 'Business';
 
   function handleAction() {
-    if (!business?.business_code) {
+    if (!business) return;
+    if (onOrderOrBook) {
+      onOrderOrBook(business);
+      onOpenChange(false);
+      return;
+    }
+    if (!business.business_code) {
       toast.error('This business has no code yet');
       return;
     }
