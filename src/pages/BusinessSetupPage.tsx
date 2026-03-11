@@ -49,10 +49,10 @@ export default function BusinessSetupPage() {
     if (!countryCode) { toast.error('Please select your country'); return; }
     setLoading(true);
     await createBusiness(name.trim(), address.trim(), contact.trim(), email.trim(), countryCode);
-    if (businessType === 'factory') {
+    if (businessType !== 'business') {
       const { data } = await supabase.from('businesses').select('id').order('created_at', { ascending: false }).limit(1).single();
       if (data) {
-        await supabase.from('businesses').update({ business_type: 'factory' } as any).eq('id', data.id);
+        await supabase.from('businesses').update({ business_type: businessType } as any).eq('id', data.id);
       }
     }
     setLoading(false);
