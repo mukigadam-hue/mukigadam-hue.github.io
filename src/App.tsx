@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { BusinessProvider, useBusiness } from "@/context/BusinessContext";
 import { FactoryProvider } from "@/context/FactoryContext";
+import { PropertyProvider } from "@/context/PropertyContext";
 import AppLayout from "@/components/AppLayout";
 import AuthPage from "./pages/AuthPage";
 import BusinessSetupPage from "./pages/BusinessSetupPage";
