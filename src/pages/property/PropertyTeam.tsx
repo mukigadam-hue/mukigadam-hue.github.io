@@ -677,8 +677,8 @@ export default function PropertyTeam() {
         </div>
       )}
 
-      {/* ========= LANDLORD / OWNER VIEW ========= */}
-      {viewMode === 'landlord' && (
+      {/* ========= ASSET OWNER VIEW ========= */}
+      {viewMode === 'owner' && (
         <div className="space-y-4">
           <Tabs defaultValue="tenants" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
