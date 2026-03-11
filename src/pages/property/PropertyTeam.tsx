@@ -397,8 +397,8 @@ export default function PropertyTeam() {
           )}
         </TabsContent>
 
-        <TabsContent value="payments" className="mt-4">
-          <WorkerPaymentManager isOwnerOrAdmin={isOwnerOrAdmin} />
+        <TabsContent value="rentals" className="mt-4 space-y-4">
+          <RentalPaymentsSection bookings={bookings} assets={assets} isOwnerOrAdmin={isOwnerOrAdmin} />
         </TabsContent>
       </Tabs>
 
