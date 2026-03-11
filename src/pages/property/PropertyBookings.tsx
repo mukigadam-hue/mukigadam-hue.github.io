@@ -70,7 +70,7 @@ function CheckInDialog({ bookingId, businessId, onClose }: { bookingId: string; 
   );
 }
 
-function BookNowDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+function BookNowDialog({ open, onClose, prefilledPropertyId, prefilledPropertyName }: { open: boolean; onClose: () => void; prefilledPropertyId?: string; prefilledPropertyName?: string }) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { fmt } = useCurrency();
@@ -86,6 +86,31 @@ function BookNowDialog({ open, onClose }: { open: boolean; onClose: () => void }
   const [durationType, setDurationType] = useState('daily');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  
+  // Property assets list for direct selection (from Discover)
+  const [propertyAssets, setPropertyAssets] = useState<any[]>([]);
+  const [loadingAssets, setLoadingAssets] = useState(false);
+
+  // Load property assets when coming from Discover
+  useEffect(() => {
+    if (open && prefilledPropertyId) {
+      setLoadingAssets(true);
+      supabase
+        .from('property_assets')
+        .select('*')
+        .eq('business_id', prefilledPropertyId)
+        .eq('is_available', true)
+        .is('deleted_at', null)
+        .then(({ data }) => {
+          setPropertyAssets(data || []);
+          setLoadingAssets(false);
+        });
+    }
+  }, [open, prefilledPropertyId]);
+
+  function selectPropertyAsset(asset: any) {
+    setFoundAsset({ ...asset, businesses: { name: prefilledPropertyName || 'Owner' } });
+  }
 
   async function searchAsset() {
     if (!assetCode.trim()) return;
