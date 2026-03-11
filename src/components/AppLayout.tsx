@@ -271,7 +271,27 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <NotificationsPanel />
           </div>
 
-          <div className="px-3 pt-3">
+          <div className="px-3 pt-3 space-y-2">
+            {/* 3-Entity Quick Switch */}
+            <div className="flex gap-1">
+              {(['business', 'factory', 'property'] as const).map(type => {
+                const typeBusinesses = businesses.filter(b => (b as any).business_type === type);
+                const icon = type === 'factory' ? '🏭' : type === 'property' ? '🏠' : '🏪';
+                const label = type === 'factory' ? 'Factory' : type === 'property' ? 'FlexRent' : 'Business';
+                const isActive = (currentBusiness as any)?.business_type === type;
+                return (
+                  <button key={type} disabled={typeBusinesses.length === 0}
+                    onClick={() => { if (typeBusinesses.length > 0) { navigate('/'); setCurrentBusinessId(typeBusinesses[0].id); } }}
+                    className={`flex-1 flex flex-col items-center gap-0.5 p-1.5 rounded-lg text-[10px] font-medium transition-all ${
+                      isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : typeBusinesses.length === 0 ? 'opacity-30' : 'hover:bg-sidebar-accent/50 text-sidebar-foreground'
+                    }`}>
+                    <span>{icon}</span>
+                    <span>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
             <Select value={currentBusiness?.id || ''} onValueChange={v => { navigate('/'); setCurrentBusinessId(v); }}>
               <SelectTrigger className="w-full bg-sidebar-accent/30 border-sidebar-border text-sidebar-foreground text-xs h-9">
                 <Building2 className="h-3 w-3 mr-1" />
@@ -346,7 +366,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <SheetTitle className="text-left">{t('nav.menu')}</SheetTitle>
             </SheetHeader>
 
-            <div className="mt-3 mb-2">
+            {/* 3-Entity Quick Switch */}
+            <div className="mb-3">
+              <p className="text-xs text-muted-foreground font-medium mb-2 px-1">Quick Switch</p>
+              <div className="grid grid-cols-3 gap-2">
+                {(['business', 'factory', 'property'] as const).map(type => {
+                  const typeBusinesses = businesses.filter(b => (b as any).business_type === type);
+                  const icon = type === 'factory' ? '🏭' : type === 'property' ? '🏠' : '🏪';
+                  const label = type === 'factory' ? 'Factory' : type === 'property' ? 'FlexRent' : 'Business';
+                  const isActive = (currentBusiness as any)?.business_type === type;
+                  return (
+                    <button key={type} disabled={typeBusinesses.length === 0}
+                      onClick={() => {
+                        if (typeBusinesses.length > 0) { navigate('/'); setCurrentBusinessId(typeBusinesses[0].id); setMoreOpen(false); }
+                      }}
+                      className={`flex flex-col items-center gap-1 p-2.5 rounded-xl text-xs font-medium transition-all ${
+                        isActive ? 'bg-primary/10 text-primary border border-primary/30' : typeBusinesses.length === 0 ? 'bg-muted/30 text-muted-foreground/40' : 'bg-muted/50 hover:bg-muted'
+                      }`}>
+                      <span className="text-lg">{icon}</span>
+                      <span>{label}</span>
+                      <span className="text-[10px] text-muted-foreground">{typeBusinesses.length}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mb-2">
               <p className="text-xs text-muted-foreground font-medium mb-2 px-1">{t('nav.switchBusiness')}</p>
               <div className="max-h-40 overflow-y-auto space-y-1.5 rounded-lg border border-border p-1.5">
                 {businesses.map(b => {
