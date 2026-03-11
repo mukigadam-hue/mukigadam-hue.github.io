@@ -358,7 +358,7 @@ export default function PropertyTeam() {
     setLoading(false);
   }
 
-  async function handleRemove(userId: string) { await removeMember(userId); loadMembers(); }
+  async function handleRemove(userId: string) { await removeMember(userId); loadMembers(); loadTeamWorkers(); }
   async function handleRoleChange(userId: string, role: string) { await updateMemberRole(userId, role); loadMembers(); }
 
   function getRoleIcon(role: string) {
