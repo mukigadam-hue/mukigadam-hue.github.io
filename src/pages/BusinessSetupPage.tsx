@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Building2, KeyRound, Plus, Factory, MapPin } from 'lucide-react';
+import { Building2, KeyRound, Plus, Factory, MapPin, Home } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { countries, getCountryByCode } from '@/lib/countries';
