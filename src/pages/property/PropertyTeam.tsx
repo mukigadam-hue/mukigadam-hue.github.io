@@ -626,7 +626,10 @@ export default function PropertyTeam() {
       )}
 
       {/* Received an invite code - available to everyone */}
-      <ReceivedInviteCodeSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />
+      <ReceivedInviteCodeSection onJoined={async () => {
+        await loadMembers();
+        await loadTeamWorkers();
+      }} />
       <AdSpace variant="banner" />
 
       {/* ========= TENANT VIEW ========= */}
