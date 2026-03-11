@@ -616,7 +616,7 @@ export default function PropertyTeam() {
         <div className="space-y-4">
           <Tabs defaultValue="my-landlords" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="my-landlords" className="text-xs">🔑 My Landlords / Bosses</TabsTrigger>
+              <TabsTrigger value="my-landlords" className="text-xs">🔑 My Asset Owners</TabsTrigger>
               <TabsTrigger value="my-payments" className="text-xs">💰 My Payments</TabsTrigger>
             </TabsList>
 
