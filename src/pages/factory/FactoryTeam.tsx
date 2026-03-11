@@ -50,6 +50,7 @@ export default function FactoryTeam() {
 
   const activeMembers = teamMembers.filter(t => t.is_active);
   const inactiveMembers = teamMembers.filter(t => !t.is_active);
+  const visibleAppMembers = appMembers.filter(member => member.role !== 'owner');
   const totalSalary = activeMembers.reduce((sum, t) => sum + Number(t.salary), 0);
 
   const loadAppMembers = useCallback(async () => {
@@ -135,8 +136,11 @@ export default function FactoryTeam() {
   async function handleRedeem() {
     if (!redeemCode.trim()) return;
     setLoading(true);
-    await redeemInviteCode(redeemCode.trim());
-    setRedeemCode('');
+    const success = await redeemInviteCode(redeemCode.trim());
+    if (success) {
+      setRedeemCode('');
+      await loadAppMembers();
+    }
     setLoading(false);
   }
 
@@ -237,15 +241,15 @@ export default function FactoryTeam() {
           {/* Unified All Workers List */}
           <Card className="shadow-card">
             <CardContent className="p-4">
-              <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
-                <Users className="h-4 w-4" /> All Workers ({appMembers.filter(m => m.role !== 'owner').length + activeMembers.filter(w => !appMembers.some(m => m.full_name?.toLowerCase() === w.full_name.toLowerCase())).length})
-              </h2>
-              {appMembers.length === 0 && activeMembers.length === 0 ? (
+                <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
+                  <Users className="h-4 w-4" /> All Workers ({visibleAppMembers.length + activeMembers.filter(w => !visibleAppMembers.some(m => m.full_name?.toLowerCase() === w.full_name.toLowerCase())).length})
+                </h2>
+                {visibleAppMembers.length === 0 && activeMembers.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">No workers yet. Add manually or invite via code.</p>
               ) : (
                 <div className="space-y-2">
                   {/* App Users */}
-                  {appMembers.map(member => {
+                  {visibleAppMembers.map(member => {
                     const matchedWorker = activeMembers.find(w => w.full_name.toLowerCase() === (member.full_name || '').toLowerCase());
                     const bal = matchedWorker ? (workerBalances[matchedWorker.id] || { totalOwed: 0, totalAdvances: 0 }) : { totalOwed: 0, totalAdvances: 0 };
                     return (

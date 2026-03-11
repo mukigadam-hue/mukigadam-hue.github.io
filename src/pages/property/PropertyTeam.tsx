@@ -77,7 +77,7 @@ function ShareButtons({ code }: { code: string }) {
   );
 }
 
-function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => void }) {
+function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => Promise<void> | void }) {
   const { redeemInviteCode } = useBusiness();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,7 +86,7 @@ function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => void }) {
     if (!code.trim()) { toast.error('Please enter an invite code'); return; }
     setLoading(true);
     const success = await redeemInviteCode(code.trim());
-    if (success) { setCode(''); onJoined(); }
+    if (success) { setCode(''); await onJoined(); }
     setLoading(false);
   }
 
@@ -347,9 +347,12 @@ export default function PropertyTeam() {
     setTeamWorkers((data || []) as TeamMember[]);
   }, [businessId]);
 
-  useEffect(() => { loadMembers(); loadTeamWorkers(); }, [currentBusiness, loadTeamWorkers]);
+  useEffect(() => { void loadMembers(); void loadTeamWorkers(); }, [currentBusiness, loadTeamWorkers]);
 
-  async function loadMembers() { const data = await getMembers(); setMembers(data); }
+  async function loadMembers() {
+    const data = await getMembers();
+    setMembers(data);
+  }
 
   async function handleGenerateCode() {
     setLoading(true);
@@ -623,7 +626,10 @@ export default function PropertyTeam() {
       )}
 
       {/* Received an invite code - available to everyone */}
-      <ReceivedInviteCodeSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />
+      <ReceivedInviteCodeSection onJoined={async () => {
+        await loadMembers();
+        await loadTeamWorkers();
+      }} />
       <AdSpace variant="banner" />
 
       {/* ========= TENANT VIEW ========= */}

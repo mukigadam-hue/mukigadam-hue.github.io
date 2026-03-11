@@ -101,7 +101,7 @@ function ShareButtons({ code, type }: { code: string; type: 'worker' }) {
   );
 }
 
-function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => void }) {
+function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => Promise<void> | void }) {
   const { redeemInviteCode } = useBusiness();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -115,7 +115,7 @@ function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => void }) {
     const success = await redeemInviteCode(code.trim());
     if (success) {
       setCode('');
-      onJoined();
+      await onJoined();
     }
     setLoading(false);
   }
@@ -195,7 +195,7 @@ export default function TeamPage() {
     loadTeamWorkers();
   }, [currentBusiness, loadTeamWorkers]);
 
-  async function loadMembers() {
+async function loadMembers() {
     const data = await getMembers();
     setMembers(data);
   }
@@ -393,8 +393,10 @@ export default function TeamPage() {
         </Card>
       )}
 
-      {/* Received an invite code - available to everyone */}
-      <ReceivedInviteCodeSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />
+           <ReceivedInviteCodeSection onJoined={async () => {
+             await loadMembers();
+             await loadTeamWorkers();
+           }} />
 
       <AdSpace variant="banner" />
 
