@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CalendarCheck, CheckCircle, XCircle, Clock, Camera, Plus, Search, MessageSquare, Send, Wallet, FileText, Copy } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import { toast } from 'sonner';
+import AdSpace from '@/components/AdSpace';
 
 function CheckInDialog({ bookingId, businessId, onClose }: { bookingId: string; businessId: string; onClose: () => void }) {
   const { t } = useTranslation();
