@@ -286,7 +286,7 @@ export default function ProofVideoButton() {
                   ) : (
                     targetPeople.map(p => (
                       <SelectItem key={p.id} value={p.id}>
-                        {p.type === 'app_user' ? '📱 ' : '👤 '}{p.name}
+                        {p.type === 'app_user' ? '📱 ' : p.type === 'tenant' ? '🏠 ' : p.type === 'owner' ? '🔑 ' : '👤 '}{p.name}
                       </SelectItem>
                     ))
                   )}
