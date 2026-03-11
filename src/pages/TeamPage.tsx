@@ -275,6 +275,7 @@ export default function TeamPage() {
 
   async function deactivateWorker(id: string) {
     await supabase.from('business_team_members').update({ is_active: false }).eq('id', id);
+    toast.success('Worker deactivated');
     loadTeamWorkers();
   }
 
@@ -285,8 +286,30 @@ export default function TeamPage() {
 
   async function deleteWorker(id: string) {
     await supabase.from('business_team_members').delete().eq('id', id);
-    toast.success('Worker removed');
+    toast.success('Worker permanently removed');
     loadTeamWorkers();
+  }
+
+  function ConfirmDeleteButton({ onConfirm, label = 'Remove' }: { onConfirm: () => void; label?: string }) {
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size="icon"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove this person. They will lose access to this business if they are an app user. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{label}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
   }
 
   const activeWorkers = teamWorkers.filter(w => w.is_active);
