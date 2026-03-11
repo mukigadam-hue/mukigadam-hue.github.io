@@ -574,7 +574,8 @@ export default function PropertySettings() {
                 );
               })}
             </div>
-          )}
+           )}
+          <AddBusinessDialog onCreated={() => {}} />
         </CardContent>
       </Card>
 

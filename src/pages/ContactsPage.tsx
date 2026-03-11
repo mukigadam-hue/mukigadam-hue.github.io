@@ -490,12 +490,12 @@ export default function ContactsPage() {
                   <img src={viewProfile.logo_url} alt="" className="h-16 w-16 rounded-full object-cover border" />
                 ) : (
                   <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center text-3xl">
-                    {viewProfile.business_type === 'factory' ? '🏭' : '🏪'}
+                    {viewProfile.business_type === 'factory' ? '🏭' : viewProfile.business_type === 'property' ? '🏠' : '🏪'}
                   </div>
                 )}
                 <div>
                   <p className="text-xl font-bold">{viewProfile.name}</p>
-                  <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{viewProfile.business_type === 'factory' ? 'Factory' : 'Business'}</span>
+                  <span className="text-xs bg-muted px-2 py-0.5 rounded-full">{viewProfile.business_type === 'factory' ? 'Factory' : viewProfile.business_type === 'property' ? 'Property' : 'Business'}</span>
                 </div>
               </div>
               <Separator />
