@@ -194,18 +194,35 @@ export default function DiscoverPage() {
                 </div>
 
                 {biz.business_code && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs font-mono gap-2"
-                    onClick={(e) => { e.stopPropagation(); copyCode(biz.business_code!); }}
-                  >
-                    {copiedCode === biz.business_code ? (
-                      <><Check className="h-3 w-3 text-primary" />Copied!</>
-                    ) : (
-                      <><Copy className="h-3 w-3" />Code: {biz.business_code}</>
-                    )}
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 text-xs font-mono gap-1"
+                      onClick={(e) => { e.stopPropagation(); copyCode(biz.business_code!); }}
+                    >
+                      {copiedCode === biz.business_code ? (
+                        <><Check className="h-3 w-3 text-primary" />Copied!</>
+                      ) : (
+                        <><Copy className="h-3 w-3" />{biz.business_code}</>
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="flex-1 text-xs gap-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(biz.business_code!);
+                        toast.success(`Code copied! Go to ${biz.business_type === 'property' ? 'Bookings' : 'Orders'} to use it.`);
+                      }}
+                    >
+                      {biz.business_type === 'property' ? (
+                        <><CalendarCheck className="h-3 w-3" /> Book Now</>
+                      ) : (
+                        <><ShoppingCart className="h-3 w-3" /> Order Now</>
+                      )}
+                    </Button>
+                  </div>
                 )}
               </CardContent>
             </Card>
