@@ -277,7 +277,7 @@ export default function PropertyTeam() {
       <Tabs defaultValue="team" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="team" className="flex items-center gap-2"><Users className="h-4 w-4" /> Team</TabsTrigger>
-          <TabsTrigger value="payments" className="flex items-center gap-2"><Wallet className="h-4 w-4" /> Payments</TabsTrigger>
+          <TabsTrigger value="rentals" className="flex items-center gap-2"><Home className="h-4 w-4" /> Rental Payments</TabsTrigger>
         </TabsList>
 
         <TabsContent value="team" className="space-y-4 mt-4">
