@@ -571,13 +571,13 @@ export default function PropertyTeam() {
           </div>
           <p className="text-[11px] text-muted-foreground">I rent properties, vehicles, or vessels from others</p>
         </button>
-        <button onClick={() => setViewMode('landlord')}
-          className={`p-4 rounded-xl border-2 text-left transition-all ${viewMode === 'landlord' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
+        <button onClick={() => setViewMode('owner')}
+          className={`p-4 rounded-xl border-2 text-left transition-all ${viewMode === 'owner' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xl">🔑</span>
-            <span className="font-semibold text-sm">I'm an Owner / Landlord</span>
+            <span className="font-semibold text-sm">I'm an Asset Owner</span>
           </div>
-          <p className="text-[11px] text-muted-foreground">I own assets and rent them out to tenants</p>
+          <p className="text-[11px] text-muted-foreground">I own properties, vehicles, or vessels and rent them out</p>
         </button>
       </div>
 
