@@ -180,9 +180,9 @@ export default function PropertyBrowse() {
                 <p className="text-xs">{asset.category === 'land' ? '🏞️' : asset.category === 'vehicle' ? '🚗' : '🚢'} {asset.sub_category || asset.category}</p>
                 {asset.description && <p className="text-xs text-muted-foreground line-clamp-2">{asset.description}</p>}
                 <div className="flex gap-2 text-xs font-medium">
-                  {asset.hourly_price > 0 && <Badge variant="outline">{symbol}{asset.hourly_price}/hr</Badge>}
-                  {asset.daily_price > 0 && <Badge variant="outline">{symbol}{asset.daily_price}/day</Badge>}
-                  {asset.monthly_price > 0 && <Badge variant="outline">{symbol}{asset.monthly_price}/mo</Badge>}
+                  {asset.hourly_price > 0 && <Badge variant="outline">{currency}{asset.hourly_price}/hr</Badge>}
+                  {asset.daily_price > 0 && <Badge variant="outline">{currency}{asset.daily_price}/day</Badge>}
+                  {asset.monthly_price > 0 && <Badge variant="outline">{currency}{asset.monthly_price}/mo</Badge>}
                 </div>
                 {asset.features && (
                   <div className="flex flex-wrap gap-1">
