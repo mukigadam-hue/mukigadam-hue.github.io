@@ -67,22 +67,39 @@ export default function FactoryProduction() {
       }
     }
 
+    const wholesalePrice = parseFloat(form.wholesale_price) || 0;
+    const retailPrice = parseFloat(form.retail_price) || 0;
+
     // Add to product stock
     if (form.product_stock_id) {
       const existing = activeProducts.find(p => p.id === form.product_stock_id);
       if (existing) {
-        await updateStockItem(existing.id, { quantity: existing.quantity + qtyProduced });
+        const updates: any = { quantity: existing.quantity + qtyProduced };
+        if (wholesalePrice > 0) updates.wholesale_price = wholesalePrice;
+        if (retailPrice > 0) updates.retail_price = retailPrice;
+        await updateStockItem(existing.id, updates);
       }
     } else {
-      // Create new product in stock
-      await addStockItem({
-        name: toSentenceCase(form.product_name.trim()),
-        category: '', quality: '',
-        quantity: qtyProduced,
-        buying_price: 0, wholesale_price: 0, retail_price: 0,
-        min_stock_level: 5, barcode: '',
-        image_url_1: '', image_url_2: '', image_url_3: '',
-      });
+      // Check if product with same name already exists to avoid duplicates
+      const existingByName = activeProducts.find(p => p.name.toLowerCase() === form.product_name.trim().toLowerCase());
+      if (existingByName) {
+        const updates: any = { quantity: existingByName.quantity + qtyProduced };
+        if (wholesalePrice > 0) updates.wholesale_price = wholesalePrice;
+        if (retailPrice > 0) updates.retail_price = retailPrice;
+        await updateStockItem(existingByName.id, updates);
+      } else {
+        // Create new product in stock
+        await addStockItem({
+          name: toSentenceCase(form.product_name.trim()),
+          category: '', quality: '',
+          quantity: qtyProduced,
+          buying_price: 0,
+          wholesale_price: wholesalePrice,
+          retail_price: retailPrice,
+          min_stock_level: 5, barcode: '',
+          image_url_1: '', image_url_2: '', image_url_3: '',
+        });
+      }
     }
 
     // Record production
