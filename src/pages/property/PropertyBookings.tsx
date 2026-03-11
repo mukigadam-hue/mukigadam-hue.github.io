@@ -81,6 +81,8 @@ function BookNowDialog({ open, onClose, prefilledPropertyId, prefilledPropertyNa
   const [renterContact, setRenterContact] = useState('');
   const [renterOccupation, setRenterOccupation] = useState('');
   const [rentalPurpose, setRentalPurpose] = useState('');
+  const [renterGender, setRenterGender] = useState('');
+  const [renterAge, setRenterAge] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [durationType, setDurationType] = useState('daily');
@@ -160,6 +162,7 @@ function BookNowDialog({ open, onClose, prefilledPropertyId, prefilledPropertyNa
     });
     if (hasConflict) { toast.error('This asset is already booked for these dates'); setSubmitting(false); return; }
 
+    const totalPrice = price * units;
     const { error } = await supabase.from('property_bookings').insert({
       asset_id: foundAsset.id,
       business_id: foundAsset.business_id,
@@ -169,11 +172,15 @@ function BookNowDialog({ open, onClose, prefilledPropertyId, prefilledPropertyNa
       start_date: start.toISOString(),
       end_date: end.toISOString(),
       duration_type: durationType,
-      total_price: price * units,
+      total_price: totalPrice,
+      agreed_amount: totalPrice,
       status: 'pending',
       notes: notes.trim(),
       renter_occupation: renterOccupation.trim(),
       rental_purpose: rentalPurpose.trim(),
+      gender: renterGender,
+      age: renterAge ? parseInt(renterAge) : null,
+      expected_payment_date: end.toISOString(),
     } as any);
     if (error) { toast.error(error.message); setSubmitting(false); return; }
     toast.success('Booking request sent!');
@@ -274,6 +281,21 @@ function BookNowDialog({ open, onClose, prefilledPropertyId, prefilledPropertyNa
                 <div><Label>Purpose of Renting *</Label><Input value={rentalPurpose} onChange={e => setRentalPurpose(e.target.value)} placeholder="e.g. Farming, Transport..." /></div>
               </div>
 
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label>Gender</Label>
+                  <Select value={renterGender} onValueChange={setRenterGender}>
+                    <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">Male</SelectItem>
+                      <SelectItem value="Female">Female</SelectItem>
+                      <SelectItem value="Other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div><Label>Age</Label><Input type="number" min="0" max="150" value={renterAge} onChange={e => setRenterAge(e.target.value)} placeholder="e.g. 30" /></div>
+              </div>
+
               {/* Duration */}
               <div>
                 <Label>Duration Type</Label>
@@ -334,6 +356,12 @@ function BookingComments({ booking, isOwner }: { booking: any; isOwner: boolean 
       )}
       {(booking as any).rental_purpose && (
         <p className="text-xs text-muted-foreground">🎯 Purpose: <span className="font-medium text-foreground">{(booking as any).rental_purpose}</span></p>
+      )}
+      {((booking as any).gender || (booking as any).age) && (
+        <p className="text-xs text-muted-foreground">
+          {(booking as any).gender && `👤 ${(booking as any).gender}`}
+          {(booking as any).age && `, ${(booking as any).age} yrs`}
+        </p>
       )}
       {/* Owner's response */}
       {isOwner && (
