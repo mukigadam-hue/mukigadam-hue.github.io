@@ -45,6 +45,12 @@ export default function BusinessSetupPage() {
     }
   }
 
+  async function handleExit() {
+    setLoading(true);
+    await signOut();
+    setLoading(false);
+  }
+
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
