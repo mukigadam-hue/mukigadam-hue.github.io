@@ -101,7 +101,7 @@ function ShareButtons({ code, type }: { code: string; type: 'worker' }) {
   );
 }
 
-function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
+function WorkerJoinSection({ onJoined }: { onJoined: () => void }) {
   const { redeemInviteCode } = useBusiness();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -115,7 +115,7 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
     const success = await redeemInviteCode(code.trim());
     if (success) {
       setCode('');
-      onRedeemed();
+      onJoined();
     }
     setLoading(false);
   }
@@ -125,21 +125,21 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
       <CardContent className="p-4 space-y-3">
         <h2 className="text-base font-semibold flex items-center gap-2">
           <Send className="h-4 w-4" />
-          Redeem Invite Code
+          Join This Business
         </h2>
         <p className="text-sm text-muted-foreground">
-          Have an invite code? Enter it below to join a business.
+          Got an invite code from the business owner? Enter it below to request access.
         </p>
         <div className="flex gap-2">
           <Input
-            placeholder="Enter code (e.g. ABC123)"
+            placeholder="Enter invite code (e.g. ABC123)"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             className="font-mono tracking-wider uppercase"
             maxLength={10}
           />
           <Button onClick={handleRedeem} disabled={loading || !code.trim()}>
-            {loading ? 'Joining...' : 'Join'}
+            {loading ? 'Requesting...' : 'Request to Join'}
           </Button>
         </div>
       </CardContent>
