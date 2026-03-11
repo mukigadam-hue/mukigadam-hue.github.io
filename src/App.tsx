@@ -42,7 +42,7 @@ const FactoryProduction = lazy(() => import("./pages/factory/FactoryProduction")
 const PropertyDashboard = lazy(() => import("./pages/property/PropertyDashboard"));
 const PropertyAssets = lazy(() => import("./pages/property/PropertyAssets"));
 const PropertyBookings = lazy(() => import("./pages/property/PropertyBookings"));
-const PropertyMessages = lazy(() => import("./pages/property/PropertyMessages"));
+// PropertyMessages removed - communication integrated into Bookings
 const PropertyBrowse = lazy(() => import("./pages/property/PropertyBrowse"));
 const PropertySettings = lazy(() => import("./pages/property/PropertySettings"));
 const PropertyTeam = lazy(() => import("./pages/property/PropertyTeam"));
@@ -123,7 +123,7 @@ function BusinessContent() {
               <Route path="/" element={<PropertyDashboard />} />
               <Route path="/assets" element={<PropertyAssets />} />
               <Route path="/bookings" element={<PropertyBookings />} />
-              <Route path="/messages" element={<PropertyMessages />} />
+              {/* Messages removed - integrated into Bookings */}
               <Route path="/browse" element={<PropertyBrowse />} />
               <Route path="/contacts" element={<ContactsPage />} />
               <Route path="/discover" element={<DiscoverPage />} />

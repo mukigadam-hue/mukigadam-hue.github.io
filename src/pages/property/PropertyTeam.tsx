@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { UserPlus, Trash2, Shield, Crown, User, Users, MessageCircle, Share2, Send, Calendar, Clock, Wallet, Plus, Edit2, AlertTriangle, ArrowDownCircle, Home, CheckCircle } from 'lucide-react';
+import { UserPlus, Trash2, Shield, Crown, User, Users, MessageCircle, Share2, Send, Calendar, Clock, Wallet, Plus, Edit2, Home, CheckCircle, Building, Key } from 'lucide-react';
 import { toast } from 'sonner';
 import AdSpace from '@/components/AdSpace';
 import { toTitleCase } from '@/lib/utils';
@@ -38,33 +38,26 @@ interface TeamMember {
   is_active: boolean;
 }
 
-interface WorkerBalance {
-  totalOwed: number;
-  totalAdvances: number;
-}
-
-// Property-relevant ranks
-const RANKS = ['Property Manager', 'Caretaker', 'Agent', 'Maintenance', 'Security', 'Cleaner', 'Driver'];
+// Property-specific roles
+const STAFF_RANKS = ['Property Manager', 'Caretaker', 'Agent', 'Maintenance', 'Security', 'Cleaner'];
+const TENANT_RANK = 'Tenant';
+const LANDLORD_RANK = 'Landlord';
+const MAX_STAFF = 3;
 
 function ShareButtons({ code }: { code: string }) {
   const message = `Join our property team! Use this invite code: ${code}`;
   const encoded = encodeURIComponent(message);
-
-  const platforms = [
-    { name: 'WhatsApp', icon: <MessageCircle className="h-4 w-4" />, url: `https://wa.me/?text=${encoded}`, bg: 'bg-green-600 hover:bg-green-700 text-white' },
-    { name: 'Copy', icon: <Share2 className="h-4 w-4" />, action: () => { navigator.clipboard.writeText(code); toast.success('Code copied!'); }, bg: 'bg-muted hover:bg-muted/80 text-foreground' },
-  ];
-
   return (
     <div className="flex items-center gap-2 flex-wrap mt-2">
       <span className="text-xs text-muted-foreground">Share via:</span>
-      {platforms.map((p) => (
-        <button key={p.name}
-          className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${p.bg}`}
-          onClick={() => { if ('action' in p && p.action) p.action(); else if ('url' in p) window.open(p.url, '_blank', 'noopener,noreferrer'); }}>
-          {p.icon}{p.name}
-        </button>
-      ))}
+      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white"
+        onClick={() => window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer')}>
+        <MessageCircle className="h-4 w-4" />WhatsApp
+      </button>
+      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-muted hover:bg-muted/80 text-foreground"
+        onClick={() => { navigator.clipboard.writeText(code); toast.success('Code copied!'); }}>
+        <Share2 className="h-4 w-4" />Copy
+      </button>
     </div>
   );
 }
@@ -97,19 +90,12 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
   );
 }
 
-interface RentalPaymentsSectionProps {
-  bookings: any[];
-  assets: any[];
-  isOwnerOrAdmin: boolean;
-}
-
-function RentalPaymentsSection({ bookings, assets, isOwnerOrAdmin }: RentalPaymentsSectionProps) {
+function RentalPaymentsSection({ bookings, assets, isOwnerOrAdmin }: { bookings: any[]; assets: any[]; isOwnerOrAdmin: boolean }) {
   const { fmt } = useCurrency();
   const [paymentDialog, setPaymentDialog] = useState<any>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
 
   const assetMap = new Map(assets.map((a: any) => [a.id, a]));
-
   const activeBookings = bookings
     .filter(b => ['active', 'confirmed', 'pending'].includes(b.status))
     .map(b => {
@@ -118,11 +104,8 @@ function RentalPaymentsSection({ bookings, assets, isOwnerOrAdmin }: RentalPayme
       const endDate = new Date(b.end_date);
       const now = new Date();
       const daysLeft = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      const isOverdue = daysLeft < 0 && outstanding > 0;
-      const isUrgent = daysLeft <= 3 && daysLeft >= 0 && outstanding > 0;
-      return { ...b, asset, outstanding, daysLeft, isOverdue, isUrgent };
-    })
-    .sort((a, b) => a.daysLeft - b.daysLeft);
+      return { ...b, asset, outstanding, daysLeft, isOverdue: daysLeft < 0 && outstanding > 0, isUrgent: daysLeft <= 3 && daysLeft >= 0 && outstanding > 0 };
+    }).sort((a, b) => a.daysLeft - b.daysLeft);
 
   const totalOutstanding = activeBookings.reduce((s, b) => s + b.outstanding, 0);
   const totalCollected = bookings.reduce((s, b) => s + Number(b.amount_paid), 0);
@@ -133,40 +116,30 @@ function RentalPaymentsSection({ bookings, assets, isOwnerOrAdmin }: RentalPayme
     if (isNaN(amt) || amt <= 0) { toast.error('Enter a valid amount'); return; }
     const newPaid = Number(paymentDialog.amount_paid) + amt;
     const newStatus = newPaid >= Number(paymentDialog.total_price) ? 'paid' : 'partial';
-    const { error } = await supabase.from('property_bookings').update({
-      amount_paid: newPaid,
-      payment_status: newStatus,
-    } as any).eq('id', paymentDialog.id);
+    const { error } = await supabase.from('property_bookings').update({ amount_paid: newPaid, payment_status: newStatus } as any).eq('id', paymentDialog.id);
     if (error) { toast.error(error.message); return; }
     toast.success(`Payment of ${fmt(amt)} recorded!`);
-    setPaymentDialog(null);
-    setPaymentAmount('');
+    setPaymentDialog(null); setPaymentAmount('');
   }
 
   return (
     <>
       <div className="grid grid-cols-2 gap-3">
-        <Card className="shadow-card">
-          <CardContent className="p-3 text-center">
-            <p className="text-xs text-muted-foreground">Total Collected</p>
-            <p className="text-lg font-bold text-success tabular-nums">{fmt(totalCollected)}</p>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card">
-          <CardContent className="p-3 text-center">
-            <p className="text-xs text-muted-foreground">Outstanding</p>
-            <p className="text-lg font-bold text-warning tabular-nums">{fmt(totalOutstanding)}</p>
-          </CardContent>
-        </Card>
+        <Card className="shadow-card"><CardContent className="p-3 text-center">
+          <p className="text-xs text-muted-foreground">Total Collected</p>
+          <p className="text-lg font-bold text-success tabular-nums">{fmt(totalCollected)}</p>
+        </CardContent></Card>
+        <Card className="shadow-card"><CardContent className="p-3 text-center">
+          <p className="text-xs text-muted-foreground">Outstanding</p>
+          <p className="text-lg font-bold text-warning tabular-nums">{fmt(totalOutstanding)}</p>
+        </CardContent></Card>
       </div>
 
       {activeBookings.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Home className="h-10 w-10 mx-auto text-muted-foreground/50 mb-2" />
-            <p className="text-sm text-muted-foreground">No active rental bookings yet.</p>
-          </CardContent>
-        </Card>
+        <Card><CardContent className="p-8 text-center">
+          <Home className="h-10 w-10 mx-auto text-muted-foreground/50 mb-2" />
+          <p className="text-sm text-muted-foreground">No active rental payments.</p>
+        </CardContent></Card>
       ) : (
         <div className="space-y-3">
           {activeBookings.map(b => (
@@ -176,43 +149,25 @@ function RentalPaymentsSection({ bookings, assets, isOwnerOrAdmin }: RentalPayme
                   <div>
                     <p className="font-semibold text-sm">{b.renter_name || 'Tenant'}</p>
                     <p className="text-xs text-muted-foreground">{b.asset?.name || 'Asset'} · {b.duration_type}</p>
-                    {b.renter_contact && <p className="text-xs text-muted-foreground">📞 {b.renter_contact}</p>}
                   </div>
                   <Badge variant={b.isOverdue ? 'destructive' : b.isUrgent ? 'secondary' : 'outline'} className="text-[10px]">
                     {b.isOverdue ? `⚠️ Overdue ${Math.abs(b.daysLeft)}d` : b.daysLeft === 0 ? '⏰ Due today' : `${b.daysLeft}d left`}
                   </Badge>
                 </div>
-
                 <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div>
-                    <p className="text-muted-foreground">Total</p>
-                    <p className="font-semibold tabular-nums">{fmt(Number(b.total_price))}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Paid</p>
-                    <p className="font-semibold text-success tabular-nums">{fmt(Number(b.amount_paid))}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Balance</p>
-                    <p className={`font-semibold tabular-nums ${b.outstanding > 0 ? 'text-warning' : 'text-success'}`}>{fmt(b.outstanding)}</p>
-                  </div>
+                  <div><p className="text-muted-foreground">Total</p><p className="font-semibold tabular-nums">{fmt(Number(b.total_price))}</p></div>
+                  <div><p className="text-muted-foreground">Paid</p><p className="font-semibold text-success tabular-nums">{fmt(Number(b.amount_paid))}</p></div>
+                  <div><p className="text-muted-foreground">Balance</p><p className={`font-semibold tabular-nums ${b.outstanding > 0 ? 'text-warning' : 'text-success'}`}>{fmt(b.outstanding)}</p></div>
                 </div>
-
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
                   <span><Calendar className="inline h-3 w-3 mr-1" />{new Date(b.start_date).toLocaleDateString()} → {new Date(b.end_date).toLocaleDateString()}</span>
-                  <Badge variant="outline" className="text-[9px]">{b.status}</Badge>
                 </div>
-
                 {isOwnerOrAdmin && b.outstanding > 0 && (
                   <Button size="sm" className="w-full h-7 text-xs" onClick={() => { setPaymentDialog(b); setPaymentAmount(String(b.outstanding)); }}>
                     <Wallet className="h-3 w-3 mr-1" /> Record Payment
                   </Button>
                 )}
-                {b.outstanding <= 0 && (
-                  <div className="flex items-center gap-1 text-xs text-success">
-                    <CheckCircle className="h-3 w-3" /> Fully paid
-                  </div>
-                )}
+                {b.outstanding <= 0 && <div className="flex items-center gap-1 text-xs text-success"><CheckCircle className="h-3 w-3" /> Fully paid</div>}
               </CardContent>
             </Card>
           ))}
@@ -221,21 +176,13 @@ function RentalPaymentsSection({ bookings, assets, isOwnerOrAdmin }: RentalPayme
 
       <Dialog open={!!paymentDialog} onOpenChange={o => { if (!o) setPaymentDialog(null); }}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Record Payment — {paymentDialog?.renter_name}</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Record Payment — {paymentDialog?.renter_name}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="p-3 bg-muted/30 rounded-lg text-sm">
-              <p>Asset: <strong>{paymentDialog?.asset?.name}</strong></p>
               <p>Outstanding: <strong className="text-warning">{fmt(paymentDialog?.outstanding || 0)}</strong></p>
             </div>
-            <div>
-              <Label>Payment Amount</Label>
-              <Input type="number" min="0" step="0.01" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} />
-            </div>
-            <Button onClick={handleRecordPayment} className="w-full">
-              <Wallet className="h-4 w-4 mr-2" /> Confirm Payment
-            </Button>
+            <div><Label>Payment Amount</Label><Input type="number" min="0" step="0.01" value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} /></div>
+            <Button onClick={handleRecordPayment} className="w-full"><Wallet className="h-4 w-4 mr-2" /> Confirm Payment</Button>
           </div>
         </DialogContent>
       </Dialog>
@@ -255,34 +202,17 @@ export default function PropertyTeam() {
   const isOwnerOrAdmin = userRole === 'owner' || userRole === 'admin';
 
   const [teamWorkers, setTeamWorkers] = useState<TeamMember[]>([]);
-  const [workerBalances, setWorkerBalances] = useState<Record<string, WorkerBalance>>({});
-  const [showAddWorker, setShowAddWorker] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
   const [editWorkerId, setEditWorkerId] = useState<string | null>(null);
-  const [workerForm, setWorkerForm] = useState({ full_name: '', rank: 'Caretaker', salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10) });
+  const [addType, setAddType] = useState<'staff' | 'tenant' | 'landlord'>('tenant');
+  const [workerForm, setWorkerForm] = useState({ full_name: '', rank: 'Tenant', salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10), occupation: '', rental_purpose: '' });
 
   const businessId = currentBusiness?.id;
 
   const loadTeamWorkers = useCallback(async () => {
     if (!businessId) return;
-    const [workersRes, paymentsRes, advancesRes] = await Promise.all([
-      supabase.from('business_team_members').select('*').eq('business_id', businessId).order('full_name'),
-      supabase.from('business_worker_payments').select('*').eq('business_id', businessId),
-      supabase.from('business_worker_advances').select('*').eq('business_id', businessId),
-    ]);
-    const workers = (workersRes.data || []) as TeamMember[];
-    setTeamWorkers(workers);
-
-    const payments = paymentsRes.data || [];
-    const advances = advancesRes.data || [];
-    const balances: Record<string, WorkerBalance> = {};
-    workers.forEach(w => {
-      const pendingPayments = payments.filter((p: any) => p.worker_id === w.id && p.status !== 'completed');
-      const totalOwed = pendingPayments.reduce((sum: number, p: any) => sum + (p.amount_due - p.amount_paid), 0);
-      const activeAdvances = advances.filter((a: any) => a.worker_id === w.id && a.status === 'active');
-      const totalAdvances = activeAdvances.reduce((sum: number, a: any) => sum + a.remaining_balance, 0);
-      balances[w.id] = { totalOwed, totalAdvances };
-    });
-    setWorkerBalances(balances);
+    const { data } = await supabase.from('business_team_members').select('*').eq('business_id', businessId).order('full_name');
+    setTeamWorkers((data || []) as TeamMember[]);
   }, [businessId]);
 
   useEffect(() => { loadMembers(); loadTeamWorkers(); }, [currentBusiness, loadTeamWorkers]);
@@ -307,11 +237,11 @@ export default function PropertyTeam() {
     }
   }
 
-  function resetWorkerForm() {
-    setWorkerForm({ full_name: '', rank: 'Caretaker', salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10) });
+  function resetForm() {
+    setWorkerForm({ full_name: '', rank: addType === 'staff' ? 'Caretaker' : addType === 'landlord' ? 'Landlord' : 'Tenant', salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10), occupation: '', rental_purpose: '' });
   }
 
-  async function handleAddWorker(e: React.FormEvent) {
+  async function handleSubmitMember(e: React.FormEvent) {
     e.preventDefault();
     if (!businessId || !workerForm.full_name.trim()) return;
     const { error } = await supabase.from('business_team_members').insert({
@@ -326,13 +256,13 @@ export default function PropertyTeam() {
       next_payment_due: new Date().toISOString().slice(0, 10),
     } as any);
     if (error) { toast.error(error.message); return; }
-    toast.success('Team member added!');
-    resetWorkerForm();
-    setShowAddWorker(false);
+    toast.success(`${workerForm.rank} added!`);
+    resetForm();
+    setShowAddDialog(false);
     loadTeamWorkers();
   }
 
-  async function handleEditWorker(e: React.FormEvent) {
+  async function handleEditMember(e: React.FormEvent) {
     e.preventDefault();
     if (!editWorkerId) return;
     const { error } = await supabase.from('business_team_members').update({
@@ -344,52 +274,49 @@ export default function PropertyTeam() {
     }).eq('id', editWorkerId);
     if (error) { toast.error(error.message); return; }
     toast.success('Updated!');
-    resetWorkerForm();
-    setEditWorkerId(null);
+    resetForm(); setEditWorkerId(null);
     loadTeamWorkers();
   }
 
-  function openEditWorker(w: TeamMember) {
-    setWorkerForm({ full_name: w.full_name, rank: w.rank, salary: String(w.salary), phone: w.phone, hire_date: w.hire_date });
+  function openEdit(w: TeamMember) {
+    setWorkerForm({ full_name: w.full_name, rank: w.rank, salary: String(w.salary), phone: w.phone, hire_date: w.hire_date, occupation: '', rental_purpose: '' });
     setEditWorkerId(w.id);
   }
 
-  async function deactivateWorker(id: string) { await supabase.from('business_team_members').update({ is_active: false }).eq('id', id); loadTeamWorkers(); }
-  async function reactivateWorker(id: string) { await supabase.from('business_team_members').update({ is_active: true }).eq('id', id); loadTeamWorkers(); }
   async function deleteWorker(id: string) { await supabase.from('business_team_members').delete().eq('id', id); toast.success('Removed'); loadTeamWorkers(); }
 
   const activeWorkers = teamWorkers.filter(w => w.is_active);
-  const inactiveWorkers = teamWorkers.filter(w => !w.is_active);
-  const totalSalary = activeWorkers.reduce((sum, w) => sum + Number(w.salary), 0);
+  const tenants = activeWorkers.filter(w => w.rank === TENANT_RANK);
+  const landlords = activeWorkers.filter(w => w.rank === LANDLORD_RANK);
+  const staff = activeWorkers.filter(w => w.rank !== TENANT_RANK && w.rank !== LANDLORD_RANK);
 
   const myMembership = members.find(m => m.user_id === user?.id);
   const myJoinDate = memberships.find(m => m.business_id === currentBusiness?.id && m.user_id === user?.id)?.created_at;
   const tenure = myJoinDate ? Math.floor((Date.now() - new Date(myJoinDate).getTime()) / (1000 * 60 * 60 * 24)) : 0;
-  const tenureLabel = tenure < 30 ? `${tenure} days` : tenure < 365 ? `${Math.floor(tenure / 30)} months` : `${Math.floor(tenure / 365)} yr ${Math.floor((tenure % 365) / 30)} mo`;
+  const tenureLabel = tenure < 30 ? `${tenure} days` : tenure < 365 ? `${Math.floor(tenure / 30)} months` : `${Math.floor(tenure / 365)} yr`;
+
+  function getRanksForType() {
+    if (addType === 'tenant') return [TENANT_RANK];
+    if (addType === 'landlord') return [LANDLORD_RANK];
+    return STAFF_RANKS;
+  }
+
+  function openAddDialog(type: 'staff' | 'tenant' | 'landlord') {
+    setAddType(type);
+    setWorkerForm({ full_name: '', rank: type === 'staff' ? 'Caretaker' : type === 'landlord' ? 'Landlord' : 'Tenant', salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10), occupation: '', rental_purpose: '' });
+    setShowAddDialog(true);
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="h-6 w-6" /> Property Team</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {activeWorkers.length} team member{activeWorkers.length !== 1 ? 's' : ''}{isOwnerOrAdmin && ` · Monthly payroll: ${fmt(totalSalary)}`}
-          </p>
-        </div>
-        {isOwnerOrAdmin && (
-          <Button onClick={() => {
-            if (activeWorkers.length >= maxWorkers) {
-              toast.info(`Free plan allows up to ${maxWorkers} members. Upgrade for unlimited.`);
-              return;
-            }
-            resetWorkerForm(); setShowAddWorker(true);
-          }}>
-            <Plus className="h-4 w-4 mr-1" />Add Member
-          </Button>
-        )}
+      <div>
+        <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="h-6 w-6" /> Property Team</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          {tenants.length} tenant{tenants.length !== 1 ? 's' : ''} · {landlords.length} landlord{landlords.length !== 1 ? 's' : ''} · {staff.length}/{MAX_STAFF} staff
+        </p>
       </div>
 
-      {/* Own profile card for non-owners */}
+      {/* Own profile for non-owners */}
       {!isOwnerOrAdmin && myMembership && (
         <Card className="shadow-card border-primary/20">
           <CardContent className="p-4">
@@ -417,158 +344,217 @@ export default function PropertyTeam() {
       )}
 
       <RedeemCodeSection onRedeemed={() => { loadMembers(); loadTeamWorkers(); }} />
-
       <AdSpace variant="banner" />
 
-      <Tabs defaultValue="team" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="team" className="flex items-center gap-2"><Users className="h-4 w-4" /> Team</TabsTrigger>
-          <TabsTrigger value="rentals" className="flex items-center gap-2"><Home className="h-4 w-4" /> Rental Payments</TabsTrigger>
+      <Tabs defaultValue="tenants" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="tenants" className="text-xs">🏠 Tenants</TabsTrigger>
+          <TabsTrigger value="landlords" className="text-xs">🔑 Landlords</TabsTrigger>
+          <TabsTrigger value="staff" className="text-xs">👷 Staff</TabsTrigger>
+          <TabsTrigger value="payments" className="text-xs">💰 Payments</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="team" className="space-y-4 mt-4">
+        {/* TENANTS TAB */}
+        <TabsContent value="tenants" className="space-y-4 mt-4">
           {isOwnerOrAdmin && (
-            <Card className="shadow-card border-dashed">
-              <CardContent className="p-4 space-y-3">
-                <h2 className="text-base font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> Invite Team Members</h2>
-                <p className="text-sm text-muted-foreground">Generate a code to add team members who can help manage your properties.</p>
-                {workerCode ? (
-                  <div className="space-y-2">
-                    <div className="rounded-lg p-3 text-center bg-primary/5">
-                      <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
-                      <p className="text-xs text-muted-foreground mt-1">🔐 Team Code — Expires in 7 days</p>
-                    </div>
-                    <ShareButtons code={workerCode} />
-                  </div>
-                ) : (
-                  <Button onClick={handleGenerateCode} disabled={loading}><UserPlus className="h-4 w-4 mr-2" /> Generate Team Code</Button>
-                )}
-              </CardContent>
-            </Card>
+            <Button onClick={() => openAddDialog('tenant')} className="w-full"><Plus className="h-4 w-4 mr-1" /> Add Tenant</Button>
           )}
-
-          {/* All Team Members */}
-          <Card className="shadow-card">
-            <CardContent className="p-4">
-              <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
-                <Users className="h-4 w-4" /> All Team Members ({members.filter(m => m.role !== 'owner').length + activeWorkers.length})
-              </h2>
-              {members.filter(m => m.role !== 'owner').length === 0 && activeWorkers.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">No team members yet. Add manually or invite via code.</p>
-              ) : (
-                <div className="space-y-2">
-                  {members.map(member => {
-                    const matchedWorker = activeWorkers.find(w => w.full_name.toLowerCase() === (member.full_name || '').toLowerCase());
-                    const bal = matchedWorker ? (workerBalances[matchedWorker.id] || { totalOwed: 0, totalAdvances: 0 }) : { totalOwed: 0, totalAdvances: 0 };
-                    return (
-                      <div key={member.user_id} className="flex items-center justify-between p-3 rounded-lg border">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            {getRoleIcon(member.role)}
-                            <p className="font-medium text-sm">{member.full_name || 'Unknown'}</p>
-                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20">📱 App User</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground ml-6">{member.email}{member.role !== 'owner' && ` · ${member.role}`}</p>
-                          {bal.totalOwed > 0 && <p className="text-xs text-destructive mt-0.5 ml-6"><AlertTriangle className="inline h-3 w-3 mr-1" />Owes: {fmt(bal.totalOwed)}</p>}
-                          {bal.totalAdvances > 0 && <p className="text-xs text-warning mt-0.5 ml-6"><ArrowDownCircle className="inline h-3 w-3 mr-1" />Advance: {fmt(bal.totalAdvances)}</p>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {isOwnerOrAdmin && member.role !== 'owner' ? (
-                            <>
-                              <Select value={member.role} onValueChange={v => handleRoleChange(member.user_id, v)}>
-                                <SelectTrigger className="w-24 h-8 text-xs"><SelectValue /></SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="admin">Admin</SelectItem>
-                                  <SelectItem value="worker">Worker</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <Button variant="ghost" size="icon" onClick={() => handleRemove(member.user_id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
-                            </>
-                          ) : (
-                            member.role === 'owner' && <span className="text-xs font-medium capitalize px-2 py-1 rounded-full bg-muted">{member.role}</span>
-                          )}
+          <p className="text-xs text-muted-foreground">People renting your properties or assets</p>
+          {tenants.length === 0 ? (
+            <Card><CardContent className="p-6 text-center text-sm text-muted-foreground">No tenants registered yet</CardContent></Card>
+          ) : (
+            <div className="space-y-2">
+              {tenants.map(t => (
+                <Card key={t.id}>
+                  <CardContent className="p-3 flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center text-sm">🏠</div>
+                        <div>
+                          <p className="text-sm font-medium">{t.full_name}</p>
+                          <p className="text-xs text-muted-foreground">{t.phone && `📞 ${t.phone} · `}Since {new Date(t.hire_date).toLocaleDateString()}</p>
                         </div>
                       </div>
-                    );
-                  })}
-
-                  {activeWorkers.map(w => {
-                    const bal = workerBalances[w.id] || { totalOwed: 0, totalAdvances: 0 };
-                    const isAlsoAppUser = members.some(m => m.full_name?.toLowerCase() === w.full_name.toLowerCase());
-                    if (isAlsoAppUser) return null;
-                    return (
-                      <div key={w.id} className="flex items-center justify-between p-3 rounded-lg border">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <User className="h-4 w-4 text-muted-foreground" />
-                            <p className="text-sm font-medium">{w.full_name}</p>
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-muted/50 text-muted-foreground">📝 Manual</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground ml-6">{w.rank}{w.phone && ` · 📞 ${w.phone}`} · Since {new Date(w.hire_date).toLocaleDateString()}</p>
-                          {bal.totalOwed > 0 && <p className="text-xs text-destructive mt-0.5 ml-6"><AlertTriangle className="inline h-3 w-3 mr-1" />Owes: {fmt(bal.totalOwed)}</p>}
-                          {bal.totalAdvances > 0 && <p className="text-xs text-warning mt-0.5 ml-6"><ArrowDownCircle className="inline h-3 w-3 mr-1" />Advance: {fmt(bal.totalAdvances)}</p>}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {isOwnerOrAdmin && <span className="text-sm font-semibold text-success tabular-nums">{fmt(Number(w.salary))}/mo</span>}
-                          {isOwnerOrAdmin && (
-                            <>
-                              <Button variant="ghost" size="icon" onClick={() => openEditWorker(w)}><Edit2 className="h-3.5 w-3.5" /></Button>
-                              <Button variant="ghost" size="icon" onClick={() => deactivateWorker(w.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {inactiveWorkers.length > 0 && (
-            <Card className="shadow-card border-destructive/20">
-              <CardContent className="p-4">
-                <h2 className="text-sm font-semibold text-destructive mb-2">Inactive ({inactiveWorkers.length})</h2>
-                {inactiveWorkers.map(w => (
-                  <div key={w.id} className="flex items-center justify-between p-2 rounded border mb-1">
-                    <span className="text-sm text-muted-foreground">{w.full_name} — {w.rank}</span>
-                    <div className="flex gap-1">
-                      <Button size="sm" variant="outline" onClick={() => reactivateWorker(w.id)}>Reactivate</Button>
-                      <Button size="sm" variant="destructive" onClick={() => deleteWorker(w.id)}>Remove</Button>
                     </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
+                    {isOwnerOrAdmin && (
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(t)}><Edit2 className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteWorker(t.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           )}
         </TabsContent>
 
-        <TabsContent value="rentals" className="mt-4 space-y-4">
+        {/* LANDLORDS TAB */}
+        <TabsContent value="landlords" className="space-y-4 mt-4">
+          {isOwnerOrAdmin && (
+            <Button onClick={() => openAddDialog('landlord')} className="w-full"><Plus className="h-4 w-4 mr-1" /> Add Landlord</Button>
+          )}
+          <p className="text-xs text-muted-foreground">Property owners whose assets you are renting</p>
+          {landlords.length === 0 ? (
+            <Card><CardContent className="p-6 text-center text-sm text-muted-foreground">No landlords registered yet</CardContent></Card>
+          ) : (
+            <div className="space-y-2">
+              {landlords.map(l => (
+                <Card key={l.id}>
+                  <CardContent className="p-3 flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-amber-500/10 flex items-center justify-center text-sm">🔑</div>
+                        <div>
+                          <p className="text-sm font-medium">{l.full_name}</p>
+                          <p className="text-xs text-muted-foreground">{l.phone && `📞 ${l.phone} · `}Since {new Date(l.hire_date).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                    {isOwnerOrAdmin && (
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(l)}><Edit2 className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteWorker(l.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* STAFF TAB */}
+        <TabsContent value="staff" className="space-y-4 mt-4">
+          {isOwnerOrAdmin && (
+            <>
+              <Button onClick={() => {
+                if (staff.length >= MAX_STAFF) { toast.info(`You can add up to ${MAX_STAFF} staff members to help manage your assets.`); return; }
+                openAddDialog('staff');
+              }} className="w-full"><Plus className="h-4 w-4 mr-1" /> Add Staff ({staff.length}/{MAX_STAFF})</Button>
+              
+              {/* Invite by code */}
+              <Card className="shadow-card border-dashed">
+                <CardContent className="p-4 space-y-3">
+                  <h2 className="text-base font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> Invite Staff via Code</h2>
+                  <p className="text-sm text-muted-foreground">Generate a code for family members or employees with the app.</p>
+                  {workerCode ? (
+                    <div className="space-y-2">
+                      <div className="rounded-lg p-3 text-center bg-primary/5">
+                        <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
+                        <p className="text-xs text-muted-foreground mt-1">🔐 Expires in 7 days</p>
+                      </div>
+                      <ShareButtons code={workerCode} />
+                    </div>
+                  ) : (
+                    <Button onClick={handleGenerateCode} disabled={loading}><UserPlus className="h-4 w-4 mr-2" /> Generate Staff Code</Button>
+                  )}
+                </CardContent>
+              </Card>
+            </>
+          )}
+          <p className="text-xs text-muted-foreground">Family or employees helping manage your assets (max {MAX_STAFF})</p>
+
+          {/* App users (members) */}
+          {members.filter(m => m.role !== 'owner').length > 0 && (
+            <div className="space-y-2">
+              {members.filter(m => m.role !== 'owner').map(member => (
+                <Card key={member.user_id}>
+                  <CardContent className="p-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {getRoleIcon(member.role)}
+                      <div>
+                        <p className="text-sm font-medium">{member.full_name || 'Unknown'}</p>
+                        <div className="flex items-center gap-1">
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-primary/10 text-primary">📱 App User</Badge>
+                          <span className="text-xs text-muted-foreground">{member.role}</span>
+                        </div>
+                      </div>
+                    </div>
+                    {isOwnerOrAdmin && member.role !== 'owner' && (
+                      <div className="flex items-center gap-2">
+                        <Select value={member.role} onValueChange={v => handleRoleChange(member.user_id, v)}>
+                          <SelectTrigger className="w-24 h-8 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="worker">Worker</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemove(member.user_id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* Manual staff */}
+          {staff.length === 0 && members.filter(m => m.role !== 'owner').length === 0 ? (
+            <Card><CardContent className="p-6 text-center text-sm text-muted-foreground">No staff members yet. Add manually or invite via code.</CardContent></Card>
+          ) : (
+            <div className="space-y-2">
+              {staff.map(s => (
+                <Card key={s.id}>
+                  <CardContent className="p-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-sm">👷</div>
+                      <div>
+                        <p className="text-sm font-medium">{s.full_name}</p>
+                        <p className="text-xs text-muted-foreground">{s.rank}{s.phone && ` · 📞 ${s.phone}`}</p>
+                        {isOwnerOrAdmin && s.salary > 0 && <p className="text-xs text-success">{fmt(Number(s.salary))}/mo</p>}
+                      </div>
+                    </div>
+                    {isOwnerOrAdmin && (
+                      <div className="flex gap-1">
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(s)}><Edit2 className="h-3.5 w-3.5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteWorker(s.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* PAYMENTS TAB */}
+        <TabsContent value="payments" className="mt-4 space-y-4">
           <RentalPaymentsSection bookings={bookings} assets={assets} isOwnerOrAdmin={isOwnerOrAdmin} />
         </TabsContent>
       </Tabs>
 
       {/* Add/Edit Dialog */}
-      <Dialog open={showAddWorker || !!editWorkerId} onOpenChange={o => { if (!o) { setShowAddWorker(false); setEditWorkerId(null); resetWorkerForm(); } }}>
+      <Dialog open={showAddDialog || !!editWorkerId} onOpenChange={o => { if (!o) { setShowAddDialog(false); setEditWorkerId(null); resetForm(); } }}>
         <DialogContent>
-          <DialogHeader><DialogTitle>{editWorkerId ? 'Edit Team Member' : 'Add Team Member'}</DialogTitle></DialogHeader>
-          <form onSubmit={editWorkerId ? handleEditWorker : handleAddWorker} className="space-y-3">
-            <div><Label>Full Name *</Label><Input value={workerForm.full_name} onChange={e => setWorkerForm(f => ({ ...f, full_name: e.target.value }))} onBlur={e => setWorkerForm(f => ({ ...f, full_name: toTitleCase(e.target.value) }))} required /></div>
+          <DialogHeader>
+            <DialogTitle>{editWorkerId ? 'Edit Member' : `Add ${addType === 'tenant' ? 'Tenant' : addType === 'landlord' ? 'Landlord' : 'Staff Member'}`}</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={editWorkerId ? handleEditMember : handleSubmitMember} className="space-y-3">
+            <div><Label>Full Name *</Label><Input value={workerForm.full_name} onChange={e => setWorkerForm(f => ({ ...f, full_name: e.target.value }))} required /></div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Role</Label>
                 <Select value={workerForm.rank} onValueChange={v => setWorkerForm(f => ({ ...f, rank: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{RANKS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+                  <SelectContent>{getRanksForType().map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div><Label>Monthly Salary</Label><Input type="number" min="0" step="0.01" value={workerForm.salary} onChange={e => setWorkerForm(f => ({ ...f, salary: e.target.value }))} /></div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
               <div><Label>Phone</Label><Input value={workerForm.phone} onChange={e => setWorkerForm(f => ({ ...f, phone: e.target.value }))} /></div>
-              <div><Label>Start Date</Label><Input type="date" value={workerForm.hire_date} onChange={e => setWorkerForm(f => ({ ...f, hire_date: e.target.value }))} /></div>
             </div>
-            <Button type="submit" className="w-full">{editWorkerId ? 'Save Changes' : 'Add Member'}</Button>
+            {addType === 'tenant' && !editWorkerId && (
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Occupation</Label><Input value={workerForm.occupation} onChange={e => setWorkerForm(f => ({ ...f, occupation: e.target.value }))} placeholder="e.g. Farmer" /></div>
+                <div><Label>Purpose of Renting</Label><Input value={workerForm.rental_purpose} onChange={e => setWorkerForm(f => ({ ...f, rental_purpose: e.target.value }))} placeholder="e.g. Farming" /></div>
+              </div>
+            )}
+            {addType === 'staff' && (
+              <div className="grid grid-cols-2 gap-3">
+                <div><Label>Monthly Salary</Label><Input type="number" min="0" step="0.01" value={workerForm.salary} onChange={e => setWorkerForm(f => ({ ...f, salary: e.target.value }))} /></div>
+                <div><Label>Start Date</Label><Input type="date" value={workerForm.hire_date} onChange={e => setWorkerForm(f => ({ ...f, hire_date: e.target.value }))} /></div>
+              </div>
+            )}
+            <Button type="submit" className="w-full">{editWorkerId ? 'Save Changes' : `Add ${addType === 'tenant' ? 'Tenant' : addType === 'landlord' ? 'Landlord' : 'Staff'}`}</Button>
           </form>
         </DialogContent>
       </Dialog>
