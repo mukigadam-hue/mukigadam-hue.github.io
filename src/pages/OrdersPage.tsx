@@ -962,103 +962,131 @@ export default function OrdersPage() {
             {orderMode === 'request' && (
               <div className="border rounded-lg p-3 space-y-3">
                 <p className="text-xs font-medium flex items-center gap-1"><Building2 className="h-3.5 w-3.5" /> Send To (Recipient Business)</p>
-                <div className="flex gap-2">
-                  <Button size="sm" variant={recipientMode === 'contact' ? 'default' : 'outline'} onClick={() => { setRecipientMode('contact'); setRecipientLookup(null); setRecipientCode(''); }}>
-                    From Contacts
-                  </Button>
-                  <Button size="sm" variant={recipientMode === 'code' ? 'default' : 'outline'} onClick={() => { setRecipientMode('code'); setSelectedContactBusinessId(''); }}>
-                    Enter Business Code
-                  </Button>
-                </div>
+                
+                {/* Pre-filled supplier from Discover page */}
+                {recipientLookup && prefilledSupplierName ? (
+                  <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <CheckCircle className="h-3.5 w-3.5 text-success" />
+                      Sending to: <strong>{recipientLookup.name}</strong>
+                    </span>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setRecipientLookup(null); setPrefilledSupplierName(''); setSupplierProducts([]); }}>Change</Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant={recipientMode === 'contact' ? 'default' : 'outline'} onClick={() => { setRecipientMode('contact'); setRecipientLookup(null); setRecipientCode(''); }}>
+                        From Contacts
+                      </Button>
+                      <Button size="sm" variant={recipientMode === 'code' ? 'default' : 'outline'} onClick={() => { setRecipientMode('code'); setSelectedContactBusinessId(''); }}>
+                        Enter Business Code
+                      </Button>
+                    </div>
 
-                {recipientMode === 'contact' && (
-                  <div className="space-y-2">
-                    {contacts.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No contacts saved. Use a business code instead, or add contacts from the Contacts page.</p>
-                    ) : (
-                      <>
-                        {selectedContactBusinessId ? (
-                          <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center justify-between">
-                            <span className="flex items-center gap-2">
-                              <CheckCircle className="h-3.5 w-3.5 text-success" />
-                              Sending to: <strong>{contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.nickname || contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.business_name}</strong>
-                            </span>
-                            <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setSelectedContactBusinessId(''); setContactPickerOpen(true); }}>Change</Button>
-                          </div>
+                    {recipientMode === 'contact' && (
+                      <div className="space-y-2">
+                        {contacts.length === 0 ? (
+                          <p className="text-xs text-muted-foreground">No contacts saved. Use a business code instead, or add contacts from the Contacts page.</p>
                         ) : (
-                          <Button size="sm" variant="outline" className="w-full justify-start gap-2" onClick={() => { setContactPickerOpen(true); setContactSearch(''); }}>
-                            <Search className="h-3.5 w-3.5" /> Select a contact...
-                          </Button>
-                        )}
-
-                        <Dialog open={contactPickerOpen} onOpenChange={setContactPickerOpen}>
-                          <DialogContent className="max-w-sm">
-                            <DialogHeader><DialogTitle>Choose Contact</DialogTitle></DialogHeader>
-                            <div className="space-y-3">
-                              <Input
-                                value={contactSearch}
-                                onChange={e => setContactSearch(e.target.value)}
-                                placeholder="Search contacts..."
-                                autoFocus
-                              />
-                              <div className="max-h-60 overflow-y-auto space-y-1">
-                                {contacts
-                                  .filter(c => {
-                                    const q = contactSearch.toLowerCase();
-                                    return !q || (c.nickname || '').toLowerCase().includes(q) || (c.business_name || '').toLowerCase().includes(q) || (c.business_code || '').toLowerCase().includes(q);
-                                  })
-                                  .map(c => (
-                                    <button
-                                      key={c.contact_business_id}
-                                      className="w-full text-left p-2.5 rounded-md hover:bg-accent transition-colors flex items-center gap-3"
-                                      onClick={() => {
-                                        setSelectedContactBusinessId(c.contact_business_id);
-                                        setContactPickerOpen(false);
-                                      }}
-                                    >
-                                      <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm">🏪</div>
-                                      <div>
-                                        <p className="text-sm font-medium">{c.nickname || c.business_name || 'Unknown'}</p>
-                                        {c.nickname && c.business_name && <p className="text-[10px] text-muted-foreground">{c.business_name}</p>}
-                                        {c.business_code && <p className="text-[10px] text-muted-foreground font-mono">{c.business_code}</p>}
-                                      </div>
-                                    </button>
-                                  ))
-                                }
-                                {contacts.filter(c => {
-                                  const q = contactSearch.toLowerCase();
-                                  return !q || (c.nickname || '').toLowerCase().includes(q) || (c.business_name || '').toLowerCase().includes(q) || (c.business_code || '').toLowerCase().includes(q);
-                                }).length === 0 && (
-                                  <p className="text-xs text-center text-muted-foreground py-4">No contacts match your search</p>
-                                )}
+                          <>
+                            {selectedContactBusinessId ? (
+                              <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center justify-between">
+                                <span className="flex items-center gap-2">
+                                  <CheckCircle className="h-3.5 w-3.5 text-success" />
+                                  Sending to: <strong>{contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.nickname || contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.business_name}</strong>
+                                </span>
+                                <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setSelectedContactBusinessId(''); setContactPickerOpen(true); }}>Change</Button>
                               </div>
-                            </div>
-                          </DialogContent>
-                        </Dialog>
-                      </>
+                            ) : (
+                              <Button size="sm" variant="outline" className="w-full justify-start gap-2" onClick={() => { setContactPickerOpen(true); setContactSearch(''); }}>
+                                <Search className="h-3.5 w-3.5" /> Select a contact...
+                              </Button>
+                            )}
+
+                            <Dialog open={contactPickerOpen} onOpenChange={setContactPickerOpen}>
+                              <DialogContent className="max-w-sm">
+                                <DialogHeader><DialogTitle>Choose Contact</DialogTitle></DialogHeader>
+                                <div className="space-y-3">
+                                  <Input
+                                    value={contactSearch}
+                                    onChange={e => setContactSearch(e.target.value)}
+                                    placeholder="Search contacts..."
+                                    autoFocus
+                                  />
+                                  <div className="max-h-60 overflow-y-auto space-y-1">
+                                    {contacts
+                                      .filter(c => {
+                                        const q = contactSearch.toLowerCase();
+                                        return !q || (c.nickname || '').toLowerCase().includes(q) || (c.business_name || '').toLowerCase().includes(q) || (c.business_code || '').toLowerCase().includes(q);
+                                      })
+                                      .map(c => (
+                                        <button
+                                          key={c.contact_business_id}
+                                          className="w-full text-left p-2.5 rounded-md hover:bg-accent transition-colors flex items-center gap-3"
+                                          onClick={() => {
+                                            setSelectedContactBusinessId(c.contact_business_id);
+                                            setContactPickerOpen(false);
+                                          }}
+                                        >
+                                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm">🏪</div>
+                                          <div>
+                                            <p className="text-sm font-medium">{c.nickname || c.business_name || 'Unknown'}</p>
+                                            {c.nickname && c.business_name && <p className="text-[10px] text-muted-foreground">{c.business_name}</p>}
+                                            {c.business_code && <p className="text-[10px] text-muted-foreground font-mono">{c.business_code}</p>}
+                                          </div>
+                                        </button>
+                                      ))
+                                    }
+                                    {contacts.filter(c => {
+                                      const q = contactSearch.toLowerCase();
+                                      return !q || (c.nickname || '').toLowerCase().includes(q) || (c.business_name || '').toLowerCase().includes(q) || (c.business_code || '').toLowerCase().includes(q);
+                                    }).length === 0 && (
+                                      <p className="text-xs text-center text-muted-foreground py-4">No contacts match your search</p>
+                                    )}
+                                  </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                          </>
+                        )}
+                      </div>
                     )}
-                  </div>
+
+                    {recipientMode === 'code' && (
+                      <div className="flex gap-2">
+                        <Input
+                          value={recipientCode}
+                          onChange={e => { setRecipientCode(e.target.value.toUpperCase()); setRecipientLookup(null); }}
+                          placeholder="Enter business code..."
+                          className="flex-1 uppercase"
+                        />
+                        <Button size="sm" variant="outline" onClick={lookupRecipientByCode} disabled={lookingUp || recipientCode.length < 3}>
+                          <Search className="h-3.5 w-3.5 mr-1" />{lookingUp ? 'Looking...' : 'Find'}
+                        </Button>
+                      </div>
+                    )}
+
+                    {recipientMode === 'code' && recipientLookup && (
+                      <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center gap-2">
+                        <CheckCircle className="h-3.5 w-3.5 text-success" />
+                        <span>Sending to: <strong>{recipientLookup.name}</strong></span>
+                      </div>
+                    )}
+                  </>
                 )}
 
-                {recipientMode === 'code' && (
-                  <div className="flex gap-2">
-                    <Input
-                      value={recipientCode}
-                      onChange={e => { setRecipientCode(e.target.value.toUpperCase()); setRecipientLookup(null); }}
-                      placeholder="Enter 8-char business code..."
-                      className="flex-1 uppercase"
-                      maxLength={8}
-                    />
-                    <Button size="sm" variant="outline" onClick={lookupRecipientByCode} disabled={lookingUp || recipientCode.length < 3}>
-                      <Search className="h-3.5 w-3.5 mr-1" />{lookingUp ? 'Looking...' : 'Find'}
-                    </Button>
-                  </div>
-                )}
-
-                {recipientMode === 'code' && recipientLookup && (
-                  <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center gap-2">
-                    <CheckCircle className="h-3.5 w-3.5 text-success" />
-                    <span>Sending to: <strong>{recipientLookup.name}</strong></span>
+                {/* Supplier products list when pre-filled */}
+                {supplierProducts.length > 0 && (
+                  <div className="bg-muted/30 border rounded-md p-2">
+                    <p className="text-[10px] font-semibold text-muted-foreground mb-1">📦 Available items from {prefilledSupplierName || 'supplier'}:</p>
+                    <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+                      {supplierProducts.map((p, i) => (
+                        <button key={i} className="text-[10px] px-2 py-0.5 rounded-full border bg-background hover:bg-accent transition-colors"
+                          onClick={() => setForm(f => ({ ...f, name: p.name, category: p.category || '', quality: p.quality || '' }))}>
+                          {p.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
