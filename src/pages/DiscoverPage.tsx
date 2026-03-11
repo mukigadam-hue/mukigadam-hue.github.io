@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Search, MapPin, Phone, Building2, Factory, Store, Copy, Check, Globe } from 'lucide-react';
+import { Search, MapPin, Phone, Building2, Factory, Store, Copy, Check, Globe, ShoppingCart, CalendarCheck, Home } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
