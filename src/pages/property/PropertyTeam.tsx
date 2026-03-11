@@ -764,17 +764,18 @@ export default function PropertyTeam() {
 
                   <Card className="shadow-card border-dashed">
                     <CardContent className="p-4 space-y-3">
-                      <h2 className="text-base font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> Invite Staff via Code</h2>
+                      <h2 className="text-base font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> Invite Staff to App</h2>
+                      <p className="text-xs text-muted-foreground">Generate a code and share it with a staff member so they can access your property on the app.</p>
                       {workerCode ? (
                         <div className="space-y-2">
                           <div className="rounded-lg p-3 text-center bg-primary/5">
                             <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
-                            <p className="text-xs text-muted-foreground mt-1">🔐 Expires in 7 days</p>
+                            <p className="text-xs text-muted-foreground mt-1">🔐 Share this code with your staff — Expires in 7 days</p>
                           </div>
                           <ShareButtons code={workerCode} />
                         </div>
                       ) : (
-                        <Button onClick={handleGenerateCode} disabled={loading}><UserPlus className="h-4 w-4 mr-2" /> Generate Staff Code</Button>
+                        <Button onClick={handleGenerateCode} disabled={loading}><UserPlus className="h-4 w-4 mr-2" /> Generate Staff Invite Code</Button>
                       )}
                     </CardContent>
                   </Card>
