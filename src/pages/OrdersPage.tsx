@@ -193,7 +193,6 @@ export default function OrdersPage() {
     : [...new Set(activeStock.map(s => s.quality).filter(Boolean))];
 
   const [scannerOpen, setScannerOpen] = useState(false);
-  const [orderMode, setOrderMode] = useState<'my_order' | 'inbox' | 'request'>('my_order');
 
   const [contactSearch, setContactSearch] = useState('');
   const [contactPickerOpen, setContactPickerOpen] = useState(false);
