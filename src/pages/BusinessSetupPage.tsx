@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useBusiness } from '@/context/BusinessContext';
+import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,7 @@ import i18n from '@/i18n';
 
 export default function BusinessSetupPage() {
   const { createBusiness, redeemInviteCode } = useBusiness();
+  const { signOut } = useAuth();
   const { setCurrency } = useCurrency();
   const [tab, setTab] = useState<'create' | 'join'>('create');
   const [businessType, setBusinessType] = useState<'business' | 'factory' | 'property'>('business');
@@ -41,6 +43,12 @@ export default function BusinessSetupPage() {
         i18n.changeLanguage(country.language);
       }
     }
+  }
+
+  async function handleExit() {
+    setLoading(true);
+    await signOut();
+    setLoading(false);
   }
 
   async function handleCreate(e: React.FormEvent) {
@@ -79,6 +87,9 @@ export default function BusinessSetupPage() {
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold">📦 BizTrack</h1>
             <p className="text-sm text-muted-foreground">Set up your business, factory, or property — or join an existing one</p>
+            <Button type="button" variant="ghost" size="sm" onClick={handleExit} disabled={loading}>
+              Exit to sign in / sign up
+            </Button>
           </div>
 
           <div className="flex gap-2">
