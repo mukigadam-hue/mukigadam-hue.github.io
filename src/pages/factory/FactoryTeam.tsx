@@ -135,8 +135,11 @@ export default function FactoryTeam() {
   async function handleRedeem() {
     if (!redeemCode.trim()) return;
     setLoading(true);
-    await redeemInviteCode(redeemCode.trim());
-    setRedeemCode('');
+    const success = await redeemInviteCode(redeemCode.trim());
+    if (success) {
+      setRedeemCode('');
+      await loadAppMembers();
+    }
     setLoading(false);
   }
 
