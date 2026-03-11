@@ -235,7 +235,9 @@ export default function PropertyAssets() {
             const showAd = idx > 0 && idx % 8 === 0;
             const status = getBookingStatus(asset.id);
             return (
-              <Card key={asset.id} className="overflow-hidden">
+              <React.Fragment key={asset.id}>
+                {showAd && <div className="sm:col-span-2"><AdSpace variant="inline" /></div>}
+              <Card className="overflow-hidden">
                 {asset.image_url_1 && (
                   <div className="h-32 overflow-hidden">
                     <img src={asset.image_url_1} alt={asset.name} className="w-full h-full object-cover" />
