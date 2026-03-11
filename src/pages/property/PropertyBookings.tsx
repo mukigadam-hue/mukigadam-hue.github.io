@@ -361,11 +361,27 @@ export default function PropertyBookings() {
   const { bookings, assets, updateBooking } = useProperty();
   const { userRole, currentBusiness } = useBusiness();
   const { fmt } = useCurrency();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [checkInBooking, setCheckInBooking] = useState<string | null>(null);
   const [bookNowOpen, setBookNowOpen] = useState(false);
   const [paymentDialog, setPaymentDialog] = useState<any>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
+  
+  // Pre-filled property from Discover page
+  const [prefilledPropertyId, setPrefilledPropertyId] = useState('');
+  const [prefilledPropertyName, setPrefilledPropertyName] = useState('');
 
+  // Auto-open BookNow when coming from Discover
+  useEffect(() => {
+    const propId = searchParams.get('property_id');
+    const propName = searchParams.get('property_name');
+    if (propId) {
+      setPrefilledPropertyId(propId);
+      setPrefilledPropertyName(propName ? decodeURIComponent(propName) : '');
+      setBookNowOpen(true);
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
   const isOwnerOrAdmin = userRole === 'owner' || userRole === 'admin';
 
   const pending = bookings.filter(b => b.status === 'pending');
