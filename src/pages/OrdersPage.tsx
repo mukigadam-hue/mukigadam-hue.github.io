@@ -73,6 +73,7 @@ export default function OrdersPage() {
   // Supplier products when coming from Discover page
   const [supplierProducts, setSupplierProducts] = useState<{ name: string; category: string; quality: string; retail_price: number }[]>([]);
   const [prefilledSupplierName, setPrefilledSupplierName] = useState('');
+  const [fromDiscover, setFromDiscover] = useState(false);
 
   // Auto-fill supplier from URL params (from Discover page "Order Now")
   useEffect(() => {
@@ -80,6 +81,8 @@ export default function OrdersPage() {
     const supplierName = searchParams.get('supplier_name');
     if (supplierId && supplierName) {
       setOrderMode('request');
+      setTab('my_requests');
+      setFromDiscover(true);
       setRecipientMode('code');
       setRecipientLookup({ id: supplierId, name: decodeURIComponent(supplierName) });
       setPrefilledSupplierName(decodeURIComponent(supplierName));
@@ -314,6 +317,9 @@ export default function OrdersPage() {
     setSelectedContactBusinessId('');
     setRecipientCode('');
     setRecipientLookup(null);
+    setFromDiscover(false);
+    setPrefilledSupplierName('');
+    setSupplierProducts([]);
   }
 
   function openEditOrder(order: Order) {
@@ -924,22 +930,24 @@ export default function OrdersPage() {
       </div>
 
       {/* Create new order */}
-      <div className="flex gap-2 flex-wrap">
-        <Button
-          size="sm"
-          variant={orderMode === 'my_order' ? 'default' : 'outline'}
-          onClick={() => { setOrderMode('my_order'); setItems([]); setCustomerName(''); }}
-        >
-          📋 New Order (Walk-in / Inbox)
-        </Button>
-        <Button
-          size="sm"
-          variant={orderMode === 'request' ? 'default' : 'outline'}
-          onClick={() => { setOrderMode('request'); setItems([]); setCustomerName(''); }}
-        >
-          📨 Request from Supplier
-        </Button>
-      </div>
+      {!fromDiscover && (
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            size="sm"
+            variant={orderMode === 'my_order' ? 'default' : 'outline'}
+            onClick={() => { setOrderMode('my_order'); setItems([]); setCustomerName(''); }}
+          >
+            📋 New Order (Walk-in / Inbox)
+          </Button>
+          <Button
+            size="sm"
+            variant={orderMode === 'request' ? 'default' : 'outline'}
+            onClick={() => { setOrderMode('request'); setItems([]); setCustomerName(''); }}
+          >
+            📨 Request from Supplier
+          </Button>
+        </div>
+      )}
 
       {/* Input section — only for my_order and request. Inbox only shows list */}
       {(orderMode === 'my_order' || orderMode === 'request') && (
@@ -1190,15 +1198,19 @@ export default function OrdersPage() {
 
       {/* Orders Lists */}
       <Tabs value={tab} onValueChange={setTab}>
-        <TabsList className="w-full grid grid-cols-4 h-12 rounded-xl bg-muted/60 p-1">
-          <TabsTrigger value="live_orders" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
-            🛒 My Orders
-            {liveOrders.length > 0 && <span className="ml-0.5 bg-primary-foreground/20 text-[10px] px-1.5 py-0.5 rounded-full">{liveOrders.length}</span>}
-          </TabsTrigger>
-          <TabsTrigger value="inbox" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
-            📥 Customers
-            {inboxOrders.length > 0 && <span className="ml-0.5 bg-warning text-warning-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold">{inboxOrders.length}</span>}
-          </TabsTrigger>
+        <TabsList className={`w-full grid ${fromDiscover ? 'grid-cols-1' : 'grid-cols-4'} h-12 rounded-xl bg-muted/60 p-1`}>
+          {!fromDiscover && (
+            <TabsTrigger value="live_orders" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
+              🛒 My Orders
+              {liveOrders.length > 0 && <span className="ml-0.5 bg-primary-foreground/20 text-[10px] px-1.5 py-0.5 rounded-full">{liveOrders.length}</span>}
+            </TabsTrigger>
+          )}
+          {!fromDiscover && (
+            <TabsTrigger value="inbox" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
+              📥 Customers
+              {inboxOrders.length > 0 && <span className="ml-0.5 bg-warning text-warning-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold">{inboxOrders.length}</span>}
+            </TabsTrigger>
+          )}
           <TabsTrigger value="my_requests" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1 relative">
             📨 Suppliers
             {myRequests.length > 0 && <span className="ml-0.5 bg-primary-foreground/20 text-[10px] px-1.5 py-0.5 rounded-full">{myRequests.length}</span>}
@@ -1208,10 +1220,12 @@ export default function OrdersPage() {
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="verify_payments" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Verify</span>
-          </TabsTrigger>
+          {!fromDiscover && (
+            <TabsTrigger value="verify_payments" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Verify</span>
+            </TabsTrigger>
+          )}
         </TabsList>
         <TabsContent value="live_orders" className="space-y-3 mt-4">
           <p className="text-xs text-muted-foreground mb-2">Orders from walk-in customers, phone calls, or messages (WhatsApp/SMS). You pack items → customer pays → you give a receipt.</p>
