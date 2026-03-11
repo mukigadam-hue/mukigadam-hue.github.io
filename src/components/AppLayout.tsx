@@ -78,7 +78,34 @@ function useNavItems() {
     { to: '/settings', label: t('nav.settings'), icon: Settings },
   ];
 
-  return { businessNavItems, factoryNavItems, businessMobileNav, businessMoreNav, factoryMobileNav, factoryMoreNav };
+  const propertyNavItems = [
+    { to: '/', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { to: '/assets', label: t('property.assets', 'My Assets'), icon: Home },
+    { to: '/bookings', label: t('property.bookings', 'Bookings'), icon: CalendarCheck },
+    { to: '/browse', label: t('property.browse', 'Browse'), icon: Search },
+    { to: '/messages', label: t('property.messages', 'Messages'), icon: MessageSquare },
+    { to: '/contacts', label: t('nav.contacts'), icon: Contact },
+    { to: '/discover', label: t('nav.discover'), icon: Globe },
+    { to: '/team', label: t('nav.team'), icon: Users },
+    { to: '/settings', label: t('nav.settings'), icon: Settings },
+  ];
+
+  const propertyMobileNav = [
+    { to: '/', label: t('nav.home'), icon: LayoutDashboard },
+    { to: '/assets', label: t('property.assets', 'Assets'), icon: Home },
+    { to: '/bookings', label: t('property.bookings', 'Bookings'), icon: CalendarCheck },
+  ];
+
+  const propertyMoreNav = [
+    { to: '/browse', label: t('property.browse', 'Browse'), icon: Search },
+    { to: '/messages', label: t('property.messages', 'Messages'), icon: MessageSquare },
+    { to: '/contacts', label: t('nav.contacts'), icon: Contact },
+    { to: '/discover', label: t('nav.discover'), icon: Globe },
+    { to: '/team', label: t('nav.team'), icon: Users },
+    { to: '/settings', label: t('nav.settings'), icon: Settings },
+  ];
+
+  return { businessNavItems, factoryNavItems, propertyNavItems, businessMobileNav, businessMoreNav, factoryMobileNav, factoryMoreNav, propertyMobileNav, propertyMoreNav };
 }
 
 function BusinessRoleBanner({ userRole, businessName, isFactory }: { userRole: string | null; businessName: string; isFactory: boolean }) {
