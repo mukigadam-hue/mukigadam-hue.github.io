@@ -284,6 +284,7 @@ export default function PropertyAssets() {
                   </div>
                 </CardContent>
               </Card>
+              </React.Fragment>
             );
           })}
         </div>
