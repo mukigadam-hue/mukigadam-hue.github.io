@@ -175,7 +175,7 @@ export default function PropertyAssets() {
   const { t } = useTranslation();
   const { assets, addAsset, updateAsset, deleteAsset, bookings } = useProperty();
   const { userRole } = useBusiness();
-  const { symbol } = useCurrency();
+  const { currency } = useCurrency();
   const [search, setSearch] = useState('');
   const [filterCat, setFilterCat] = useState('all');
   const [dialogOpen, setDialogOpen] = useState(false);
