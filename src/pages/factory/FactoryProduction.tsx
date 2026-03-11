@@ -31,6 +31,7 @@ export default function FactoryProduction() {
 
   const [form, setForm] = useState({
     product_name: '', product_stock_id: '', quantity_produced: '',
+    wholesale_price: '', retail_price: '',
     waste_quantity: '0', waste_unit: 'Pieces',
     production_date: new Date().toISOString().slice(0, 10),
     expiry_date: '',
@@ -66,22 +67,39 @@ export default function FactoryProduction() {
       }
     }
 
+    const wholesalePrice = parseFloat(form.wholesale_price) || 0;
+    const retailPrice = parseFloat(form.retail_price) || 0;
+
     // Add to product stock
     if (form.product_stock_id) {
       const existing = activeProducts.find(p => p.id === form.product_stock_id);
       if (existing) {
-        await updateStockItem(existing.id, { quantity: existing.quantity + qtyProduced });
+        const updates: any = { quantity: existing.quantity + qtyProduced };
+        if (wholesalePrice > 0) updates.wholesale_price = wholesalePrice;
+        if (retailPrice > 0) updates.retail_price = retailPrice;
+        await updateStockItem(existing.id, updates);
       }
     } else {
-      // Create new product in stock
-      await addStockItem({
-        name: toSentenceCase(form.product_name.trim()),
-        category: '', quality: '',
-        quantity: qtyProduced,
-        buying_price: 0, wholesale_price: 0, retail_price: 0,
-        min_stock_level: 5, barcode: '',
-        image_url_1: '', image_url_2: '', image_url_3: '',
-      });
+      // Check if product with same name already exists to avoid duplicates
+      const existingByName = activeProducts.find(p => p.name.toLowerCase() === form.product_name.trim().toLowerCase());
+      if (existingByName) {
+        const updates: any = { quantity: existingByName.quantity + qtyProduced };
+        if (wholesalePrice > 0) updates.wholesale_price = wholesalePrice;
+        if (retailPrice > 0) updates.retail_price = retailPrice;
+        await updateStockItem(existingByName.id, updates);
+      } else {
+        // Create new product in stock
+        await addStockItem({
+          name: toSentenceCase(form.product_name.trim()),
+          category: '', quality: '',
+          quantity: qtyProduced,
+          buying_price: 0,
+          wholesale_price: wholesalePrice,
+          retail_price: retailPrice,
+          min_stock_level: 5, barcode: '',
+          image_url_1: '', image_url_2: '', image_url_3: '',
+        });
+      }
     }
 
     // Record production
@@ -101,6 +119,7 @@ export default function FactoryProduction() {
 
     setForm({
       product_name: '', product_stock_id: '', quantity_produced: '',
+      wholesale_price: '', retail_price: '',
       waste_quantity: '0', waste_unit: 'Pieces',
       production_date: new Date().toISOString().slice(0, 10),
       expiry_date: '', recorded_by: '', notes: '', batch_number: generateBatchNumber(),
@@ -148,14 +167,25 @@ export default function FactoryProduction() {
               </div>
               <div>
                 <Label>Link to Existing Product</Label>
-                <Select value={form.product_stock_id || '__new__'} onValueChange={v => setForm(f => ({ ...f, product_stock_id: v === '__new__' ? '' : v }))}>
+                <Select value={form.product_stock_id || '__new__'} onValueChange={v => {
+                  setForm(f => ({ ...f, product_stock_id: v === '__new__' ? '' : v }));
+                  if (v !== '__new__') {
+                    const p = activeProducts.find(pr => pr.id === v);
+                    if (p) setForm(f => ({ ...f, product_name: p.name }));
+                  }
+                }}>
                   <SelectTrigger><SelectValue placeholder="Optional..." /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__new__">New Product</SelectItem>
-                    {activeProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                    {activeProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name} (W:{fmt(Number(p.wholesale_price))} R:{fmt(Number(p.retail_price))})</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>Wholesale Price</Label><Input type="number" min="0" step="0.01" value={form.wholesale_price} onChange={e => setForm(f => ({ ...f, wholesale_price: e.target.value }))} placeholder="0.00" /></div>
+              <div><Label>Retail Price</Label><Input type="number" min="0" step="0.01" value={form.retail_price} onChange={e => setForm(f => ({ ...f, retail_price: e.target.value }))} placeholder="0.00" /></div>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">

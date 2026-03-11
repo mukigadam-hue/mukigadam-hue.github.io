@@ -26,6 +26,7 @@ const ContactsPage = lazy(() => import("./pages/ContactsPage"));
 const BusinessExpenses = lazy(() => import("./pages/BusinessExpenses"));
 const DiscoverPage = lazy(() => import("./pages/DiscoverPage"));
 const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
+const WastePage = lazy(() => import("./pages/WastePage"));
 
 // Factory pages
 const FactoryDashboard = lazy(() => import("./pages/factory/FactoryDashboard"));
@@ -179,6 +180,7 @@ function BusinessContent() {
           <Route path="/discover" element={<DiscoverPage />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/expenses" element={<BusinessExpenses />} />
+          <Route path="/waste" element={<WastePage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/team" element={<TeamPage />} />

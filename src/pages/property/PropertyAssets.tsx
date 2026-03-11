@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProperty, PropertyAsset } from '@/context/PropertyContext';
 import { useBusiness } from '@/context/BusinessContext';
@@ -15,6 +15,7 @@ import { Switch } from '@/components/ui/switch';
 import { Plus, Search, MapPin, Edit2, Trash2, Home } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import { toast } from 'sonner';
+import AdSpace from '@/components/AdSpace';
 
 const CATEGORIES = [
   { value: 'land', label: '🏞️ Land', subs: ['plot', 'farm', 'parking'] },
@@ -230,10 +231,13 @@ export default function PropertyAssets() {
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
-          {filtered.map(asset => {
+          {filtered.map((asset, idx) => {
+            const showAd = idx > 0 && idx % 8 === 0;
             const status = getBookingStatus(asset.id);
             return (
-              <Card key={asset.id} className="overflow-hidden">
+              <React.Fragment key={asset.id}>
+                {showAd && <div className="sm:col-span-2"><AdSpace variant="inline" /></div>}
+              <Card className="overflow-hidden">
                 {asset.image_url_1 && (
                   <div className="h-32 overflow-hidden">
                     <img src={asset.image_url_1} alt={asset.name} className="w-full h-full object-cover" />
@@ -280,6 +284,7 @@ export default function PropertyAssets() {
                   </div>
                 </CardContent>
               </Card>
+              </React.Fragment>
             );
           })}
         </div>

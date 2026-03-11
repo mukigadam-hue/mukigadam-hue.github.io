@@ -226,86 +226,7 @@ export default function FactorySales() {
             </div>
           </div>
 
-          {/* Service Items */}
-          <div className="border rounded-lg p-3 space-y-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">🔧 Services (Optional)</p>
-            
-            {/* Service Details */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <Label>Service Name</Label>
-                <Input value={svcForm.service_name} onChange={e => setSvcForm(f => ({ ...f, service_name: e.target.value }))} onBlur={() => setSvcForm(f => ({ ...f, service_name: toSentenceCase(f.service_name) }))} placeholder="e.g. Repair..." />
-              </div>
-              <div>
-                <Label>Description</Label>
-                <Input value={svcForm.description} onChange={e => setSvcForm(f => ({ ...f, description: e.target.value }))} placeholder="Details..." />
-              </div>
-              <div>
-                <Label>Cost</Label>
-                <Input type="number" min="0" step="0.01" value={svcForm.cost} onChange={e => setSvcForm(f => ({ ...f, cost: e.target.value }))} placeholder="0.00" />
-              </div>
-            </div>
-
-            {/* Parts Used from Stock */}
-            <div className="bg-muted/30 rounded-lg p-3 space-y-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1">
-                <Package className="h-3.5 w-3.5" /> Items/Parts Used from Stock
-              </p>
-              <div className="flex flex-wrap gap-2 items-end">
-                <div className="flex-1 min-w-[180px]">
-                  <Label className="text-xs">Select Part</Label>
-                  <div className="flex gap-1.5">
-                    <Select value={selectedPartStock} onValueChange={setSelectedPartStock}>
-                      <SelectTrigger className="flex-1">
-                        <SelectValue placeholder="Choose from stock..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {availablePartsStock.map(s => (
-                          <SelectItem key={s.id} value={s.id}>
-                            {s.name}{s.category ? ` · ${s.category}` : ''}{s.quality ? ` · ${s.quality}` : ''} (qty: {s.quantity})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <Button type="button" variant="outline" size="icon" className="shrink-0 h-9 w-9" onClick={() => setPartScannerOpen(true)} title="Scan barcode">
-                      <ScanLine className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-                <div className="w-16">
-                  <Label className="text-xs">Qty</Label>
-                  <Input type="number" min="1" value={partQty} onChange={e => setPartQty(e.target.value)} />
-                </div>
-                <Button size="sm" variant="outline" onClick={addServicePart} disabled={!selectedPartStock}>
-                  <Plus className="h-3.5 w-3.5 mr-1" />Add Part
-                </Button>
-              </div>
-              {serviceParts.length > 0 && (
-                <div className="space-y-1 mt-2">
-                  {serviceParts.map((part, i) => (
-                    <div key={i} className="flex items-center justify-between text-sm bg-background rounded px-2 py-1">
-                      <span>
-                        {part.item_name} × {part.quantity}
-                        {part.category && <span className="text-xs text-muted-foreground ml-1">· {part.category}</span>}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        <span className="tabular-nums font-medium text-xs">{fmt(part.subtotal)}</span>
-                        <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => removeServicePart(i)}>
-                          <Trash2 className="h-3 w-3 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                  <div className="text-xs text-muted-foreground text-right">Parts total: {fmt(partsTotal)}</div>
-                </div>
-              )}
-            </div>
-
-            {/* Add Service Button - at the bottom */}
-            <Button onClick={addServiceItem} disabled={!svcForm.service_name.trim()} variant="outline" className="w-full">
-              <Wrench className="h-4 w-4 mr-1" />Add Service
-            </Button>
-          </div>
+          {/* Service section removed for factory */}
 
           {/* Summary Table */}
           {(items.length > 0 || serviceItems.length > 0 || serviceParts.length > 0) && (
@@ -330,26 +251,7 @@ export default function FactorySales() {
                         <TableCell><Button variant="ghost" size="icon" onClick={() => removeItem(i)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button></TableCell>
                       </TableRow>
                     ))}
-                    {serviceItems.map((svc, i) => (
-                      <TableRow key={`svc-${i}`} className="bg-muted/20">
-                        <TableCell className="font-medium">🔧 {svc.service_name}</TableCell>
-                        <TableCell className="text-xs">Service</TableCell>
-                        <TableCell className="text-right">1</TableCell>
-                        <TableCell className="text-right tabular-nums">{fmt(svc.cost)}</TableCell>
-                        <TableCell className="text-right font-semibold tabular-nums">{fmt(svc.cost)}</TableCell>
-                        <TableCell><Button variant="ghost" size="icon" onClick={() => removeServiceItem(i)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button></TableCell>
-                      </TableRow>
-                    ))}
-                    {serviceParts.map((part, i) => (
-                      <TableRow key={`part-${i}`} className="bg-accent/5">
-                        <TableCell className="font-medium text-accent">[Part] {part.item_name}</TableCell>
-                        <TableCell className="text-xs">Part</TableCell>
-                        <TableCell className="text-right">{part.quantity}</TableCell>
-                        <TableCell className="text-right tabular-nums">{fmt(part.unit_price)}</TableCell>
-                        <TableCell className="text-right font-semibold tabular-nums">{fmt(part.subtotal)}</TableCell>
-                        <TableCell><Button variant="ghost" size="icon" onClick={() => removeServicePart(i)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button></TableCell>
-                      </TableRow>
-                    ))}
+                    {/* Service rows removed */}
                     <TableRow>
                       <TableCell colSpan={4} className="text-right font-bold">Grand Total</TableCell>
                       <TableCell className="text-right font-bold text-lg text-success tabular-nums">{fmt(grandTotal)}</TableCell>

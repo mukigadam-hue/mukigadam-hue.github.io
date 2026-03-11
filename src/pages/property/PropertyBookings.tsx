@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { CalendarCheck, CheckCircle, XCircle, Clock, Camera, Plus, Search, MessageSquare, Send, Wallet, FileText, Copy } from 'lucide-react';
 import ImageUpload from '@/components/ImageUpload';
 import { toast } from 'sonner';
+import AdSpace from '@/components/AdSpace';
 
 function CheckInDialog({ bookingId, businessId, onClose }: { bookingId: string; businessId: string; onClose: () => void }) {
   const { t } = useTranslation();
@@ -550,6 +551,8 @@ export default function PropertyBookings() {
         </Button>
       </div>
 
+      <AdSpace variant="banner" />
+
       <Tabs defaultValue="pending">
         <TabsList className="grid grid-cols-3">
           <TabsTrigger value="pending" className="text-xs">Pending ({pending.length})</TabsTrigger>
@@ -569,6 +572,8 @@ export default function PropertyBookings() {
             : completed.map(b => <BookingCard key={b.id} booking={b} />)}
         </TabsContent>
       </Tabs>
+
+      <AdSpace variant="inline" />
 
       {/* Book Now Dialog */}
       <BookNowDialog open={bookNowOpen} onClose={() => { setBookNowOpen(false); setPrefilledPropertyId(''); setPrefilledPropertyName(''); }} 

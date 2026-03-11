@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Search, MapPin, Phone, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import AdSpace, { withInlineAds } from '@/components/AdSpace';
 
 interface SearchAsset {
   id: string;
@@ -104,7 +105,7 @@ export default function PropertyBrowse() {
         <p className="text-center text-muted-foreground py-8">No assets found. Try different filters.</p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {results.map(asset => (
+          {withInlineAds(results, (asset) => (
             <Card key={asset.id} className="overflow-hidden">
               {asset.image_url_1 && (
                 <div className="h-36 overflow-hidden">
@@ -139,7 +140,7 @@ export default function PropertyBrowse() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          ), 8)}
         </div>
       )}
 
