@@ -887,7 +887,7 @@ export default function PropertyTeam() {
             )}
 
             {/* Agreed amount — for tenant and landlord */}
-            {(addType === 'tenant' || addType === 'landlord') && (
+            {(addType === 'tenant' || addType === 'owner') && (
               <div><Label>Agreed Amount (per period)</Label><Input type="number" min="0" step="0.01" value={workerForm.agreed_amount} onChange={e => setWorkerForm(f => ({ ...f, agreed_amount: e.target.value }))} placeholder="Rental amount agreed upon" /></div>
             )}
 
