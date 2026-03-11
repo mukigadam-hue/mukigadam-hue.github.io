@@ -81,6 +81,8 @@ export default function OrdersPage() {
     const supplierName = searchParams.get('supplier_name');
     if (supplierId && supplierName) {
       setOrderMode('request');
+      setTab('my_requests');
+      setFromDiscover(true);
       setRecipientMode('code');
       setRecipientLookup({ id: supplierId, name: decodeURIComponent(supplierName) });
       setPrefilledSupplierName(decodeURIComponent(supplierName));
