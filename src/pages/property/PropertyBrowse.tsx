@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Search, MapPin, Phone, Copy } from 'lucide-react';
 import { toast } from 'sonner';
+import AdSpace, { withInlineAds } from '@/components/AdSpace';
 
 interface SearchAsset {
   id: string;
