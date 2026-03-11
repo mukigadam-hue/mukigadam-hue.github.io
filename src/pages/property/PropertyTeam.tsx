@@ -77,7 +77,7 @@ function ShareButtons({ code }: { code: string }) {
   );
 }
 
-function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => void }) {
+function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => Promise<void> | void }) {
   const { redeemInviteCode } = useBusiness();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
