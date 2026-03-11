@@ -101,7 +101,7 @@ function ShareButtons({ code, type }: { code: string; type: 'worker' }) {
   );
 }
 
-function JoinAnotherBusinessSection({ onJoined }: { onJoined: () => void }) {
+function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => void }) {
   const { redeemInviteCode } = useBusiness();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -125,10 +125,10 @@ function JoinAnotherBusinessSection({ onJoined }: { onJoined: () => void }) {
       <CardContent className="p-4 space-y-3">
         <h2 className="text-base font-semibold flex items-center gap-2">
           <Send className="h-4 w-4" />
-          Join Another Business
+          📩 I Received an Invite Code
         </h2>
         <p className="text-sm text-muted-foreground">
-          Have an invite code from another business owner? Enter it below to join their business as a worker or team member.
+          If your <strong>boss or business owner</strong> sent you a code, enter it here to join their team as a worker.
         </p>
         <div className="flex gap-2">
           <Input
@@ -393,8 +393,8 @@ export default function TeamPage() {
         </Card>
       )}
 
-      {/* Join another business - available to everyone */}
-      <JoinAnotherBusinessSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />
+      {/* Received an invite code - available to everyone */}
+      <ReceivedInviteCodeSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />
 
       <AdSpace variant="banner" />
 
@@ -414,22 +414,22 @@ export default function TeamPage() {
             <Card className="shadow-card border-dashed">
               <CardContent className="p-4 space-y-3">
                 <h2 className="text-base font-semibold flex items-center gap-2">
-                  <UserPlus className="h-4 w-4" /> Invite Worker to App
+                  <UserPlus className="h-4 w-4" /> 👔 Invite My Worker to App
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Generate a code and share it with a worker. They'll use it to join your business and help manage stock, sales & orders.
+                  As the <strong>owner/boss</strong>, generate a code and send it to your worker. They will enter it on their phone to join your business team.
                 </p>
                 {workerCode ? (
                   <div className="space-y-2">
                     <div className="rounded-lg p-3 text-center bg-primary/5">
                       <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
-                      <p className="text-xs text-muted-foreground mt-1">🔐 Share this code with your worker — Expires in 7 days</p>
+                      <p className="text-xs text-muted-foreground mt-1">🔐 Send this code to your worker — Expires in 7 days</p>
                     </div>
                     <ShareButtons code={workerCode} type="worker" />
                   </div>
                 ) : (
                   <Button onClick={handleGenerateCode} disabled={loading}>
-                    <UserPlus className="h-4 w-4 mr-2" /> Generate Worker Invite Code
+                    <UserPlus className="h-4 w-4 mr-2" /> Generate Code for My Worker
                   </Button>
                 )}
               </CardContent>
