@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Phone, Building2, Factory, Store, Copy, Check, Globe, ShoppingCart, CalendarCheck, Home } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,6 +26,7 @@ interface DiscoveredBusiness {
 }
 
 export default function DiscoverPage() {
+  const navigate = useNavigate();
   const { currentBusiness } = useBusiness();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<DiscoveredBusiness[]>([]);
@@ -76,6 +78,16 @@ export default function DiscoverPage() {
     setTimeout(() => setCopiedCode(null), 2000);
   }
 
+  function handleOrderOrBook(biz: DiscoveredBusiness) {
+    if (biz.business_type === 'property') {
+      // Navigate to bookings with the property pre-selected
+      navigate(`/bookings?property_id=${biz.id}&property_name=${encodeURIComponent(biz.name)}`);
+    } else {
+      // Navigate to orders with supplier pre-filled
+      navigate(`/orders?supplier_id=${biz.id}&supplier_name=${encodeURIComponent(biz.name)}`);
+    }
+  }
+
   const myCountryData = getCountryByCode(myCountry);
 
   return (
@@ -100,7 +112,6 @@ export default function DiscoverPage() {
 
       {/* Filters */}
       <div className="space-y-2">
-        {/* Entity type filter */}
         <div className="flex items-center gap-2 flex-wrap">
           {([
             { key: 'all', label: 'All', icon: '🌐' },
@@ -115,7 +126,6 @@ export default function DiscoverPage() {
           ))}
         </div>
 
-        {/* Country filter */}
         {myCountry && (
           <div className="flex items-center gap-2">
             <Button variant={filterCountry ? 'default' : 'outline'} size="sm" className="text-xs gap-1.5" onClick={() => setFilterCountry(true)}>
@@ -144,7 +154,6 @@ export default function DiscoverPage() {
           {results.map(biz => (
             <Card key={biz.id} className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedBiz(biz)}>
               <CardContent className="p-4 space-y-3">
-                {/* Header */}
                 <div className="flex items-start gap-3">
                   {biz.logo_url ? (
                     <img src={biz.logo_url} alt={biz.name} className="h-10 w-10 rounded-lg object-cover border" />
@@ -212,8 +221,7 @@ export default function DiscoverPage() {
                       className="flex-1 text-xs gap-1"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigator.clipboard.writeText(biz.business_code!);
-                        toast.success(`Code copied! Go to ${biz.business_type === 'property' ? 'Bookings' : 'Orders'} to use it.`);
+                        handleOrderOrBook(biz);
                       }}
                     >
                       {biz.business_type === 'property' ? (
@@ -234,6 +242,7 @@ export default function DiscoverPage() {
         business={selectedBiz}
         open={!!selectedBiz}
         onOpenChange={(open) => { if (!open) setSelectedBiz(null); }}
+        onOrderOrBook={handleOrderOrBook}
       />
     </div>
   );
