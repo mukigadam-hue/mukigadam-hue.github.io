@@ -38,6 +38,13 @@ const FactoryExpenses = lazy(() => import("./pages/factory/FactoryExpenses"));
 const FactoryServices = lazy(() => import("./pages/factory/FactoryServices"));
 const FactoryProduction = lazy(() => import("./pages/factory/FactoryProduction"));
 
+// Property pages
+const PropertyDashboard = lazy(() => import("./pages/property/PropertyDashboard"));
+const PropertyAssets = lazy(() => import("./pages/property/PropertyAssets"));
+const PropertyBookings = lazy(() => import("./pages/property/PropertyBookings"));
+const PropertyMessages = lazy(() => import("./pages/property/PropertyMessages"));
+const PropertyBrowse = lazy(() => import("./pages/property/PropertyBrowse"));
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
