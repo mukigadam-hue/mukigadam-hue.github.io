@@ -249,7 +249,7 @@ export default function FactoryTeam() {
               ) : (
                 <div className="space-y-2">
                   {/* App Users */}
-                  {appMembers.map(member => {
+                  {visibleAppMembers.map(member => {
                     const matchedWorker = activeMembers.find(w => w.full_name.toLowerCase() === (member.full_name || '').toLowerCase());
                     const bal = matchedWorker ? (workerBalances[matchedWorker.id] || { totalOwed: 0, totalAdvances: 0 }) : { totalOwed: 0, totalAdvances: 0 };
                     return (
