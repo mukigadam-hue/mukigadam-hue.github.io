@@ -15,6 +15,7 @@ import i18n from '@/i18n';
 
 export default function BusinessSetupPage() {
   const { createBusiness, redeemInviteCode } = useBusiness();
+  const { signOut } = useAuth();
   const { setCurrency } = useCurrency();
   const [tab, setTab] = useState<'create' | 'join'>('create');
   const [businessType, setBusinessType] = useState<'business' | 'factory' | 'property'>('business');
