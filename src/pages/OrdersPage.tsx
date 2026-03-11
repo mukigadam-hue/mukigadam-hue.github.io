@@ -69,6 +69,28 @@ export default function OrdersPage() {
   const [allocating, setAllocating] = useState(false);
   const isFactory = currentBusiness?.business_type === 'factory';
 
+  // Supplier products when coming from Discover page
+  const [supplierProducts, setSupplierProducts] = useState<{ name: string; category: string; quality: string; retail_price: number }[]>([]);
+  const [prefilledSupplierName, setPrefilledSupplierName] = useState('');
+
+  // Auto-fill supplier from URL params (from Discover page "Order Now")
+  useEffect(() => {
+    const supplierId = searchParams.get('supplier_id');
+    const supplierName = searchParams.get('supplier_name');
+    if (supplierId && supplierName) {
+      setOrderMode('request');
+      setRecipientMode('code');
+      setRecipientLookup({ id: supplierId, name: decodeURIComponent(supplierName) });
+      setPrefilledSupplierName(decodeURIComponent(supplierName));
+      // Load supplier's products for item suggestions
+      supabase.rpc('get_business_public_products', { _business_id: supplierId }).then(({ data }) => {
+        if (data) setSupplierProducts(data as any[]);
+      });
+      // Clean URL params
+      setSearchParams({}, { replace: true });
+    }
+  }, []);
+
   const EXPENSE_CATEGORIES = isFactory
     ? ['Electricity', 'Water', 'Gas', 'Machinery Repair', 'Building Repair', 'Lubricants', 'Cleaning Supplies', 'Safety Gear', 'Factory Rent', 'Transport Costs', 'Insurance', 'Other']
     : ['Rent', 'Electricity', 'Water', 'Internet', 'Cleaning Equipment', 'Food for Workers', 'Transport', 'Repairs & Maintenance', 'Office Supplies', 'Security', 'Other'];
