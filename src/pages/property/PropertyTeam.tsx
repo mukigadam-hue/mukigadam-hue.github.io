@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
@@ -48,7 +49,7 @@ interface Member {
 
 const STAFF_RANKS = ['Property Manager', 'Caretaker', 'Agent', 'Maintenance', 'Security', 'Cleaner'];
 const TENANT_RANK = 'Tenant';
-const LANDLORD_RANK = 'Landlord';
+const LANDLORD_RANK = 'Asset Owner';
 const MAX_STAFF = 3;
 const GENDERS = ['Male', 'Female', 'Other'];
 const PAYMENT_METHODS = [
@@ -93,7 +94,7 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
     <Card className="shadow-card border-dashed border-primary/30">
       <CardContent className="p-4 space-y-3">
         <h2 className="text-base font-semibold flex items-center gap-2"><Send className="h-4 w-4" /> Join via Invite Code</h2>
-        <p className="text-sm text-muted-foreground">Have an invite code from a landlord or tenant? Enter it to connect.</p>
+        <p className="text-sm text-muted-foreground">Have an invite code from an asset owner or tenant? Enter it to connect.</p>
         <div className="flex gap-2">
           <Input placeholder="Enter code (e.g. ABC123)" value={code} onChange={e => setCode(e.target.value.toUpperCase())}
             className="font-mono tracking-wider uppercase" maxLength={10} />
@@ -328,11 +329,11 @@ export default function PropertyTeam() {
   const [loading, setLoading] = useState(false);
   const isOwnerOrAdmin = userRole === 'owner' || userRole === 'admin';
 
-  const [viewMode, setViewMode] = useState<'tenant' | 'landlord'>('landlord');
+  const [viewMode, setViewMode] = useState<'tenant' | 'owner'>('owner');
   const [teamWorkers, setTeamWorkers] = useState<TeamMember[]>([]);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editWorkerId, setEditWorkerId] = useState<string | null>(null);
-  const [addType, setAddType] = useState<'staff' | 'tenant' | 'landlord'>('tenant');
+  const [addType, setAddType] = useState<'staff' | 'tenant' | 'owner'>('tenant');
   const [workerForm, setWorkerForm] = useState({
     full_name: '', rank: 'Tenant', salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10),
     occupation: '', rental_purpose: '', gender: '', age: '', rental_end_date: '', agreed_amount: '',
@@ -370,7 +371,7 @@ export default function PropertyTeam() {
 
   function resetForm() {
     setWorkerForm({
-      full_name: '', rank: addType === 'staff' ? 'Caretaker' : addType === 'landlord' ? 'Landlord' : 'Tenant',
+      full_name: '', rank: addType === 'staff' ? 'Caretaker' : addType === 'owner' ? 'Asset Owner' : 'Tenant',
       salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10),
       occupation: '', rental_purpose: '', gender: '', age: '', rental_end_date: '', agreed_amount: '',
     });
@@ -435,16 +436,36 @@ export default function PropertyTeam() {
       gender: w.gender || '', age: w.age ? String(w.age) : '', rental_end_date: w.rental_end_date || '',
       agreed_amount: w.agreed_amount ? String(w.agreed_amount) : '',
     });
-    setAddType(w.rank === TENANT_RANK ? 'tenant' : w.rank === LANDLORD_RANK ? 'landlord' : 'staff');
+    setAddType(w.rank === TENANT_RANK ? 'tenant' : (w.rank === LANDLORD_RANK || w.rank === 'Landlord') ? 'owner' : 'staff');
     setEditWorkerId(w.id);
   }
 
   async function deleteWorker(id: string) { await supabase.from('business_team_members').delete().eq('id', id); toast.success('Removed'); loadTeamWorkers(); }
 
+  function ConfirmDeleteButton({ onConfirm, label = 'Remove', name = '' }: { onConfirm: () => void; label?: string; name?: string }) {
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive"><Trash2 className="h-3 w-3" /></Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {name || 'this person'}?</AlertDialogTitle>
+            <AlertDialogDescription>This action cannot be undone. They will lose access if they are an app user.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{label}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  }
+
   const activeWorkers = teamWorkers.filter(w => w.is_active);
   const tenants = activeWorkers.filter(w => w.rank === TENANT_RANK);
-  const landlords = activeWorkers.filter(w => w.rank === LANDLORD_RANK);
-  const staff = activeWorkers.filter(w => w.rank !== TENANT_RANK && w.rank !== LANDLORD_RANK);
+  const landlords = activeWorkers.filter(w => w.rank === LANDLORD_RANK || w.rank === 'Landlord');
+  const staff = activeWorkers.filter(w => w.rank !== TENANT_RANK && w.rank !== LANDLORD_RANK && w.rank !== 'Landlord');
 
   const myMembership = members.find(m => m.user_id === user?.id);
   const myJoinDate = memberships.find(m => m.business_id === currentBusiness?.id && m.user_id === user?.id)?.created_at;
@@ -453,14 +474,14 @@ export default function PropertyTeam() {
 
   function getRanksForType() {
     if (addType === 'tenant') return [TENANT_RANK];
-    if (addType === 'landlord') return [LANDLORD_RANK];
+    if (addType === 'owner') return [LANDLORD_RANK];
     return STAFF_RANKS;
   }
 
-  function openAddDialog(type: 'staff' | 'tenant' | 'landlord') {
+  function openAddDialog(type: 'staff' | 'tenant' | 'owner') {
     setAddType(type);
     setWorkerForm({
-      full_name: '', rank: type === 'staff' ? 'Caretaker' : type === 'landlord' ? 'Landlord' : 'Tenant',
+      full_name: '', rank: type === 'staff' ? 'Caretaker' : type === 'owner' ? 'Asset Owner' : 'Tenant',
       salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10),
       occupation: '', rental_purpose: '', gender: '', age: '', rental_end_date: '', agreed_amount: '',
     });
@@ -525,7 +546,7 @@ export default function PropertyTeam() {
           {showDelete && (
             <div className="flex gap-1 pt-1">
               <Button variant="ghost" size="sm" className="h-7 text-xs flex-1" onClick={() => openEdit(person)}><Edit2 className="h-3 w-3 mr-1" /> Edit</Button>
-              <Button variant="ghost" size="sm" className="h-7 text-xs text-destructive" onClick={() => deleteWorker(person.id)}><Trash2 className="h-3 w-3" /></Button>
+              <ConfirmDeleteButton onConfirm={() => deleteWorker(person.id)} name={person.full_name} />
             </div>
           )}
         </CardContent>
@@ -537,7 +558,7 @@ export default function PropertyTeam() {
     <div className="space-y-4">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="h-6 w-6" /> Property Team</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage your property relationships — tenants, landlords & staff</p>
+        <p className="text-sm text-muted-foreground mt-1">Manage your property relationships — tenants, asset owners & staff</p>
       </div>
 
       {/* VIEW MODE SELECTOR */}
@@ -550,13 +571,13 @@ export default function PropertyTeam() {
           </div>
           <p className="text-[11px] text-muted-foreground">I rent properties, vehicles, or vessels from others</p>
         </button>
-        <button onClick={() => setViewMode('landlord')}
-          className={`p-4 rounded-xl border-2 text-left transition-all ${viewMode === 'landlord' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
+        <button onClick={() => setViewMode('owner')}
+          className={`p-4 rounded-xl border-2 text-left transition-all ${viewMode === 'owner' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/30'}`}>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xl">🔑</span>
-            <span className="font-semibold text-sm">I'm an Owner / Landlord</span>
+            <span className="font-semibold text-sm">I'm an Asset Owner</span>
           </div>
-          <p className="text-[11px] text-muted-foreground">I own assets and rent them out to tenants</p>
+          <p className="text-[11px] text-muted-foreground">I own properties, vehicles, or vessels and rent them out</p>
         </button>
       </div>
 
@@ -595,33 +616,33 @@ export default function PropertyTeam() {
         <div className="space-y-4">
           <Tabs defaultValue="my-landlords" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="my-landlords" className="text-xs">🔑 My Landlords / Bosses</TabsTrigger>
+              <TabsTrigger value="my-landlords" className="text-xs">🔑 My Asset Owners</TabsTrigger>
               <TabsTrigger value="my-payments" className="text-xs">💰 My Payments</TabsTrigger>
             </TabsList>
 
             <TabsContent value="my-landlords" className="space-y-4 mt-4">
               <Card className="shadow-card border-dashed border-primary/30">
                 <CardContent className="p-4 space-y-3">
-                  <h2 className="text-base font-semibold flex items-center gap-2"><Key className="h-4 w-4" /> Add My Landlord / Boss</h2>
+                  <h2 className="text-base font-semibold flex items-center gap-2"><Key className="h-4 w-4" /> Add My Asset Owner</h2>
                   <p className="text-sm text-muted-foreground">
-                    If your landlord uses this app, ask them for their invite code and enter it above.
+                    If the asset owner uses this app, ask them for their invite code and enter it above.
                     Otherwise, add them manually below.
                   </p>
-                  <Button onClick={() => openAddDialog('landlord')} variant="outline" className="w-full">
-                    <Plus className="h-4 w-4 mr-1" /> Add Landlord Manually
+                  <Button onClick={() => openAddDialog('owner')} variant="outline" className="w-full">
+                    <Plus className="h-4 w-4 mr-1" /> Add Asset Owner Manually
                   </Button>
                 </CardContent>
               </Card>
 
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-sm font-semibold">My Landlords & Bosses</h3>
+                <h3 className="text-sm font-semibold">My Asset Owners</h3>
                 <Badge variant="secondary" className="text-[10px]">{landlords.length}</Badge>
               </div>
 
               {landlords.length === 0 ? (
                 <Card><CardContent className="p-6 text-center text-sm text-muted-foreground">
                   <Key className="h-8 w-8 mx-auto text-muted-foreground/40 mb-2" />
-                  No landlords added yet. Use an invite code or add manually.
+                  No asset owners added yet. Use an invite code or add manually.
                 </CardContent></Card>
               ) : (
                 <div className="space-y-2">
@@ -633,7 +654,7 @@ export default function PropertyTeam() {
               <Card className="shadow-card border-dashed">
                 <CardContent className="p-4 space-y-3">
                   <h2 className="text-base font-semibold flex items-center gap-2"><Share2 className="h-4 w-4" /> Share My Code</h2>
-                  <p className="text-sm text-muted-foreground">Generate a code and give it to your landlord so they can add you as a tenant.</p>
+                  <p className="text-sm text-muted-foreground">Generate a code and give it to the asset owner so they can add you as a tenant.</p>
                   {workerCode ? (
                     <div className="space-y-2">
                       <div className="rounded-lg p-3 text-center bg-primary/5">
@@ -656,8 +677,8 @@ export default function PropertyTeam() {
         </div>
       )}
 
-      {/* ========= LANDLORD / OWNER VIEW ========= */}
-      {viewMode === 'landlord' && (
+      {/* ========= ASSET OWNER VIEW ========= */}
+      {viewMode === 'owner' && (
         <div className="space-y-4">
           <Tabs defaultValue="tenants" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
@@ -770,7 +791,7 @@ export default function PropertyTeam() {
                                 <SelectItem value="worker">Worker</SelectItem>
                               </SelectContent>
                             </Select>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => handleRemove(member.user_id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                            <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Remove {member.full_name}?</AlertDialogTitle><AlertDialogDescription>This will revoke their app access. This cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleRemove(member.user_id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remove</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                           </div>
                         )}
                       </CardContent>
@@ -797,7 +818,7 @@ export default function PropertyTeam() {
                         {isOwnerOrAdmin && (
                           <div className="flex gap-1">
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(s)}><Edit2 className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteWorker(s.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                            <ConfirmDeleteButton onConfirm={() => deleteWorker(s.id)} name={s.full_name} />
                           </div>
                         )}
                       </CardContent>
@@ -819,7 +840,7 @@ export default function PropertyTeam() {
       <Dialog open={showAddDialog || !!editWorkerId} onOpenChange={o => { if (!o) { setShowAddDialog(false); setEditWorkerId(null); resetForm(); } }}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editWorkerId ? 'Edit Member' : `Add ${addType === 'tenant' ? 'Tenant / Renter' : addType === 'landlord' ? 'Landlord / Boss' : 'Staff Member'}`}</DialogTitle>
+            <DialogTitle>{editWorkerId ? 'Edit Member' : `Add ${addType === 'tenant' ? 'Tenant / Renter' : addType === 'owner' ? 'Asset Owner' : 'Staff Member'}`}</DialogTitle>
           </DialogHeader>
           <form onSubmit={editWorkerId ? handleEditMember : handleSubmitMember} className="space-y-3">
             <div><Label>Full Name *</Label><Input value={workerForm.full_name} onChange={e => setWorkerForm(f => ({ ...f, full_name: e.target.value }))} required /></div>
@@ -836,7 +857,7 @@ export default function PropertyTeam() {
             </div>
 
             {/* Gender & Age — for tenant and landlord */}
-            {(addType === 'tenant' || addType === 'landlord') && (
+            {(addType === 'tenant' || addType === 'owner') && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Gender</Label>
@@ -858,7 +879,7 @@ export default function PropertyTeam() {
             )}
 
             {/* Start & End dates — for tenant and landlord */}
-            {(addType === 'tenant' || addType === 'landlord') && (
+            {(addType === 'tenant' || addType === 'owner') && (
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Start Date *</Label><Input type="date" value={workerForm.hire_date} onChange={e => setWorkerForm(f => ({ ...f, hire_date: e.target.value }))} required /></div>
                 <div><Label>End / Expiry Date</Label><Input type="date" value={workerForm.rental_end_date} onChange={e => setWorkerForm(f => ({ ...f, rental_end_date: e.target.value }))} /></div>
@@ -866,7 +887,7 @@ export default function PropertyTeam() {
             )}
 
             {/* Agreed amount — for tenant and landlord */}
-            {(addType === 'tenant' || addType === 'landlord') && (
+            {(addType === 'tenant' || addType === 'owner') && (
               <div><Label>Agreed Amount (per period)</Label><Input type="number" min="0" step="0.01" value={workerForm.agreed_amount} onChange={e => setWorkerForm(f => ({ ...f, agreed_amount: e.target.value }))} placeholder="Rental amount agreed upon" /></div>
             )}
 
@@ -878,7 +899,7 @@ export default function PropertyTeam() {
               </div>
             )}
 
-            <Button type="submit" className="w-full">{editWorkerId ? 'Save Changes' : `Add ${addType === 'tenant' ? 'Tenant' : addType === 'landlord' ? 'Landlord' : 'Staff'}`}</Button>
+            <Button type="submit" className="w-full">{editWorkerId ? 'Save Changes' : `Add ${addType === 'tenant' ? 'Tenant' : addType === 'owner' ? 'Asset Owner' : 'Staff'}`}</Button>
           </form>
         </DialogContent>
       </Dialog>

@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Edit2, Trash2, Users, UserPlus, Send, Calendar, Clock, User, Wallet, Shield, Crown, AlertTriangle, ArrowDownCircle } from 'lucide-react';
 import WorkerPaymentManager from '@/components/factory/WorkerPaymentManager';
@@ -277,9 +278,10 @@ export default function FactoryTeam() {
                                   <SelectItem value="worker">Worker</SelectItem>
                                 </SelectContent>
                               </Select>
-                              <Button variant="ghost" size="icon" onClick={() => removeMember(member.user_id).then(loadAppMembers)}>
+                              <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon">
                                 <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                              </Button>
+                              </Button></AlertDialogTrigger>
+                              <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will remove this person and revoke their app access. This cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => removeMember(member.user_id).then(loadAppMembers)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remove</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                             </>
                           ) : (
                             member.role === 'owner' && <span className="text-xs font-medium capitalize px-2 py-1 rounded-full bg-muted">{member.role}</span>
@@ -321,7 +323,7 @@ export default function FactoryTeam() {
                         <div className="flex items-center gap-2">
                           {isOwnerOrAdmin && <span className="text-sm font-semibold text-success tabular-nums">{fmt(Number(m.salary))}/mo</span>}
                           {isOwnerOrAdmin && <Button variant="ghost" size="icon" onClick={() => openEdit(m)}><Edit2 className="h-3.5 w-3.5" /></Button>}
-                          {isOwnerOrAdmin && <Button variant="ghost" size="icon" onClick={() => updateTeamMember(m.id, { is_active: false })}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>}
+                          {isOwnerOrAdmin && <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Deactivate {m.full_name}?</AlertDialogTitle><AlertDialogDescription>This will deactivate the worker. You can reactivate them later.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => updateTeamMember(m.id, { is_active: false })} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Deactivate</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>}
                         </div>
                       </div>
                     );
@@ -340,7 +342,7 @@ export default function FactoryTeam() {
                     <span className="text-sm text-muted-foreground">{m.full_name} — {m.rank}</span>
                     <div className="flex gap-1">
                       <Button size="sm" variant="outline" onClick={() => updateTeamMember(m.id, { is_active: true })}>Reactivate</Button>
-                      <Button size="sm" variant="destructive" onClick={() => deleteTeamMember(m.id)}>Remove</Button>
+                      <AlertDialog><AlertDialogTrigger asChild><Button size="sm" variant="destructive">Remove</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Permanently remove {m.full_name}?</AlertDialogTitle><AlertDialogDescription>This will permanently delete this worker's record. This cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteTeamMember(m.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remove</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                     </div>
                   </div>
                 ))}

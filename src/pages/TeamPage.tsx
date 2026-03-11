@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { UserPlus, Trash2, Shield, Crown, User, Users, MessageCircle, Share2, Send, Calendar, Clock, Wallet, Plus, Edit2, AlertTriangle, ArrowDownCircle } from 'lucide-react';
@@ -209,6 +210,7 @@ export default function TeamPage() {
   async function handleRemove(userId: string) {
     await removeMember(userId);
     loadMembers();
+    loadTeamWorkers();
   }
 
   async function handleRoleChange(userId: string, role: string) {
@@ -273,6 +275,7 @@ export default function TeamPage() {
 
   async function deactivateWorker(id: string) {
     await supabase.from('business_team_members').update({ is_active: false }).eq('id', id);
+    toast.success('Worker deactivated');
     loadTeamWorkers();
   }
 
@@ -283,8 +286,30 @@ export default function TeamPage() {
 
   async function deleteWorker(id: string) {
     await supabase.from('business_team_members').delete().eq('id', id);
-    toast.success('Worker removed');
+    toast.success('Worker permanently removed');
     loadTeamWorkers();
+  }
+
+  function ConfirmDeleteButton({ onConfirm, label = 'Remove' }: { onConfirm: () => void; label?: string }) {
+    return (
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button variant="ghost" size="icon"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove this person. They will lose access to this business if they are an app user. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{label}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
   }
 
   const activeWorkers = teamWorkers.filter(w => w.is_active);
@@ -441,9 +466,7 @@ export default function TeamPage() {
                                   <SelectItem value="worker">Worker</SelectItem>
                                 </SelectContent>
                               </Select>
-                              <Button variant="ghost" size="icon" onClick={() => handleRemove(member.user_id)}>
-                                <Trash2 className="h-3.5 w-3.5 text-destructive" />
-                              </Button>
+                              <ConfirmDeleteButton onConfirm={() => handleRemove(member.user_id)} />
                             </>
                           ) : (
                             member.role === 'owner' && <span className="text-xs font-medium capitalize px-2 py-1 rounded-full bg-muted">{member.role}</span>
@@ -490,7 +513,7 @@ export default function TeamPage() {
                           {isOwnerOrAdmin && (
                             <>
                               <Button variant="ghost" size="icon" onClick={() => openEditWorker(w)}><Edit2 className="h-3.5 w-3.5" /></Button>
-                              <Button variant="ghost" size="icon" onClick={() => deactivateWorker(w.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                              <ConfirmDeleteButton onConfirm={() => deactivateWorker(w.id)} label="Deactivate" />
                             </>
                           )}
                         </div>
@@ -512,7 +535,15 @@ export default function TeamPage() {
                     <span className="text-sm text-muted-foreground">{w.full_name} — {w.rank}</span>
                     <div className="flex gap-1">
                       <Button size="sm" variant="outline" onClick={() => reactivateWorker(w.id)}>Reactivate</Button>
-                      <Button size="sm" variant="destructive" onClick={() => deleteWorker(w.id)}>Remove</Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild><Button size="sm" variant="destructive">Remove</Button></AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader><AlertDialogTitle>Permanently remove {w.full_name}?</AlertDialogTitle>
+                          <AlertDialogDescription>This will permanently delete this worker's record. This cannot be undone.</AlertDialogDescription></AlertDialogHeader>
+                          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => deleteWorker(w.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remove</AlertDialogAction></AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 ))}
