@@ -818,7 +818,7 @@ export default function PropertyTeam() {
                         {isOwnerOrAdmin && (
                           <div className="flex gap-1">
                             <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEdit(s)}><Edit2 className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => deleteWorker(s.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                            <ConfirmDeleteButton onConfirm={() => deleteWorker(s.id)} name={s.full_name} />
                           </div>
                         )}
                       </CardContent>
