@@ -573,6 +573,8 @@ export default function PropertyBookings() {
         </TabsContent>
       </Tabs>
 
+      <AdSpace variant="inline" />
+
       {/* Book Now Dialog */}
       <BookNowDialog open={bookNowOpen} onClose={() => { setBookNowOpen(false); setPrefilledPropertyId(''); setPrefilledPropertyName(''); }} 
         prefilledPropertyId={prefilledPropertyId} prefilledPropertyName={prefilledPropertyName} />

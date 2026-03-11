@@ -140,7 +140,7 @@ export default function PropertyBrowse() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          ), 8)}
         </div>
       )}
 
