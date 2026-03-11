@@ -411,16 +411,16 @@ export default function ContactsPage() {
                             <img src={contact.profile.logo_url} alt="" className="h-10 w-10 rounded-full object-cover border" />
                           ) : (
                             <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center text-xl">
-                              {contact.profile?.business_type === 'factory' ? '🏭' : '🏪'}
+                              {contact.profile?.business_type === 'factory' ? '🏭' : contact.profile?.business_type === 'property' ? '🏠' : '🏪'}
                             </div>
                           )}
                           <div>
-                            <p className="font-semibold">{contact.nickname || contact.profile?.name || 'Unknown Business'}</p>
+                            <p className="font-semibold">{contact.nickname || contact.profile?.name || 'Unknown'}</p>
                             {contact.nickname && contact.profile?.name && (
                               <p className="text-xs text-muted-foreground">{contact.profile.name}</p>
                             )}
                             <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded-full">
-                              {contact.profile?.business_type === 'factory' ? 'Factory' : 'Business'}
+                              {contact.profile?.business_type === 'factory' ? 'Factory' : contact.profile?.business_type === 'property' ? 'Property' : 'Business'}
                             </span>
                           </div>
                         </div>
