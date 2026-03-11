@@ -77,7 +77,7 @@ function ShareButtons({ code }: { code: string }) {
   );
 }
 
-function WorkerJoinSection({ onJoined }: { onJoined: () => void }) {
+function ReceivedInviteCodeSection({ onJoined }: { onJoined: () => void }) {
   const { redeemInviteCode } = useBusiness();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -93,8 +93,8 @@ function WorkerJoinSection({ onJoined }: { onJoined: () => void }) {
   return (
     <Card className="shadow-card border-dashed border-primary/30">
       <CardContent className="p-4 space-y-3">
-        <h2 className="text-base font-semibold flex items-center gap-2"><Send className="h-4 w-4" /> Join Another Business</h2>
-        <p className="text-sm text-muted-foreground">Have an invite code from another business, factory, or property owner? Enter it below to join their team.</p>
+        <h2 className="text-base font-semibold flex items-center gap-2"><Send className="h-4 w-4" /> 📩 I Received an Invite Code</h2>
+        <p className="text-sm text-muted-foreground">If a <strong>property owner or business owner</strong> sent you a code, enter it here to join their team.</p>
         <div className="flex gap-2">
           <Input placeholder="Enter invite code (e.g. ABC123)" value={code} onChange={e => setCode(e.target.value.toUpperCase())}
             className="font-mono tracking-wider uppercase" maxLength={10} />
