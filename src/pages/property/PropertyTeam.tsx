@@ -635,7 +635,7 @@ export default function PropertyTeam() {
               </Card>
 
               <div className="flex items-center gap-2 mb-2">
-                <h3 className="text-sm font-semibold">My Landlords & Bosses</h3>
+                <h3 className="text-sm font-semibold">My Asset Owners</h3>
                 <Badge variant="secondary" className="text-[10px]">{landlords.length}</Badge>
               </div>
 
