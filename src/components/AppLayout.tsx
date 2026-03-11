@@ -346,7 +346,33 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <SheetTitle className="text-left">{t('nav.menu')}</SheetTitle>
             </SheetHeader>
 
-            <div className="mt-3 mb-2">
+            {/* 3-Entity Quick Switch */}
+            <div className="mb-3">
+              <p className="text-xs text-muted-foreground font-medium mb-2 px-1">Quick Switch</p>
+              <div className="grid grid-cols-3 gap-2">
+                {(['business', 'factory', 'property'] as const).map(type => {
+                  const typeBusinesses = businesses.filter(b => (b as any).business_type === type);
+                  const icon = type === 'factory' ? '🏭' : type === 'property' ? '🏠' : '🏪';
+                  const label = type === 'factory' ? 'Factory' : type === 'property' ? 'FlexRent' : 'Business';
+                  const isActive = (currentBusiness as any)?.business_type === type;
+                  return (
+                    <button key={type} disabled={typeBusinesses.length === 0}
+                      onClick={() => {
+                        if (typeBusinesses.length > 0) { navigate('/'); setCurrentBusinessId(typeBusinesses[0].id); setMoreOpen(false); }
+                      }}
+                      className={`flex flex-col items-center gap-1 p-2.5 rounded-xl text-xs font-medium transition-all ${
+                        isActive ? 'bg-primary/10 text-primary border border-primary/30' : typeBusinesses.length === 0 ? 'bg-muted/30 text-muted-foreground/40' : 'bg-muted/50 hover:bg-muted'
+                      }`}>
+                      <span className="text-lg">{icon}</span>
+                      <span>{label}</span>
+                      <span className="text-[10px] text-muted-foreground">{typeBusinesses.length}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="mb-2">
               <p className="text-xs text-muted-foreground font-medium mb-2 px-1">{t('nav.switchBusiness')}</p>
               <div className="max-h-40 overflow-y-auto space-y-1.5 rounded-lg border border-border p-1.5">
                 {businesses.map(b => {
