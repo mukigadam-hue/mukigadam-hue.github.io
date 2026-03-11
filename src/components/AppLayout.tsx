@@ -108,12 +108,12 @@ function useNavItems() {
   return { businessNavItems, factoryNavItems, propertyNavItems, businessMobileNav, businessMoreNav, factoryMobileNav, factoryMoreNav, propertyMobileNav, propertyMoreNav };
 }
 
-function BusinessRoleBanner({ userRole, businessName, isFactory }: { userRole: string | null; businessName: string; isFactory: boolean }) {
+function BusinessRoleBanner({ userRole, businessName, businessType }: { userRole: string | null; businessName: string; businessType: string }) {
   const { t } = useTranslation();
   if (!userRole) return null;
   const isOwner = userRole === 'owner';
   const isAdmin = userRole === 'admin';
-  const typeLabel = isFactory ? 'Factory' : 'Business';
+  const typeLabel = businessType === 'factory' ? 'Factory' : businessType === 'property' ? 'Property' : 'Business';
 
   return (
     <div className={`px-4 py-1.5 text-xs font-medium flex items-center gap-2 ${
@@ -121,7 +121,8 @@ function BusinessRoleBanner({ userRole, businessName, isFactory }: { userRole: s
         : isAdmin ? 'bg-accent/20 text-accent-foreground border-b border-accent/30'
         : 'bg-orange-500/10 text-orange-700 dark:text-orange-400 border-b border-orange-500/20'
     }`}>
-      {isFactory && <Factory className="h-3.5 w-3.5" />}
+      {businessType === 'factory' && <Factory className="h-3.5 w-3.5" />}
+      {businessType === 'property' && <Home className="h-3.5 w-3.5" />}
       {isOwner ? (
         <><Crown className="h-3.5 w-3.5" /> 👔 {t('nav.owner')} — <span className="font-bold">{businessName}</span> <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded-full ml-1">{typeLabel}</span></>
       ) : (
