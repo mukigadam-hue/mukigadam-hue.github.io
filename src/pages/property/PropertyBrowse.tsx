@@ -39,7 +39,7 @@ export default function PropertyBrowse() {
   const { user } = useAuth();
   const { currency } = useCurrency();
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState('all');
   const [location, setLocation] = useState('');
   const [results, setResults] = useState<SearchAsset[]>([]);
   const [loading, setLoading] = useState(false);
