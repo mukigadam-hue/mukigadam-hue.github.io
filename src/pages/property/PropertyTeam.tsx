@@ -622,8 +622,8 @@ export default function PropertyTeam() {
         </Card>
       )}
 
-      {/* Join another business - available to everyone */}
-      <WorkerJoinSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />
+      {/* Received an invite code - available to everyone */}
+      <ReceivedInviteCodeSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />
       <AdSpace variant="banner" />
 
       {/* ========= TENANT VIEW ========= */}
