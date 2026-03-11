@@ -478,10 +478,10 @@ export default function PropertyTeam() {
     return STAFF_RANKS;
   }
 
-  function openAddDialog(type: 'staff' | 'tenant' | 'landlord') {
+  function openAddDialog(type: 'staff' | 'tenant' | 'owner') {
     setAddType(type);
     setWorkerForm({
-      full_name: '', rank: type === 'staff' ? 'Caretaker' : type === 'landlord' ? 'Landlord' : 'Tenant',
+      full_name: '', rank: type === 'staff' ? 'Caretaker' : type === 'owner' ? 'Asset Owner' : 'Tenant',
       salary: '', phone: '', hire_date: new Date().toISOString().slice(0, 10),
       occupation: '', rental_purpose: '', gender: '', age: '', rental_end_date: '', agreed_amount: '',
     });
