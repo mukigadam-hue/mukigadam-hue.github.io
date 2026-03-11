@@ -61,7 +61,7 @@ export default function PropertyBrowse() {
     setLoading(true);
     const { data, error } = await supabase.rpc('search_property_assets', {
       _query: query,
-      _category: category,
+      _category: category === 'all' ? '' : category,
       _location: location,
     });
     if (!error) setResults((data || []) as SearchAsset[]);
