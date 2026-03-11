@@ -47,7 +47,7 @@ interface WorkerBalance {
 const RANKS = ['Supervisor', 'Manager', 'Cashier', 'Security', 'Worker', 'Driver', 'Cleaner'];
 
 function ShareButtons({ code, type }: { code: string; type: 'worker' }) {
-  const message = `Join our business as a Worker! Use this invite code: ${code}`;
+  const message = `You've been invited to join our business as a Worker! Use this invite code in the BizTrack app: ${code}`;
   const encoded = encodeURIComponent(message);
 
   const platforms = [
@@ -101,7 +101,7 @@ function ShareButtons({ code, type }: { code: string; type: 'worker' }) {
   );
 }
 
-function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
+function WorkerJoinSection({ onJoined }: { onJoined: () => void }) {
   const { redeemInviteCode } = useBusiness();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -115,7 +115,7 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
     const success = await redeemInviteCode(code.trim());
     if (success) {
       setCode('');
-      onRedeemed();
+      onJoined();
     }
     setLoading(false);
   }
@@ -125,21 +125,21 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
       <CardContent className="p-4 space-y-3">
         <h2 className="text-base font-semibold flex items-center gap-2">
           <Send className="h-4 w-4" />
-          Redeem Invite Code
+          Join This Business
         </h2>
         <p className="text-sm text-muted-foreground">
-          Have an invite code? Enter it below to join a business.
+          Got an invite code from the business owner? Enter it below to request access.
         </p>
         <div className="flex gap-2">
           <Input
-            placeholder="Enter code (e.g. ABC123)"
+            placeholder="Enter invite code (e.g. ABC123)"
             value={code}
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             className="font-mono tracking-wider uppercase"
             maxLength={10}
           />
           <Button onClick={handleRedeem} disabled={loading || !code.trim()}>
-            {loading ? 'Joining...' : 'Join'}
+            {loading ? 'Requesting...' : 'Request to Join'}
           </Button>
         </div>
       </CardContent>
@@ -393,7 +393,8 @@ export default function TeamPage() {
         </Card>
       )}
 
-      <RedeemCodeSection onRedeemed={() => { loadMembers(); loadTeamWorkers(); }} />
+      {/* Workers see "Join" section, Owners don't need it */}
+      {!isOwnerOrAdmin && <WorkerJoinSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />}
 
       <AdSpace variant="banner" />
 
@@ -413,22 +414,22 @@ export default function TeamPage() {
             <Card className="shadow-card border-dashed">
               <CardContent className="p-4 space-y-3">
                 <h2 className="text-base font-semibold flex items-center gap-2">
-                  <UserPlus className="h-4 w-4" /> Invite App Users
+                  <UserPlus className="h-4 w-4" /> Invite Worker to App
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Generate a code to add team members who can manage stock, sales & orders.
+                  Generate a code and share it with a worker. They'll use it to join your business and help manage stock, sales & orders.
                 </p>
                 {workerCode ? (
                   <div className="space-y-2">
                     <div className="rounded-lg p-3 text-center bg-primary/5">
                       <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
-                      <p className="text-xs text-muted-foreground mt-1">🔐 Worker Code — Expires in 7 days</p>
+                      <p className="text-xs text-muted-foreground mt-1">🔐 Share this code with your worker — Expires in 7 days</p>
                     </div>
                     <ShareButtons code={workerCode} type="worker" />
                   </div>
                 ) : (
                   <Button onClick={handleGenerateCode} disabled={loading}>
-                    <UserPlus className="h-4 w-4 mr-2" /> Generate Worker Code
+                    <UserPlus className="h-4 w-4 mr-2" /> Generate Worker Invite Code
                   </Button>
                 )}
               </CardContent>

@@ -60,7 +60,7 @@ const PAYMENT_METHODS = [
 ];
 
 function ShareButtons({ code }: { code: string }) {
-  const message = `Join our property team! Use this invite code: ${code}`;
+  const message = `You've been invited to join our property team! Use this invite code in the BizTrack app: ${code}`;
   const encoded = encodeURIComponent(message);
   return (
     <div className="flex items-center gap-2 flex-wrap mt-2">
@@ -77,7 +77,7 @@ function ShareButtons({ code }: { code: string }) {
   );
 }
 
-function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
+function WorkerJoinSection({ onJoined }: { onJoined: () => void }) {
   const { redeemInviteCode } = useBusiness();
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,7 +86,7 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
     if (!code.trim()) { toast.error('Please enter an invite code'); return; }
     setLoading(true);
     const success = await redeemInviteCode(code.trim());
-    if (success) { setCode(''); onRedeemed(); }
+    if (success) { setCode(''); onJoined(); }
     setLoading(false);
   }
 
@@ -94,11 +94,11 @@ function RedeemCodeSection({ onRedeemed }: { onRedeemed: () => void }) {
     <Card className="shadow-card border-dashed border-primary/30">
       <CardContent className="p-4 space-y-3">
         <h2 className="text-base font-semibold flex items-center gap-2"><Send className="h-4 w-4" /> Join via Invite Code</h2>
-        <p className="text-sm text-muted-foreground">Have an invite code from an asset owner or tenant? Enter it to connect.</p>
+        <p className="text-sm text-muted-foreground">Got an invite code from an asset owner or property manager? Enter it to request access.</p>
         <div className="flex gap-2">
-          <Input placeholder="Enter code (e.g. ABC123)" value={code} onChange={e => setCode(e.target.value.toUpperCase())}
+          <Input placeholder="Enter invite code (e.g. ABC123)" value={code} onChange={e => setCode(e.target.value.toUpperCase())}
             className="font-mono tracking-wider uppercase" maxLength={10} />
-          <Button onClick={handleRedeem} disabled={loading || !code.trim()}>{loading ? 'Joining...' : 'Join'}</Button>
+          <Button onClick={handleRedeem} disabled={loading || !code.trim()}>{loading ? 'Requesting...' : 'Request to Join'}</Button>
         </div>
       </CardContent>
     </Card>
@@ -622,7 +622,8 @@ export default function PropertyTeam() {
         </Card>
       )}
 
-      <RedeemCodeSection onRedeemed={() => { loadMembers(); loadTeamWorkers(); }} />
+      {/* Workers/non-owners see join section, owners don't need it */}
+      {!isOwnerOrAdmin && <WorkerJoinSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />}
       <AdSpace variant="banner" />
 
       {/* ========= TENANT VIEW ========= */}
@@ -664,16 +665,16 @@ export default function PropertyTeam() {
                 </div>
               )}
 
-              {/* Generate my code so landlord can add me */}
+              {/* Tenant: Generate code so the asset owner can add me */}
               <Card className="shadow-card border-dashed">
                 <CardContent className="p-4 space-y-3">
-                  <h2 className="text-base font-semibold flex items-center gap-2"><Share2 className="h-4 w-4" /> Share My Code</h2>
-                  <p className="text-sm text-muted-foreground">Generate a code and give it to the asset owner so they can add you as a tenant.</p>
+                  <h2 className="text-base font-semibold flex items-center gap-2"><Share2 className="h-4 w-4" /> Share My Code with Asset Owner</h2>
+                  <p className="text-sm text-muted-foreground">Generate a code and give it to the asset owner so they can add you as a tenant on their app.</p>
                   {workerCode ? (
                     <div className="space-y-2">
                       <div className="rounded-lg p-3 text-center bg-primary/5">
                         <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
-                        <p className="text-xs text-muted-foreground mt-1">🔐 Expires in 7 days</p>
+                        <p className="text-xs text-muted-foreground mt-1">🔐 Give this code to your asset owner — Expires in 7 days</p>
                       </div>
                       <ShareButtons code={workerCode} />
                     </div>
@@ -714,22 +715,22 @@ export default function PropertyTeam() {
                 </CardContent>
               </Card>
 
-              {/* Generate code for tenant to join */}
+              {/* Owner: Generate invite code for tenant to join the app */}
               {isOwnerOrAdmin && (
                 <Card className="shadow-card border-dashed">
                   <CardContent className="p-4 space-y-3">
-                    <h2 className="text-base font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> Invite Tenant via Code</h2>
-                    <p className="text-sm text-muted-foreground">Generate a code for tenants who use this app to join your team.</p>
+                    <h2 className="text-base font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> Invite Tenant to App</h2>
+                    <p className="text-sm text-muted-foreground">Generate a code and share it with a tenant who uses this app, so they can access your property profile.</p>
                     {workerCode ? (
                       <div className="space-y-2">
                         <div className="rounded-lg p-3 text-center bg-primary/5">
                           <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
-                          <p className="text-xs text-muted-foreground mt-1">🔐 Expires in 7 days</p>
+                          <p className="text-xs text-muted-foreground mt-1">🔐 Share this code with your tenant — Expires in 7 days</p>
                         </div>
                         <ShareButtons code={workerCode} />
                       </div>
                     ) : (
-                      <Button onClick={handleGenerateCode} disabled={loading}><UserPlus className="h-4 w-4 mr-2" /> Generate Invite Code</Button>
+                      <Button onClick={handleGenerateCode} disabled={loading}><UserPlus className="h-4 w-4 mr-2" /> Generate Tenant Invite Code</Button>
                     )}
                   </CardContent>
                 </Card>
@@ -763,17 +764,18 @@ export default function PropertyTeam() {
 
                   <Card className="shadow-card border-dashed">
                     <CardContent className="p-4 space-y-3">
-                      <h2 className="text-base font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> Invite Staff via Code</h2>
+                      <h2 className="text-base font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> Invite Staff to App</h2>
+                      <p className="text-xs text-muted-foreground">Generate a code and share it with a staff member so they can access your property on the app.</p>
                       {workerCode ? (
                         <div className="space-y-2">
                           <div className="rounded-lg p-3 text-center bg-primary/5">
                             <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
-                            <p className="text-xs text-muted-foreground mt-1">🔐 Expires in 7 days</p>
+                            <p className="text-xs text-muted-foreground mt-1">🔐 Share this code with your staff — Expires in 7 days</p>
                           </div>
                           <ShareButtons code={workerCode} />
                         </div>
                       ) : (
-                        <Button onClick={handleGenerateCode} disabled={loading}><UserPlus className="h-4 w-4 mr-2" /> Generate Staff Code</Button>
+                        <Button onClick={handleGenerateCode} disabled={loading}><UserPlus className="h-4 w-4 mr-2" /> Generate Staff Invite Code</Button>
                       )}
                     </CardContent>
                   </Card>

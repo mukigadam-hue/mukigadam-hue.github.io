@@ -86,7 +86,7 @@ export default function BusinessSetupPage() {
         <CardContent className="p-6 space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold">📦 BizTrack</h1>
-            <p className="text-sm text-muted-foreground">Set up your business, factory, or property — or join an existing one</p>
+            <p className="text-sm text-muted-foreground">Create your own business, factory, or property — or join an existing one as a worker</p>
             <Button type="button" variant="ghost" size="sm" onClick={handleExit} disabled={loading}>
               Exit to sign in / sign up
             </Button>
@@ -94,10 +94,10 @@ export default function BusinessSetupPage() {
 
           <div className="flex gap-2">
             <Button variant={tab === 'create' ? 'default' : 'outline'} className="flex-1" onClick={() => setTab('create')}>
-              <Plus className="h-4 w-4 mr-2" />Create New
+              <Plus className="h-4 w-4 mr-2" />I'm the Owner
             </Button>
             <Button variant={tab === 'join' ? 'default' : 'outline'} className="flex-1" onClick={() => setTab('join')}>
-              <KeyRound className="h-4 w-4 mr-2" />Join with Code
+              <KeyRound className="h-4 w-4 mr-2" />I'm a Worker
             </Button>
           </div>
 
@@ -195,17 +195,21 @@ export default function BusinessSetupPage() {
             </form>
           ) : (
             <form onSubmit={handleJoin} className="space-y-4">
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground mb-1">👷 Joining as a Worker</p>
+                <p>Your boss or business owner will give you an invite code. Enter it below to join their business, factory, or property.</p>
+              </div>
               <div>
-                <Label>Invite Code</Label>
+                <Label>Invite Code from Owner</Label>
                 <Input value={inviteCode} onChange={e => setInviteCode(e.target.value.toUpperCase())}
-                  required placeholder="Enter invite code" maxLength={6}
+                  required placeholder="Enter the code your boss gave you" maxLength={6}
                   className="text-center text-lg tracking-widest font-mono" />
                 <p className="text-xs text-muted-foreground mt-1">
-                  Ask your business/factory owner for the invite code.
+                  Ask your business/factory/property owner for the invite code.
                 </p>
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                <KeyRound className="h-4 w-4 mr-2" />Join
+                <KeyRound className="h-4 w-4 mr-2" />Request to Join
               </Button>
             </form>
           )}
