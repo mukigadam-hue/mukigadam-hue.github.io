@@ -231,7 +231,8 @@ export default function PropertyAssets() {
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
-          {filtered.map(asset => {
+          {filtered.map((asset, idx) => {
+            const showAd = idx > 0 && idx % 8 === 0;
             const status = getBookingStatus(asset.id);
             return (
               <Card key={asset.id} className="overflow-hidden">
