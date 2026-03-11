@@ -101,7 +101,7 @@ export default function PropertyBookings() {
           </div>
           <div className="text-xs space-y-0.5">
             <p>📅 {new Date(booking.start_date).toLocaleDateString()} → {new Date(booking.end_date).toLocaleDateString()}</p>
-            <p>⏱ {booking.duration_type} · {symbol}{booking.total_price.toLocaleString()}</p>
+            <p>⏱ {booking.duration_type} · {currency}{booking.total_price.toLocaleString()}</p>
             <p>💰 {t('sales.paymentStatus', 'Payment')}: <span className={booking.payment_status === 'paid' ? 'text-green-600' : 'text-amber-600'}>{booking.payment_status}</span></p>
           </div>
           {booking.notes && <p className="text-xs text-muted-foreground">📝 {booking.notes}</p>}

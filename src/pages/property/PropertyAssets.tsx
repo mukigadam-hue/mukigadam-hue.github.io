@@ -257,9 +257,9 @@ export default function PropertyAssets() {
                     {asset.area_size > 0 && <span>· {asset.area_size} {asset.area_unit}</span>}
                   </div>
                   <div className="flex gap-3 text-xs">
-                    {asset.hourly_price > 0 && <span>{symbol}{asset.hourly_price}/hr</span>}
-                    {asset.daily_price > 0 && <span>{symbol}{asset.daily_price}/day</span>}
-                    {asset.monthly_price > 0 && <span>{symbol}{asset.monthly_price}/mo</span>}
+                    {asset.hourly_price > 0 && <span>{currency}{asset.hourly_price}/hr</span>}
+                    {asset.daily_price > 0 && <span>{currency}{asset.daily_price}/day</span>}
+                    {asset.monthly_price > 0 && <span>{currency}{asset.monthly_price}/mo</span>}
                   </div>
                   {asset.features && (
                     <div className="flex flex-wrap gap-1">

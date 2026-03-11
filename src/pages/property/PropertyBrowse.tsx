@@ -225,9 +225,9 @@ export default function PropertyBrowse() {
               <Select value={durationType} onValueChange={setDurationType}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {bookingAsset?.hourly_price ? <SelectItem value="hourly">{t('property.hourly', 'Hourly')} ({symbol}{bookingAsset.hourly_price}/hr)</SelectItem> : null}
-                  {bookingAsset?.daily_price ? <SelectItem value="daily">{t('property.daily', 'Daily')} ({symbol}{bookingAsset.daily_price}/day)</SelectItem> : null}
-                  {bookingAsset?.monthly_price ? <SelectItem value="monthly">{t('property.monthly', 'Monthly')} ({symbol}{bookingAsset.monthly_price}/mo)</SelectItem> : null}
+                  {bookingAsset?.hourly_price ? <SelectItem value="hourly">{t('property.hourly', 'Hourly')} ({currency}{bookingAsset.hourly_price}/hr)</SelectItem> : null}
+                  {bookingAsset?.daily_price ? <SelectItem value="daily">{t('property.daily', 'Daily')} ({currency}{bookingAsset.daily_price}/day)</SelectItem> : null}
+                  {bookingAsset?.monthly_price ? <SelectItem value="monthly">{t('property.monthly', 'Monthly')} ({currency}{bookingAsset.monthly_price}/mo)</SelectItem> : null}
                 </SelectContent>
               </Select>
             </div>

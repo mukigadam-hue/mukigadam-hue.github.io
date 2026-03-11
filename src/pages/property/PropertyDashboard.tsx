@@ -139,7 +139,7 @@ export default function PropertyDashboard() {
                       <p className="text-sm font-medium">{asset?.name || 'Unknown'}</p>
                       <p className="text-xs text-muted-foreground">{b.renter_name} · {new Date(b.start_date).toLocaleDateString()}</p>
                     </div>
-                    <span className="text-xs font-medium text-amber-600">{symbol}{b.total_price.toLocaleString()}</span>
+                    <span className="text-xs font-medium text-amber-600"><span className="text-xs font-medium text-amber-600">{currency}{b.total_price.toLocaleString()}</span></span>
                   </div>
                 );
               })}
