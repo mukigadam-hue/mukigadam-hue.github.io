@@ -151,7 +151,7 @@ export default function PropertyBrowse() {
         <Select value={category} onValueChange={setCategory}>
           <SelectTrigger className="w-36 h-9"><SelectValue placeholder={t('property.allCategories', 'All Types')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All</SelectItem>
+            <SelectItem value="all">All</SelectItem>
             <SelectItem value="land">🏞️ Land</SelectItem>
             <SelectItem value="vehicle">🚗 Vehicle</SelectItem>
             <SelectItem value="vessel">🚢 Vessel</SelectItem>
