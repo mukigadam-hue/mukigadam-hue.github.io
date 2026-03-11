@@ -393,8 +393,8 @@ export default function TeamPage() {
         </Card>
       )}
 
-      {/* Workers see "Join" section, Owners don't need it */}
-      {!isOwnerOrAdmin && <WorkerJoinSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />}
+      {/* Join another business - available to everyone */}
+      <JoinAnotherBusinessSection onJoined={() => { loadMembers(); loadTeamWorkers(); }} />
 
       <AdSpace variant="banner" />
 
