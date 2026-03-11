@@ -258,7 +258,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen overflow-hidden flex-col">
-      {currentBusiness && <BusinessRoleBanner userRole={userRole} businessName={currentBusiness.name} isFactory={isFactory} />}
+      {currentBusiness && <BusinessRoleBanner userRole={userRole!} businessName={currentBusiness.name} businessType={(currentBusiness as any).business_type || 'business'} />}
 
       <div className="flex flex-1 overflow-hidden">
         {/* Desktop Sidebar */}
