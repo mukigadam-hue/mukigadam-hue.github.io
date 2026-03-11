@@ -1912,6 +1912,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      get_business_members: {
+        Args: { _business_id: string }
+        Returns: {
+          created_at: string
+          email: string
+          full_name: string
+          role: Database["public"]["Enums"]["business_role"]
+          user_id: string
+        }[]
+      }
       get_business_public_products: {
         Args: { _business_id: string; _limit?: number }
         Returns: {
