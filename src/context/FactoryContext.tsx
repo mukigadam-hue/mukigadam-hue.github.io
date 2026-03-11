@@ -210,13 +210,38 @@ export function FactoryProvider({ children }: { children: React.ReactNode }) {
   const updateTeamMember = useCallback(async (id: string, updates: Partial<FactoryTeamMember>) => {
     const { error } = await supabase.from('factory_team_members').update(updates as any).eq('id', id);
     if (error) { toast.error(error.message); return; }
+    // If deactivating, also remove matching membership
+    if (updates.is_active === false) {
+      const { data: member } = await supabase.from('factory_team_members').select('full_name, business_id').eq('id', id).single();
+      if (member) {
+        const { data: profiles } = await supabase.from('profiles').select('id, full_name').ilike('full_name', member.full_name);
+        if (profiles) {
+          for (const p of profiles) {
+            await supabase.from('business_memberships').delete()
+              .eq('user_id', p.id).eq('business_id', member.business_id);
+          }
+        }
+      }
+    }
     setTeamMembers(prev => prev.map(t => t.id === id ? { ...t, ...updates } as FactoryTeamMember : t));
     toast.success('Updated!');
   }, []);
 
   const deleteTeamMember = useCallback(async (id: string) => {
+    // Get the member name before deleting to clean up memberships
+    const { data: member } = await supabase.from('factory_team_members').select('full_name, business_id').eq('id', id).single();
     const { error } = await supabase.from('factory_team_members').delete().eq('id', id);
     if (error) { toast.error(error.message); return; }
+    // Also remove matching membership by name
+    if (member) {
+      const { data: profiles } = await supabase.from('profiles').select('id, full_name').ilike('full_name', member.full_name);
+      if (profiles) {
+        for (const p of profiles) {
+          await supabase.from('business_memberships').delete()
+            .eq('user_id', p.id).eq('business_id', member.business_id);
+        }
+      }
+    }
     toast.success('Member removed');
   }, []);
 
