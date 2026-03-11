@@ -180,9 +180,17 @@ export default function OrdersPage() {
   }
 
   const activeStock = stock.filter(s => !s.deleted_at);
-  const suggestions = activeStock.map(s => s.name);
-  const existingCategories = [...new Set(activeStock.map(s => s.category).filter(Boolean))];
-  const existingQualities = [...new Set(activeStock.map(s => s.quality).filter(Boolean))];
+  // When in request mode with supplier products loaded, show supplier items as suggestions
+  const supplierSuggestions = supplierProducts.map(p => p.name);
+  const suggestions = orderMode === 'request' && supplierSuggestions.length > 0
+    ? [...new Set([...supplierSuggestions, ...activeStock.map(s => s.name)])]
+    : activeStock.map(s => s.name);
+  const existingCategories = orderMode === 'request' && supplierProducts.length > 0
+    ? [...new Set([...supplierProducts.map(p => p.category).filter(Boolean), ...activeStock.map(s => s.category).filter(Boolean)])]
+    : [...new Set(activeStock.map(s => s.category).filter(Boolean))];
+  const existingQualities = orderMode === 'request' && supplierProducts.length > 0
+    ? [...new Set([...supplierProducts.map(p => p.quality).filter(Boolean), ...activeStock.map(s => s.quality).filter(Boolean)])]
+    : [...new Set(activeStock.map(s => s.quality).filter(Boolean))];
 
   const [scannerOpen, setScannerOpen] = useState(false);
   const [orderMode, setOrderMode] = useState<'my_order' | 'inbox' | 'request'>('my_order');
