@@ -440,7 +440,21 @@ export default function PropertyTeam() {
     setEditWorkerId(w.id);
   }
 
-  async function deleteWorker(id: string) { await supabase.from('business_team_members').delete().eq('id', id); toast.success('Removed'); loadTeamWorkers(); }
+  async function deleteWorker(id: string) {
+    const worker = teamWorkers.find(w => w.id === id);
+    await supabase.from('business_team_members').delete().eq('id', id);
+    // Also remove matching membership by name
+    if (worker && businessId) {
+      const matchedMember = appMembers.find(m => m.full_name?.toLowerCase() === worker.full_name.toLowerCase());
+      if (matchedMember) {
+        await supabase.from('business_memberships').delete()
+          .eq('user_id', matchedMember.user_id).eq('business_id', businessId);
+      }
+    }
+    toast.success('Removed');
+    loadTeamWorkers();
+    loadAppMembers();
+  }
 
   function ConfirmDeleteButton({ onConfirm, label = 'Remove', name = '' }: { onConfirm: () => void; label?: string; name?: string }) {
     return (
