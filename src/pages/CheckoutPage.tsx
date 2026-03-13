@@ -77,6 +77,7 @@ export default function CheckoutPage() {
       toast.error('Please upload payment proof screenshot');
       return;
     }
+    }
 
     setSubmitting(true);
     try {
