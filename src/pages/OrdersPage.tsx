@@ -280,7 +280,7 @@ export default function OrdersPage() {
       price_type: form.priceType,
       unit_price: unitPrice,
     }]);
-    setForm({ name: '', category: '', quality: '', quantity: '1', priceType: 'retail', unitPrice: '' });
+    setForm({ name: '', category: '', quality: '', quantity: '1', priceType: 'retail', unitPrice: '', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
   }
 
   function removeItem(idx: number) { setItems(prev => prev.filter((_, i) => i !== idx)); }
