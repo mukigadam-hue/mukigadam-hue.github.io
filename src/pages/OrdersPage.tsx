@@ -1152,6 +1152,14 @@ export default function OrdersPage() {
               )}
               <Button onClick={addItem} disabled={!form.name.trim()}><Plus className="h-4 w-4 mr-1" />Add</Button>
             </div>
+            <BulkPackagingFields
+              piecesPerCarton={form.pieces_per_carton}
+              cartonsPerBox={form.cartons_per_box}
+              boxesPerContainer={form.boxes_per_container}
+              onChange={(field, value) => setForm(f => ({ ...f, [field]: value }))}
+              onQuantityCalculated={(total) => setForm(f => ({ ...f, quantity: String(total) }))}
+              currentQuantity={form.quantity}
+            />
 
             {items.length > 0 && (
               <>
