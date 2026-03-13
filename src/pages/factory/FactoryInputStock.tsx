@@ -23,7 +23,7 @@ export default function FactoryInputStock() {
   const { fmt } = useCurrency();
   const [showAdd, setShowAdd] = useState(false);
   const [editItem, setEditItem] = useState<string | null>(null);
-  const [form, setForm] = useState({ name: '', category: '', unit_type: 'Pieces', quantity: '', unit_cost: '', min_stock_level: '5', supplier: '' });
+  const [form, setForm] = useState({ name: '', category: '', unit_type: 'Pieces', quantity: '', unit_cost: '', min_stock_level: '5', supplier: '', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
 
   const active = rawMaterials.filter(r => !r.deleted_at);
   const existingCategories = [...new Set(active.map(r => r.category).filter(Boolean))];
