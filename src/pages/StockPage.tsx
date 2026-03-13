@@ -11,6 +11,7 @@ import { Plus, Search, Pencil, Trash2, RotateCcw, AlertTriangle, Image, X, ScanL
 import BarcodeScanner from '@/components/BarcodeScanner';
 import type { StockItem } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
+import BulkPackagingInfo, { BulkPackagingFields } from '@/components/BulkPackagingInfo';
 
 import { toSentenceCase } from '@/lib/utils';
 
