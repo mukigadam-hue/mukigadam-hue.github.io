@@ -109,7 +109,7 @@ export default function CheckoutPage() {
         type: 'checkout',
         customer_name: toTitleCase(customerName.trim()),
         grand_total: grandTotal,
-        status: paymentMethod === 'card' ? 'paid' : 'pending',
+        status: paymentMethod === 'card' || paymentMethod === 'cash' ? 'paid' : 'pending',
         code,
         payment_method: paymentMethod,
         proof_url: proofUrl,
