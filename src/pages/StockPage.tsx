@@ -218,6 +218,12 @@ export default function StockPage() {
                     <Label>Barcode (Optional)</Label>
                     <Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} placeholder="Scan or type barcode..." />
                   </div>
+                  <BulkPackagingFields
+                    piecesPerCarton={form.pieces_per_carton}
+                    cartonsPerBox={form.cartons_per_box}
+                    boxesPerContainer={form.boxes_per_container}
+                    onChange={(field, value) => setForm(f => ({ ...f, [field]: value }))}
+                  />
                   <Button type="submit" className="w-full">{editItem ? 'Update Item' : 'Add Item'}</Button>
                 </form>
               </DialogContent>
