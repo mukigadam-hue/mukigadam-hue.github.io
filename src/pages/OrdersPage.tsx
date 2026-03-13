@@ -48,7 +48,7 @@ export default function OrdersPage() {
   const [completeDialog, setCompleteDialog] = useState<Order | null>(null);
   const [completeBuyer, setCompleteBuyer] = useState('');
   const [completeSeller, setCompleteSeller] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'mobile_money' | 'card'>('mobile_money');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'mobile_money' | 'card'>('mobile_money');
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [proofPreview, setProofPreview] = useState<string | null>(null);
   const [completing, setCompleting] = useState(false);
