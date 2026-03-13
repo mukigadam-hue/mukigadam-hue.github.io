@@ -12,6 +12,8 @@ import { APP_VERSION } from '@/version';
 import LanguageSelector from '@/components/LanguageSelector';
 import ImageUpload from '@/components/ImageUpload';
 import AdSpace from '@/components/AdSpace';
+import DailyTipBanner from '@/components/DailyTipBanner';
+import AnnouncementsBanner from '@/components/AnnouncementsBanner';
 
 export default function PropertyDashboard() {
   const { t } = useTranslation();
