@@ -35,7 +35,7 @@ export default function FactoryProductStock() {
   const deleted = stock.filter(s => s.deleted_at);
 
   function resetForm() {
-    setForm({ name: '', category: '', quality: '', quantity: '0', barcode: '', buying_price: '', wholesale_price: '', retail_price: '', min_stock_level: '5', image_url_1: '', image_url_2: '', image_url_3: '' });
+    setForm({ name: '', category: '', quality: '', quantity: '0', barcode: '', buying_price: '', wholesale_price: '', retail_price: '', min_stock_level: '5', image_url_1: '', image_url_2: '', image_url_3: '', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
   }
 
   async function handleAdd(e: React.FormEvent) {
