@@ -148,6 +148,7 @@ export default function FactoryProductStock() {
                           {item.quantity}
                           {isOut && <span className="ml-1 text-xs text-destructive font-semibold">OUT</span>}
                           {isLow && <span className="ml-1 text-xs text-warning font-semibold">LOW</span>}
+                          <BulkPackagingInfo quantity={item.quantity} piecesPerCarton={(item as any).pieces_per_carton || 0} cartonsPerBox={(item as any).cartons_per_box || 0} boxesPerContainer={(item as any).boxes_per_container || 0} compact />
                         </TableCell>
                         <TableCell className="text-right tabular-nums">{fmt(Number(item.wholesale_price))}</TableCell>
                         <TableCell className="text-right tabular-nums">{fmt(Number(item.retail_price))}</TableCell>
