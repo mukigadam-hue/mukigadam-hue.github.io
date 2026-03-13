@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Plus, Trash2, CreditCard, Smartphone, Upload, CheckCircle, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 import Receipt from '@/components/Receipt';
+import { PaymentMethodsViewer } from '@/components/PaymentMethodsManager';
 import type { Order } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
 
