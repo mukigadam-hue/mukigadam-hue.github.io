@@ -8,6 +8,8 @@ import { Package, TrendingUp, AlertTriangle, XCircle, DollarSign, Factory, Wrenc
 import ImageUpload from '@/components/ImageUpload';
 import QuickAddItem from '@/components/QuickAddItem';
 import AdSpace from '@/components/AdSpace';
+import DailyTipBanner from '@/components/DailyTipBanner';
+import AnnouncementsBanner from '@/components/AnnouncementsBanner';
 
 export default function FactoryDashboard() {
   const { currentBusiness, updateBusiness, stock, sales, services } = useBusiness();
