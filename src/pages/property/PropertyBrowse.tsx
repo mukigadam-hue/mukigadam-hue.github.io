@@ -14,7 +14,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Search, MapPin, Phone, Copy, CalendarCheck, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { toTitleCase, toSentenceCase } from '@/lib/utils';
 import AdSpace, { withInlineAds } from '@/components/AdSpace';
+
+const PAYMENT_FREQUENCIES = [
+  { value: 'monthly', label: 'Every Month' },
+  { value: 'quarterly', label: 'Every 3 Months' },
+  { value: 'biannual', label: 'Every 6 Months' },
+  { value: 'annual', label: 'Every 12 Months' },
+  { value: 'one-time', label: 'One-Time Payment' },
+];
 
 interface SearchAsset {
   id: string;
@@ -49,6 +58,7 @@ function BookingDialog({ open, onClose, asset, propertyName }: { open: boolean; 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [durationType, setDurationType] = useState('daily');
+  const [paymentFrequency, setPaymentFrequency] = useState('monthly');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -86,17 +96,18 @@ function BookingDialog({ open, onClose, asset, propertyName }: { open: boolean; 
       asset_id: asset.id,
       business_id: asset.business_id,
       renter_id: user!.id,
-      renter_name: renterName.trim(),
+      renter_name: toTitleCase(renterName.trim()),
       renter_contact: renterContact.trim(),
       start_date: start.toISOString(),
       end_date: end.toISOString(),
       duration_type: durationType,
+      payment_frequency: paymentFrequency,
       total_price: totalPrice,
       agreed_amount: totalPrice,
       status: 'pending',
-      notes: notes.trim(),
-      renter_occupation: renterOccupation.trim(),
-      rental_purpose: rentalPurpose.trim(),
+      notes: toSentenceCase(notes.trim()),
+      renter_occupation: toSentenceCase(renterOccupation.trim()),
+      rental_purpose: toSentenceCase(rentalPurpose.trim()),
       gender: renterGender,
       age: renterAge ? parseInt(renterAge) : null,
       expected_payment_date: end.toISOString(),
@@ -157,17 +168,28 @@ function BookingDialog({ open, onClose, asset, propertyName }: { open: boolean; 
             <div><Label>Age</Label><Input type="number" min="0" max="150" value={renterAge} onChange={e => setRenterAge(e.target.value)} placeholder="e.g. 30" /></div>
           </div>
 
-          {/* Duration */}
-          <div>
-            <Label>Duration Type</Label>
-            <Select value={durationType} onValueChange={setDurationType}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {asset.hourly_price > 0 && <SelectItem value="hourly">Hourly ({fmt(asset.hourly_price)}/hr)</SelectItem>}
-                {asset.daily_price > 0 && <SelectItem value="daily">Daily ({fmt(asset.daily_price)}/day)</SelectItem>}
-                {asset.monthly_price > 0 && <SelectItem value="monthly">Monthly ({fmt(asset.monthly_price)}/mo)</SelectItem>}
-              </SelectContent>
-            </Select>
+          {/* Duration & Payment Frequency */}
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label>Billing Duration</Label>
+              <Select value={durationType} onValueChange={setDurationType}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {asset.hourly_price > 0 && <SelectItem value="hourly">Hourly ({fmt(asset.hourly_price)}/hr)</SelectItem>}
+                  {asset.daily_price > 0 && <SelectItem value="daily">Daily ({fmt(asset.daily_price)}/day)</SelectItem>}
+                  {asset.monthly_price > 0 && <SelectItem value="monthly">Monthly ({fmt(asset.monthly_price)}/mo)</SelectItem>}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Payment Frequency</Label>
+              <Select value={paymentFrequency} onValueChange={setPaymentFrequency}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PAYMENT_FREQUENCIES.map(f => <SelectItem key={f.value} value={f.value}>{f.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">

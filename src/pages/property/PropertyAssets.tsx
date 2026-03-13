@@ -16,6 +16,7 @@ import { Plus, Search, MapPin, Edit2, Trash2, Home, RefreshCw, DoorOpen } from '
 import ImageUpload from '@/components/ImageUpload';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import AdSpace from '@/components/AdSpace';
 
 const CATEGORIES = [
@@ -59,7 +60,15 @@ function AssetForm({ asset, onSave, onClose }: { asset?: PropertyAsset; onSave: 
     e.preventDefault();
     if (!form.name.trim()) { toast.error('Name is required'); return; }
     if (!form.location.trim()) { toast.error('Location is required'); return; }
-    onSave(form);
+    onSave({
+      ...form,
+      name: toSentenceCase(form.name.trim()),
+      description: toSentenceCase(form.description.trim()),
+      location: toTitleCase(form.location.trim()),
+      owner_name: toTitleCase(form.owner_name.trim()),
+      features: form.features.trim(),
+      rules: toSentenceCase(form.rules.trim()),
+    });
     onClose();
   }
 
@@ -68,7 +77,8 @@ function AssetForm({ asset, onSave, onClose }: { asset?: PropertyAsset; onSave: 
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2">
           <Label>Asset Name *</Label>
-          <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. 2-Bedroom Apartment Block A" required />
+          <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Room 1 - front, Room 2 - back, Toyota Hiace" required />
+          <p className="text-[10px] text-muted-foreground mt-0.5">💡 For different prices, add each room/unit as a separate asset (e.g. "Room 1 - Front", "Room 2 - Back")</p>
         </div>
         <div>
           <Label>Category</Label>
