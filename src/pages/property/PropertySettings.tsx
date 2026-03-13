@@ -10,11 +10,67 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Save, Building2, Plus, ChevronRight, Lock, Copy, KeyRound, Eye, EyeOff, ShieldBan, X, Home, Trash2, Factory, CalendarCheck, TrendingUp, DollarSign, Wallet } from 'lucide-react';
+import { Save, Building2, Plus, ChevronRight, Lock, Copy, KeyRound, Eye, EyeOff, ShieldBan, X, Home, Trash2, Factory, CalendarCheck, TrendingUp, DollarSign, Wallet, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import AdSpace from '@/components/AdSpace';
 import LanguageSelector from '@/components/LanguageSelector';
+import Receipt from '@/components/Receipt';
+
+function ReceiptArchive({ businessId }: { businessId: string }) {
+  const [receipts, setReceipts] = useState<any[]>([]);
+  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+  const { fmt } = useCurrency();
+
+  useEffect(() => {
+    if (!businessId) return;
+    supabase.from('receipts').select('*').eq('business_id', businessId).order('created_at', { ascending: false })
+      .then(({ data }) => setReceipts(data || []));
+  }, [businessId]);
+
+  if (receipts.length === 0) return null;
+
+  return (
+    <>
+      <Card className="shadow-card">
+        <CardContent className="p-4 space-y-3">
+          <h2 className="text-base font-semibold flex items-center gap-2"><FileText className="h-4 w-4" /> Receipt Archive</h2>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {receipts.map(r => (
+              <button key={r.id} onClick={() => setSelectedReceipt(r)}
+                className="w-full text-left p-3 rounded-lg border hover:border-primary/50 hover:bg-primary/5 transition-colors">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="text-sm font-medium">{r.buyer_name || 'Customer'}</p>
+                    <p className="text-xs text-muted-foreground">{r.receipt_type} · {new Date(r.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <span className="text-sm font-bold text-success">{fmt(Number(r.grand_total))}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {selectedReceipt && (
+        <Dialog open={!!selectedReceipt} onOpenChange={() => setSelectedReceipt(null)}>
+          <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogHeader><DialogTitle>📄 Receipt</DialogTitle></DialogHeader>
+            <Receipt
+              items={Array.isArray(selectedReceipt.items) ? selectedReceipt.items : []}
+              grandTotal={Number(selectedReceipt.grand_total)}
+              buyerName={selectedReceipt.buyer_name}
+              sellerName={selectedReceipt.seller_name}
+              date={selectedReceipt.created_at}
+              type="sale"
+              businessInfo={selectedReceipt.business_info || undefined}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+    </>
+  );
+}
 
 function DiscoverVisibilityCard({ businessId }: { businessId: string }) {
   const [isDiscoverable, setIsDiscoverable] = useState(true);
@@ -389,6 +445,9 @@ export default function PropertySettings() {
       </Card>
 
       <AdSpace variant="inline" />
+
+      {/* ===== RECEIPT ARCHIVE ===== */}
+      <ReceiptArchive businessId={currentBusiness?.id || ''} />
 
       {/* ===== PROPERTY FINANCIAL SUMMARY ===== */}
       <Card className="shadow-card border-primary/20">
