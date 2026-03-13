@@ -157,6 +157,9 @@ export default function StockPage() {
       name: item.name, category: item.category, quality: item.quality, barcode: item.barcode || '',
       buying_price: String(item.buying_price), wholesale_price: String(item.wholesale_price), retail_price: String(item.retail_price),
       quantity: String(item.quantity), min_stock_level: String(item.min_stock_level),
+      pieces_per_carton: String((item as any).pieces_per_carton || 0),
+      cartons_per_box: String((item as any).cartons_per_box || 0),
+      boxes_per_container: String((item as any).boxes_per_container || 0),
     });
     setOpen(true);
   }
