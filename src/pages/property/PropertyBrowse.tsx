@@ -49,6 +49,7 @@ function BookingDialog({ open, onClose, asset, propertyName }: { open: boolean; 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [durationType, setDurationType] = useState('daily');
+  const [paymentFrequency, setPaymentFrequency] = useState('monthly');
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
