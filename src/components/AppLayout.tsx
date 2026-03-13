@@ -339,8 +339,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-0">
+        <main className="flex-1 overflow-y-auto pb-20 md:pb-10">
           <div className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto animate-fade-in">{children}</div>
+          {/* Desktop prev/next page nav */}
+          <DesktopPageNav navItems={navItems} pathname={pathname} />
         </main>
       </div>
 
