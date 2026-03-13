@@ -37,7 +37,7 @@ export default function OrdersPage() {
   const [customerName, setCustomerName] = useState('');
   const [sellerName, setSellerName] = useState('');
   const [items, setItems] = useState<{ item_name: string; category: string; quality: string; quantity: number; price_type: string; unit_price: number }[]>([]);
-  const [form, setForm] = useState({ name: '', category: '', quality: '', quantity: '1', priceType: 'retail' as string, unitPrice: '' });
+  const [form, setForm] = useState({ name: '', category: '', quality: '', quantity: '1', priceType: 'retail' as string, unitPrice: '', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
   const [requestComment, setRequestComment] = useState('');
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [editItems, setEditItems] = useState<OrderItem[]>([]);
