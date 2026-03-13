@@ -16,6 +16,7 @@ import { Plus, Search, MapPin, Edit2, Trash2, Home, RefreshCw, DoorOpen } from '
 import ImageUpload from '@/components/ImageUpload';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import AdSpace from '@/components/AdSpace';
 
 const CATEGORIES = [
