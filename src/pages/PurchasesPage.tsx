@@ -11,6 +11,7 @@ import { Plus, Trash2, Package, ScanLine } from 'lucide-react';
 import BarcodeScanner from '@/components/BarcodeScanner';
 import { toast } from 'sonner';
 import AdSpace from '@/components/AdSpace';
+import { BulkPackagingFields } from '@/components/BulkPackagingInfo';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
