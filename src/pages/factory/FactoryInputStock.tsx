@@ -122,9 +122,16 @@ export default function FactoryInputStock() {
                         <TableCell>{r.category}</TableCell>
                         <TableCell className="capitalize">{r.unit_type}</TableCell>
                         <TableCell className="text-right tabular-nums">
-                          {r.quantity}
-                          {isOut && <span className="ml-1 text-xs text-destructive font-semibold">OUT</span>}
-                          {isLow && <span className="ml-1 text-xs text-warning font-semibold">LOW</span>}
+                          <div>{r.quantity}</div>
+                          {isOut && <span className="text-xs text-destructive font-semibold">OUT</span>}
+                          {isLow && <span className="text-xs text-warning font-semibold">LOW</span>}
+                          <BulkPackagingInfo
+                            quantity={Number(r.quantity)}
+                            piecesPerCarton={(r as any).pieces_per_carton || 0}
+                            cartonsPerBox={(r as any).cartons_per_box || 0}
+                            boxesPerContainer={(r as any).boxes_per_container || 0}
+                            compact
+                          />
                         </TableCell>
                         <TableCell className="text-right tabular-nums">{fmt(Number(r.unit_cost))}</TableCell>
                         <TableCell className="text-right tabular-nums font-semibold">{fmt(Number(r.quantity) * Number(r.unit_cost))}</TableCell>
