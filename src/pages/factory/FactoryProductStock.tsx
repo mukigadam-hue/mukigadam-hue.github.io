@@ -64,6 +64,9 @@ export default function FactoryProductStock() {
       buying_price: parseFloat(form.buying_price) || 0, wholesale_price: parseFloat(form.wholesale_price) || 0,
       retail_price: parseFloat(form.retail_price) || 0, min_stock_level: parseInt(form.min_stock_level) || 5,
       image_url_1: form.image_url_1, image_url_2: form.image_url_2, image_url_3: form.image_url_3,
+      pieces_per_carton: parseInt(form.pieces_per_carton) || 0,
+      cartons_per_box: parseInt(form.cartons_per_box) || 0,
+      boxes_per_container: parseInt(form.boxes_per_container) || 0,
     });
     resetForm(); setEditItem(null);
   }
