@@ -30,7 +30,7 @@ export default function FactoryInputStock() {
   const allCategories = [...new Set([...CATEGORIES, ...existingCategories])];
 
   function resetForm() {
-    setForm({ name: '', category: '', unit_type: 'Pieces', quantity: '', unit_cost: '', min_stock_level: '5', supplier: '' });
+    setForm({ name: '', category: '', unit_type: 'Pieces', quantity: '', unit_cost: '', min_stock_level: '5', supplier: '', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
   }
 
   async function handleAdd(e: React.FormEvent) {
