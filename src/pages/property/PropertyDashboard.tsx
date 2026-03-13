@@ -40,6 +40,9 @@ export default function PropertyDashboard() {
         <LanguageSelector variant="compact" />
       </div>
 
+      <AnnouncementsBanner />
+      <DailyTipBanner />
+
       {/* Header with Logo - same pattern as Business Dashboard */}
       <div className="gradient-primary rounded-xl p-4 sm:p-6 text-primary-foreground">
         <div className="flex items-start gap-3 sm:gap-4">

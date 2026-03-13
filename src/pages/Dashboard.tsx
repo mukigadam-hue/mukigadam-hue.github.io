@@ -78,6 +78,9 @@ export default function Dashboard() {
         <LanguageSelector variant="compact" />
       </div>
 
+      <AnnouncementsBanner />
+      <DailyTipBanner />
+
       <div className="gradient-primary rounded-xl p-4 sm:p-6 text-primary-foreground">
         <div className="flex items-start gap-3 sm:gap-4">
           <div className="shrink-0">

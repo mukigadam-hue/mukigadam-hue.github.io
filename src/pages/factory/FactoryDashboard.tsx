@@ -44,6 +44,9 @@ export default function FactoryDashboard() {
 
   return (
     <div className="space-y-6">
+      <AnnouncementsBanner />
+      <DailyTipBanner />
+
       {/* Header */}
       <div className="gradient-primary rounded-xl p-4 sm:p-6 text-primary-foreground">
         <div className="flex items-start gap-3 sm:gap-4">
