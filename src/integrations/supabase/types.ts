@@ -1027,8 +1027,10 @@ export type Database = {
           name: string
           owner_contact: string
           owner_name: string
+          room_size: string
           rules: string
           sub_category: string
+          total_rooms: number
           updated_at: string
         }
         Insert: {
@@ -1053,8 +1055,10 @@ export type Database = {
           name: string
           owner_contact?: string
           owner_name?: string
+          room_size?: string
           rules?: string
           sub_category?: string
+          total_rooms?: number
           updated_at?: string
         }
         Update: {
@@ -1079,8 +1083,10 @@ export type Database = {
           name?: string
           owner_contact?: string
           owner_name?: string
+          room_size?: string
           rules?: string
           sub_category?: string
+          total_rooms?: number
           updated_at?: string
         }
         Relationships: [
@@ -1099,6 +1105,7 @@ export type Database = {
           agreed_amount: number
           amount_paid: number
           asset_id: string
+          booking_type: string
           business_id: string
           created_at: string
           duration_type: string
@@ -1111,6 +1118,7 @@ export type Database = {
           owner_notes: string | null
           payment_method: string
           payment_status: string
+          proof_url: string | null
           rental_purpose: string | null
           renter_contact: string
           renter_id: string
@@ -1125,6 +1133,7 @@ export type Database = {
           agreed_amount?: number
           amount_paid?: number
           asset_id: string
+          booking_type?: string
           business_id: string
           created_at?: string
           duration_type?: string
@@ -1137,6 +1146,7 @@ export type Database = {
           owner_notes?: string | null
           payment_method?: string
           payment_status?: string
+          proof_url?: string | null
           rental_purpose?: string | null
           renter_contact?: string
           renter_id: string
@@ -1151,6 +1161,7 @@ export type Database = {
           agreed_amount?: number
           amount_paid?: number
           asset_id?: string
+          booking_type?: string
           business_id?: string
           created_at?: string
           duration_type?: string
@@ -1163,6 +1174,7 @@ export type Database = {
           owner_notes?: string | null
           payment_method?: string
           payment_status?: string
+          proof_url?: string | null
           rental_purpose?: string | null
           renter_contact?: string
           renter_id?: string
@@ -1230,6 +1242,73 @@ export type Database = {
           },
           {
             foreignKeyName: "property_check_ins_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      property_complaints: {
+        Row: {
+          asset_id: string
+          booking_id: string
+          business_id: string
+          category: string
+          created_at: string
+          description: string
+          id: string
+          owner_response: string
+          renter_id: string
+          renter_name: string
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          asset_id: string
+          booking_id: string
+          business_id: string
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          owner_response?: string
+          renter_id: string
+          renter_name?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          asset_id?: string
+          booking_id?: string
+          business_id?: string
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          owner_response?: string
+          renter_id?: string
+          renter_name?: string
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_complaints_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "property_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_complaints_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "property_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "property_complaints_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
@@ -2006,6 +2085,41 @@ export type Database = {
               products_description: string
             }[]
           }
+      search_property_assets: {
+        Args: {
+          _category?: string
+          _end_date?: string
+          _limit?: number
+          _location?: string
+          _max_price?: number
+          _min_price?: number
+          _offset?: number
+          _query?: string
+          _start_date?: string
+        }
+        Returns: {
+          area_size: number
+          area_unit: string
+          business_contact: string
+          business_id: string
+          business_name: string
+          category: string
+          daily_price: number
+          description: string
+          features: string
+          hourly_price: number
+          id: string
+          image_url_1: string
+          location: string
+          monthly_price: number
+          name: string
+          owner_contact: string
+          owner_name: string
+          room_size: string
+          sub_category: string
+          total_rooms: number
+        }[]
+      }
     }
     Enums: {
       business_role: "owner" | "admin" | "worker"
