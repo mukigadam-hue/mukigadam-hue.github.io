@@ -76,6 +76,9 @@ export default function FactoryInputStock() {
       name: r.name, category: r.category, unit_type: r.unit_type,
       quantity: String(r.quantity), unit_cost: String(r.unit_cost),
       min_stock_level: String(r.min_stock_level), supplier: r.supplier,
+      pieces_per_carton: String((r as any).pieces_per_carton || 0),
+      cartons_per_box: String((r as any).cartons_per_box || 0),
+      boxes_per_container: String((r as any).boxes_per_container || 0),
     });
     setEditItem(r.id);
   }
