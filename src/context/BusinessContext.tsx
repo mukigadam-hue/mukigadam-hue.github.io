@@ -18,6 +18,9 @@ export interface StockItem {
   image_url_1: string;
   image_url_2: string;
   image_url_3: string;
+  pieces_per_carton: number;
+  cartons_per_box: number;
+  boxes_per_container: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
