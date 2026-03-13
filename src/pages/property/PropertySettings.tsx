@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import AdSpace from '@/components/AdSpace';
 import LanguageSelector from '@/components/LanguageSelector';
 import Receipt from '@/components/Receipt';
+import PaymentMethodsManager from '@/components/PaymentMethodsManager';
 
 function ReceiptArchive({ businessId }: { businessId: string }) {
   const [receipts, setReceipts] = useState<any[]>([]);
