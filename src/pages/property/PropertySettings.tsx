@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Save, Building2, Plus, ChevronRight, Lock, Copy, KeyRound, Eye, EyeOff, ShieldBan, X, Home, Trash2, Factory, CalendarCheck, TrendingUp, DollarSign, Wallet, FileText } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import AdSpace from '@/components/AdSpace';
