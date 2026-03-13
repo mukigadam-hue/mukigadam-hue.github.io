@@ -310,6 +310,12 @@ export default function StockPage() {
                             <span className="text-[10px] font-semibold text-success bg-success/10 px-2 py-0.5 rounded-full shrink-0">OK</span>
                           )}
                         </div>
+                        <BulkPackagingInfo
+                          quantity={item.quantity}
+                          piecesPerCarton={(item as any).pieces_per_carton || 0}
+                          cartonsPerBox={(item as any).cartons_per_box || 0}
+                          boxesPerContainer={(item as any).boxes_per_container || 0}
+                        />
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex gap-3 text-xs flex-wrap">
                             <span className="tabular-nums"><span className="text-muted-foreground">W:</span> <span className="font-semibold">{fmt(Number(item.wholesale_price))}</span></span>
