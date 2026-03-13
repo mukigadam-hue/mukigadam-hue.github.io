@@ -332,6 +332,7 @@ export default function PropertyBrowse() {
           <SelectTrigger className="w-36 h-9"><SelectValue placeholder="All Types" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
+            <SelectItem value="house">🏠 House</SelectItem>
             <SelectItem value="land">🏞️ Land</SelectItem>
             <SelectItem value="vehicle">🚗 Vehicle</SelectItem>
             <SelectItem value="vessel">🚢 Vessel</SelectItem>
