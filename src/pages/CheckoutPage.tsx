@@ -263,7 +263,21 @@ export default function CheckoutPage() {
             <CardTitle className="text-base">Payment Method</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <button
+                onClick={() => setPaymentMethod('cash')}
+                className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                  paymentMethod === 'cash'
+                    ? 'border-primary bg-primary/5'
+                    : 'border-border hover:border-muted-foreground/30'
+                }`}
+              >
+                <ShoppingBag className="h-6 w-6 text-amber-600" />
+                <div className="text-left">
+                  <p className="font-semibold text-sm">Cash in Hand</p>
+                  <p className="text-xs text-muted-foreground">Direct cash payment</p>
+                </div>
+              </button>
               <button
                 onClick={() => setPaymentMethod('mobile_money')}
                 className={`flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
