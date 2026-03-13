@@ -599,7 +599,7 @@ export default function OrdersPage() {
         await supabase.from('orders').update({
           payment_method: paymentMethod,
           proof_url: proofUrl,
-          status: paymentMethod === 'card' ? 'paid' : 'pending',
+          status: paymentMethod === 'card' || paymentMethod === 'cash' ? 'paid' : 'pending',
         } as any).eq('id', completeDialog.id);
 
         await completeOrderToSale(completeDialog.id, toTitleCase(completeBuyer.trim()), toTitleCase(completeSeller.trim()));
