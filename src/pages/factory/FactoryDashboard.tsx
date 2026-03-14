@@ -254,6 +254,9 @@ export default function FactoryDashboard() {
         </CardContent>
       </Card>
 
+      {/* Worker Activity Tracker */}
+      <WorkerActivityTracker />
+
       <AdSpace variant="banner" />
     </div>
   );
