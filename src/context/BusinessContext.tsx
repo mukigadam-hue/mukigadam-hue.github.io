@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
+import { enqueueOfflineOperation } from '@/hooks/useOfflineQueue';
 
 export interface StockItem {
   id: string;
