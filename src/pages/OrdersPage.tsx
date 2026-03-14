@@ -307,16 +307,17 @@ export default function OrdersPage() {
       if (recipientBusinessId === currentBusiness?.id) { toast.error("You can't send an order to yourself"); return; }
     }
 
+    const reqComment = type === 'request' && requestComment.trim() ? requestComment.trim() : undefined;
     const userName = customerName.trim() || userFullName || 'Walk-in';
     const nameWithRole = type === 'request'
       ? `${userName} (${roleLabel} — ${currentBusiness?.name || ''})`
       : userName;
-    const name = comment ? `${nameWithRole} | Comment: ${comment}` : nameWithRole;
+    const finalName = reqComment ? `${nameWithRole} | Comment: ${reqComment}` : nameWithRole;
     await addOrder(
-      type, name,
+      type, finalName,
       items.map(item => ({ ...item, subtotal: item.quantity * item.unit_price })),
       grandTotal, type === 'request' ? 'pending' : 'confirmed',
-      recipientBusinessId, comment
+      recipientBusinessId, reqComment
     );
     setItems([]);
     setCustomerName('');
