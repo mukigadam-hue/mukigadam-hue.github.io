@@ -259,10 +259,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const isFactory = (currentBusiness as any)?.business_type === 'factory';
   const isProperty = (currentBusiness as any)?.business_type === 'property';
-  const { businessNavItems, factoryNavItems, propertyNavItems, businessMobileNav, factoryMobileNav, propertyMobileNav, businessMoreNav, factoryMoreNav, propertyMoreNav } = useNavItems();
-  const navItems = isProperty ? propertyNavItems : isFactory ? factoryNavItems : businessNavItems;
-  const mobileMainNav = isProperty ? propertyMobileNav : isFactory ? factoryMobileNav : businessMobileNav;
-  const mobileMoreNav = isProperty ? propertyMoreNav : isFactory ? factoryMoreNav : businessMoreNav;
+  const isPersonal = (currentBusiness as any)?.business_type === 'personal';
+  const { businessNavItems, factoryNavItems, propertyNavItems, personalNavItems, businessMobileNav, factoryMobileNav, propertyMobileNav, personalMobileNav, businessMoreNav, factoryMoreNav, propertyMoreNav, personalMoreNav } = useNavItems();
+  const navItems = isPersonal ? personalNavItems : isProperty ? propertyNavItems : isFactory ? factoryNavItems : businessNavItems;
+  const mobileMainNav = isPersonal ? personalMobileNav : isProperty ? propertyMobileNav : isFactory ? factoryMobileNav : businessMobileNav;
+  const mobileMoreNav = isPersonal ? personalMoreNav : isProperty ? propertyMoreNav : isFactory ? factoryMoreNav : businessMoreNav;
   const unreadCount = notifications.filter(n => !n.is_read).length;
   const [moreOpen, setMoreOpen] = useState(false);
 
