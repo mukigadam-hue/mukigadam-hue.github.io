@@ -843,6 +843,7 @@ export default function SettingsPage() {
 
       {/* Payment Methods - TOP PRIORITY */}
       {currentBusiness && <PaymentMethodsManager businessId={currentBusiness.id} />}
+      </>)}
 
       {/* Currency Setting */}
       <Card className="shadow-card">
