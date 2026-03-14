@@ -186,6 +186,7 @@ function BusinessContent() {
           <Route path="/browse" element={<PropertyBrowse />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/register-business" element={<RegisterBusinessPage />} />
           <Route path="/team" element={<TeamPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
