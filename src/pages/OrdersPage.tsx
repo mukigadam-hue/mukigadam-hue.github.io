@@ -912,6 +912,13 @@ export default function OrdersPage() {
               <Package className="h-3.5 w-3.5 mr-1" />Allocate Items
             </Button>
           )}
+
+          {/* Update Payment for orders with outstanding balance */}
+          {order.payment_status !== 'paid' && Number(order.balance) > 0 && order.grand_total > 0 && (
+            <Button size="sm" variant="outline" onClick={() => { setUpdatePaymentOrder(order); setUpdatePaymentAmount(String(order.amount_paid || 0)); }}>
+              💰 Update Payment
+            </Button>
+          )}
         </div>
       </div>
     );
