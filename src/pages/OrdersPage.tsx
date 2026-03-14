@@ -740,6 +740,27 @@ export default function OrdersPage() {
             {isRequest && order.grand_total === 0 ? 'Price Pending' : <span className="text-success bg-success/10 px-2 py-0.5 rounded-md">{fmt(Number(order.grand_total))}</span>}
           </span>
         </div>
+        {/* Payment status badge */}
+        {order.payment_status && order.payment_status !== 'unpaid' && order.grand_total > 0 && (
+          <div className="flex items-center gap-2">
+            <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${
+              order.payment_status === 'paid' ? 'bg-success/10 text-success' :
+              order.payment_status === 'partial' ? 'bg-warning/10 text-warning' :
+              'bg-destructive/10 text-destructive'
+            }`}>
+              {order.payment_status === 'paid' ? '✅ Paid' : order.payment_status === 'partial' ? `⚠️ Partial (${fmt(Number(order.amount_paid))})` : '❌ Unpaid'}
+            </span>
+            {order.payment_status !== 'paid' && Number(order.balance) > 0 && (
+              <span className="text-xs font-semibold text-destructive">Balance: {fmt(Number(order.balance))}</span>
+            )}
+          </div>
+        )}
+        {order.payment_status === 'unpaid' && order.grand_total > 0 && order.status !== 'pending' && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold bg-destructive/10 text-destructive">❌ Unpaid</span>
+            <span className="text-xs font-semibold text-destructive">Balance: {fmt(Number(order.grand_total))}</span>
+          </div>
+        )}
 
         {/* Rejection reason banner */}
         {order.status === 'rejected' && rejectionReason && (
