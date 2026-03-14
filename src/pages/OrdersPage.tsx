@@ -25,10 +25,13 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function OrdersPage() {
   const { stock, orders, addOrder, updateOrder, completeOrderToSale, saveReceipt, currentBusiness, addStockItem, addExpense, refreshData, notifications, userRole } = useBusiness();
+  const { user } = useAuth();
   const { fmt } = useCurrency();
   const [searchParams, setSearchParams] = useSearchParams();
   const [tab, setTab] = useState('live_orders');
   const isAdmin = userRole === 'owner' || userRole === 'admin';
+  const userFullName = user?.user_metadata?.full_name || '';
+  const roleLabel = userRole === 'owner' ? 'Owner' : userRole === 'admin' ? 'Admin' : 'Worker';
 
   // Payment verification state
   const [verifyFilter, setVerifyFilter] = useState<'pending' | 'paid' | 'all'>('pending');
