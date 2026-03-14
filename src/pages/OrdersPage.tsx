@@ -510,6 +510,11 @@ export default function OrdersPage() {
   }
 
   async function confirmPaymentReceived(order: Order) {
+    // Show the proof viewer dialog first so supplier can review before confirming
+    setConfirmPaymentOrder(order);
+  }
+
+  async function doConfirmPayment(order: Order) {
     setSyncing(true);
     try {
       const res = await supabase.functions.invoke('sync-order-prices', {
@@ -518,12 +523,32 @@ export default function OrdersPage() {
       if (res.error || res.data?.error) {
         toast.error(res.data?.error || 'Failed to confirm payment');
       } else {
+        // Update payment tracking
+        await supabase.from('orders').update({
+          amount_paid: Number(order.grand_total),
+          balance: 0,
+          payment_status: 'paid',
+        } as any).eq('id', order.id);
         toast.success('Payment confirmed!');
         await refreshData();
       }
+      setConfirmPaymentOrder(null);
     } finally {
       setSyncing(false);
     }
+  }
+
+  async function updateOrderPayment(orderId: string, newAmountPaid: number, total: number) {
+    const status = newAmountPaid >= total ? 'paid' : newAmountPaid > 0 ? 'partial' : 'unpaid';
+    const balance = total - newAmountPaid;
+    await supabase.from('orders').update({
+      amount_paid: newAmountPaid,
+      balance: Math.max(0, balance),
+      payment_status: status,
+    } as any).eq('id', orderId);
+    toast.success('Payment updated!');
+    setUpdatePaymentOrder(null);
+    await refreshData();
   }
 
   function getStockStatus(itemName: string, category: string, quality: string) {
