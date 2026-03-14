@@ -1105,7 +1105,13 @@ export default function OrdersPage() {
               </div>
             )}
 
-            <div><Label>Your Name / Customer Name</Label><Input value={customerName} onChange={e => setCustomerName(e.target.value)} onBlur={() => setCustomerName(toTitleCase(customerName))} placeholder="Name..." /></div>
+            <div>
+              <Label>Your Name / Customer Name ({roleLabel} at {currentBusiness?.name})</Label>
+              <Input value={customerName || userFullName} onChange={e => setCustomerName(e.target.value)} onBlur={() => setCustomerName(toTitleCase(customerName || userFullName))} placeholder="Auto-filled from your profile" />
+              {orderMode === 'request' && currentBusiness && (
+                <p className="text-[10px] text-muted-foreground mt-0.5">📍 Business: {currentBusiness.name} · Contact: {currentBusiness.contact || currentBusiness.email}</p>
+              )}
+            </div>
 
             {orderMode === 'request' && (
               <div>
