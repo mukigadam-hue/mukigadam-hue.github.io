@@ -705,6 +705,8 @@ export default function OrdersPage() {
       setCompleteSeller('');
       setProofFile(null);
       setProofPreview(null);
+      setOrderPaymentStatus('paid');
+      setOrderAmountPaid('');
       await refreshData();
     } catch (err: any) {
       toast.error(err.message || 'Failed to complete order');
