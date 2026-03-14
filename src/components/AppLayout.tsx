@@ -322,9 +322,9 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
           <div className="p-5 border-b border-sidebar-border flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold text-sidebar-accent-foreground tracking-tight">
-                {isProperty ? '🏠 FlexRent' : isFactory ? '🏭 BizTrack' : '📦 BizTrack'}
+                {isPersonal ? '👤 BizTrack' : isProperty ? '🏠 FlexRent' : isFactory ? '🏭 BizTrack' : '📦 BizTrack'}
               </h1>
-              <p className="text-xs text-sidebar-muted mt-1">{isProperty ? t('nav.propertyManager', 'Property Manager') : isFactory ? t('nav.factoryManager') : t('nav.businessManager')}</p>
+              <p className="text-xs text-sidebar-muted mt-1">{isPersonal ? 'Personal Account' : isProperty ? t('nav.propertyManager', 'Property Manager') : isFactory ? t('nav.factoryManager') : t('nav.businessManager')}</p>
             </div>
             <NotificationsPanel />
           </div>
