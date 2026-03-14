@@ -393,6 +393,9 @@ export default function Dashboard() {
         </Card>
       </div>
 
+      {/* Worker Activity Tracker */}
+      <WorkerActivityTracker />
+
       <AdSpace variant="banner" />
     </div>
   );
