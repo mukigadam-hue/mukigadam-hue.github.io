@@ -27,7 +27,7 @@ export default function PurchasesPage() {
     quantity: number; unit_price: number; wholesale_price: number; retail_price: number;
   }[]>([]);
   const [supplier, setSupplier] = useState('');
-  const [recordedBy, setRecordedBy] = useState('');
+  const [recordedBy, setRecordedBy] = useState(userFullName);
   const [form, setForm] = useState({
     name: '', category: '', quality: '', quantity: '1',
     unit_price: '', wholesale_price: '', retail_price: '',
