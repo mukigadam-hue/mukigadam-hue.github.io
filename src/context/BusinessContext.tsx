@@ -265,22 +265,51 @@ function generateCode(): string {
 
 export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [memberships, setMemberships] = useState<BusinessMembership[]>([]);
+  const [businesses, setBusinesses] = useState<Business[]>(() => {
+    try { return JSON.parse(localStorage.getItem('biztrack_cache_businesses') || '[]'); } catch { return []; }
+  });
+  const [memberships, setMemberships] = useState<BusinessMembership[]>(() => {
+    try { return JSON.parse(localStorage.getItem('biztrack_cache_memberships') || '[]'); } catch { return []; }
+  });
   const [currentBusinessId, setCurrentBusinessId] = useState<string | null>(() => {
     return localStorage.getItem('biztrack_current_business');
   });
-  const [stock, setStock] = useState<StockItem[]>([]);
-  const [sales, setSales] = useState<Sale[]>([]);
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [services, setServices] = useState<ServiceRecord[]>([]);
-  const [expenses, setExpenses] = useState<BusinessExpense[]>([]);
+  const [stock, setStock] = useState<StockItem[]>(() => {
+    try { return JSON.parse(localStorage.getItem('biztrack_cache_stock') || '[]'); } catch { return []; }
+  });
+  const [sales, setSales] = useState<Sale[]>(() => {
+    try { return JSON.parse(localStorage.getItem('biztrack_cache_sales') || '[]'); } catch { return []; }
+  });
+  const [purchases, setPurchases] = useState<Purchase[]>(() => {
+    try { return JSON.parse(localStorage.getItem('biztrack_cache_purchases') || '[]'); } catch { return []; }
+  });
+  const [orders, setOrders] = useState<Order[]>(() => {
+    try { return JSON.parse(localStorage.getItem('biztrack_cache_orders') || '[]'); } catch { return []; }
+  });
+  const [services, setServices] = useState<ServiceRecord[]>(() => {
+    try { return JSON.parse(localStorage.getItem('biztrack_cache_services') || '[]'); } catch { return []; }
+  });
+  const [expenses, setExpenses] = useState<BusinessExpense[]>(() => {
+    try { return JSON.parse(localStorage.getItem('biztrack_cache_expenses') || '[]'); } catch { return []; }
+  });
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => {
+    // If we have cached businesses, skip the loading state
+    try { return JSON.parse(localStorage.getItem('biztrack_cache_businesses') || '[]').length === 0; } catch { return true; }
+  });
 
   const currentBusiness = businesses.find(b => b.id === currentBusinessId) || null;
   const userRole = memberships.find(m => m.business_id === currentBusinessId)?.role || null;
+
+  // Persist cache on data change
+  useEffect(() => { try { localStorage.setItem('biztrack_cache_businesses', JSON.stringify(businesses)); } catch {} }, [businesses]);
+  useEffect(() => { try { localStorage.setItem('biztrack_cache_memberships', JSON.stringify(memberships)); } catch {} }, [memberships]);
+  useEffect(() => { try { localStorage.setItem('biztrack_cache_stock', JSON.stringify(stock)); } catch {} }, [stock]);
+  useEffect(() => { try { localStorage.setItem('biztrack_cache_sales', JSON.stringify(sales)); } catch {} }, [sales]);
+  useEffect(() => { try { localStorage.setItem('biztrack_cache_purchases', JSON.stringify(purchases)); } catch {} }, [purchases]);
+  useEffect(() => { try { localStorage.setItem('biztrack_cache_orders', JSON.stringify(orders)); } catch {} }, [orders]);
+  useEffect(() => { try { localStorage.setItem('biztrack_cache_services', JSON.stringify(services)); } catch {} }, [services]);
+  useEffect(() => { try { localStorage.setItem('biztrack_cache_expenses', JSON.stringify(expenses)); } catch {} }, [expenses]);
 
   useEffect(() => {
     if (currentBusinessId) {
@@ -307,7 +336,8 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
   async function loadBusinesses() {
     if (!user) return;
-    setLoading(true);
+    // Only show loading if no cached data
+    if (businesses.length === 0) setLoading(true);
     try {
       const { data: membershipData } = await supabase
         .from('business_memberships')
