@@ -29,6 +29,7 @@ const DiscoverPage = lazy(() => import("./pages/DiscoverPage"));
 const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
 const WastePage = lazy(() => import("./pages/WastePage"));
 const RegisterBusinessPage = lazy(() => import("./pages/RegisterBusinessPage"));
+const PersonalDashboard = lazy(() => import("./pages/PersonalDashboard"));
 
 // Factory pages
 const FactoryDashboard = lazy(() => import("./pages/factory/FactoryDashboard"));
