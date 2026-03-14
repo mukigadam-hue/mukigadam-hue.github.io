@@ -619,11 +619,19 @@ export default function OrdersPage() {
       }
 
       if (isB2BRequest) {
-        // Buyer submitting payment → update order and notify supplier
+        // Buyer submitting payment → calculate amount
+        const total = Number(completeDialog.grand_total);
+        const paidAmt = orderPaymentStatus === 'paid' ? total : (parseFloat(orderAmountPaid) || 0);
+        const bal = Math.max(0, total - paidAmt);
+        const pStatus = paidAmt >= total ? 'paid' : paidAmt > 0 ? 'partial' : 'unpaid';
+
         await supabase.from('orders').update({
           payment_method: paymentMethod,
           proof_url: proofUrl,
           status: 'payment_submitted',
+          amount_paid: paidAmt,
+          balance: bal,
+          payment_status: pStatus,
         } as any).eq('id', completeDialog.id);
 
         // Sync status to supplier's inbox order
@@ -654,14 +662,24 @@ export default function OrdersPage() {
         }
         toast.success('Receipt issued!');
       } else {
-        // Live order — original flow
+        // Live order — with installment support
+        const total = Number(completeDialog.grand_total);
+        const paidAmt = orderPaymentStatus === 'paid' ? total : (parseFloat(orderAmountPaid) || 0);
+        const bal = Math.max(0, total - paidAmt);
+        const pStatus = paidAmt >= total ? 'paid' : paidAmt > 0 ? 'partial' : 'unpaid';
+
         await supabase.from('orders').update({
           payment_method: paymentMethod,
           proof_url: proofUrl,
-          status: paymentMethod === 'card' || paymentMethod === 'cash' ? 'paid' : 'pending',
+          status: pStatus === 'paid' ? 'paid' : 'pending',
+          amount_paid: paidAmt,
+          balance: bal,
+          payment_status: pStatus,
         } as any).eq('id', completeDialog.id);
 
-        await completeOrderToSale(completeDialog.id, toTitleCase(completeBuyer.trim()), toTitleCase(completeSeller.trim()));
+        if (pStatus === 'paid') {
+          await completeOrderToSale(completeDialog.id, toTitleCase(completeBuyer.trim()), toTitleCase(completeSeller.trim()));
+        }
         
         if (currentBusiness) {
           await saveReceipt({
@@ -679,7 +697,7 @@ export default function OrdersPage() {
             code: completeDialog.code,
           });
         }
-        toast.success(paymentMethod === 'mobile_money' ? 'Order completed! Payment proof submitted.' : 'Order completed and paid!');
+        toast.success(pStatus === 'paid' ? 'Order completed and paid!' : pStatus === 'partial' ? 'Partial payment recorded. Balance outstanding.' : 'Order recorded as credit/unpaid.');
       }
 
       setCompleteDialog(null);
