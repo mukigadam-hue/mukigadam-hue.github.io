@@ -814,8 +814,8 @@ export default function OrdersPage() {
             </Button>
           )}
 
-          {/* Allocate for confirmed/priced inbox orders */}
-          {order.type === 'inbox' && (order.status === 'priced' || order.status === 'confirmed' || order.status === 'payment_submitted') && !order.transferred_to_sale && (
+          {/* Allocate for confirmed/priced inbox or request orders */}
+          {(order.type === 'inbox' || order.type === 'request') && (order.status === 'priced' || order.status === 'confirmed' || order.status === 'payment_submitted' || order.status === 'paid') && !order.transferred_to_sale && (
             <Button size="sm" variant="outline" onClick={() => openAllocateDialog(order)}>
               <Package className="h-3.5 w-3.5 mr-1" />Allocate Items
             </Button>
