@@ -213,6 +213,14 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
+            {overdueOrders.length > 0 && (
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase text-destructive">Overdue Orders:</p>
+                {overdueOrders.map(o => (
+                  <div key={o.id} className="flex justify-between text-sm"><span>📋 {o.customer_name} — {o.code} — {new Date(o.created_at).toLocaleDateString()}</span><span className="font-bold text-destructive tabular-nums">{fmt(Number(o.balance))}</span></div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
