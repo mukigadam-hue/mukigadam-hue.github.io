@@ -857,24 +857,39 @@ export default function OrdersPage() {
         if (target === 'stock') {
           // Add to stock (business stock or factory input stock)
           if (isFactory) {
-            await supabase.from('factory_raw_materials').insert({
-              business_id: currentBusiness.id,
-              name: item.item_name,
-              category: item.category || '',
-              unit_type: 'Pieces',
-              quantity: item.quantity,
-              unit_cost: Number(item.unit_price),
-              min_stock_level: 5,
-              supplier: allocateOrder.customer_name,
-            });
+            // Check for existing material to merge
+            const { data: existingMats } = await supabase.from('factory_raw_materials').select('*')
+              .eq('business_id', currentBusiness.id)
+              .ilike('name', item.item_name)
+              .is('deleted_at', null)
+              .limit(1);
+            if (existingMats && existingMats.length > 0) {
+              // Merge: add quantity to existing
+              await supabase.from('factory_raw_materials').update({
+                quantity: Number(existingMats[0].quantity) + item.quantity,
+                unit_cost: Number(item.unit_price),
+              }).eq('id', existingMats[0].id);
+            } else {
+              await supabase.from('factory_raw_materials').insert({
+                business_id: currentBusiness.id,
+                name: item.item_name,
+                category: item.category || '',
+                unit_type: 'Pieces',
+                quantity: item.quantity,
+                unit_cost: Number(item.unit_price),
+                min_stock_level: 5,
+                supplier: allocateOrder.customer_name,
+              });
+            }
           } else {
-            // Check if item already exists in stock
+            // Check if item already exists in stock (merge)
             const existing = activeStock.find(s =>
               s.name.toLowerCase() === item.item_name.toLowerCase() &&
               s.category.toLowerCase() === (item.category || '').toLowerCase() &&
               s.quality.toLowerCase() === (item.quality || '').toLowerCase()
             );
             if (existing) {
+              // Merge: add quantity
               await supabase.from('stock_items').update({
                 quantity: existing.quantity + item.quantity,
                 buying_price: Number(item.unit_price),
