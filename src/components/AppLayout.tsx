@@ -288,6 +288,7 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
 
   return (
     <div className="flex h-screen overflow-hidden flex-col">
+      <NetworkStatusBanner />
       {currentBusiness && <BusinessRoleBanner userRole={userRole!} businessName={currentBusiness.name} businessType={(currentBusiness as any).business_type || 'business'} />}
 
       <div className="flex flex-1 overflow-hidden">
