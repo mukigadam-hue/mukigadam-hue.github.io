@@ -164,12 +164,13 @@ function NotificationsPanel({ onNavigate, variant = 'desktop' }: { onNavigate?: 
   const [open, setOpen] = useState(false);
   const unread = notifications.filter(n => !n.is_read).length;
 
-  function handleNotificationClick(n: { id: string; type: string; is_read: boolean }) {
+  function handleNotificationClick(n: { id: string; type: string; is_read: boolean; title: string; message: string }) {
     if (!n.is_read) markNotificationRead(n.id);
     const route = getNotificationRoute(n.type);
     setOpen(false);
     onNavigate?.();
-    navigate(route);
+    // Deep-link with highlight: pass notification id as URL param
+    navigate(`${route}?highlight_notification=${n.id}`);
   }
 
   return (

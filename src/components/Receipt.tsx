@@ -106,6 +106,12 @@ export default function Receipt({ items, grandTotal, buyerName, sellerName, cust
               <span>TOTAL</span>
               <span className="text-success tabular-nums">{fmt(grandTotal)}</span>
             </div>
+            {recordedBy && (
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Recorded by:</span>
+                <span className="font-medium text-foreground">{recordedBy} {recordedByRole && <span className="text-[10px]">({recordedByRole})</span>}</span>
+              </div>
+            )}
             <p className="text-center text-xs text-muted-foreground pt-2">Thank you for your business!</p>
           </CardContent>
         </Card>
