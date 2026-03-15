@@ -297,16 +297,28 @@ export default function OrdersPage() {
       (!form.quality || s.quality.toLowerCase() === form.quality.toLowerCase())
     ) || activeStock.find(s => s.name.toLowerCase() === form.name.toLowerCase());
 
+    // For requests with supplier products, use supplier's selling prices (retail/wholesale) not buying price
+    const supplierItem = supplierProducts.find(p =>
+      p.name.toLowerCase() === form.name.trim().toLowerCase()
+    );
+
     const unitPrice = isRequest ? 0 : (
       form.unitPrice ? parseFloat(form.unitPrice) : (
-        stockItem ? (form.priceType === 'wholesale' ? Number(stockItem.wholesale_price) : Number(stockItem.retail_price)) : 0
+        supplierItem
+          ? Number(supplierItem.retail_price)
+          : stockItem
+            ? (form.priceType === 'wholesale' ? Number(stockItem.wholesale_price) : Number(stockItem.retail_price))
+            : 0
       )
     );
 
+    // Auto-detect bulk packaging from supplier's stock info
+    const bulkSource = stockItem || supplierItem;
+
     setItems(prev => [...prev, {
       item_name: toSentenceCase(form.name.trim()),
-      category: toSentenceCase(form.category) || stockItem?.category || '',
-      quality: toSentenceCase(form.quality) || stockItem?.quality || '',
+      category: toSentenceCase(form.category) || supplierItem?.category || stockItem?.category || '',
+      quality: toSentenceCase(form.quality) || supplierItem?.quality || stockItem?.quality || '',
       quantity: parseInt(form.quantity) || 1,
       price_type: form.priceType,
       unit_price: unitPrice,
