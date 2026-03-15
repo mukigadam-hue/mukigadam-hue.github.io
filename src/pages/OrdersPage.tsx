@@ -966,29 +966,43 @@ export default function OrdersPage() {
     setExpenseCategory(defaultCategories);
   }
 
+  // Check which items already exist in stock for merge info
+  function getStockMergeInfo(itemName: string, category: string, quality: string) {
+    if (isFactory) {
+      // Can't check factory materials from stock array, but allocation logic handles it
+      return null;
+    }
+    return activeStock.find(s =>
+      s.name.toLowerCase() === itemName.toLowerCase() &&
+      s.category.toLowerCase() === (category || '').toLowerCase() &&
+      s.quality.toLowerCase() === (quality || '').toLowerCase()
+    );
+  }
+
   async function handleAllocateItems() {
     if (!allocateOrder || !currentBusiness) return;
     setAllocating(true);
     try {
+      let mergedCount = 0;
+      let newCount = 0;
+
       for (let i = 0; i < allocateOrder.items.length; i++) {
         const item = allocateOrder.items[i];
         const target = allocations[i] || 'stock';
 
         if (target === 'stock') {
-          // Add to stock (business stock or factory input stock)
           if (isFactory) {
-            // Check for existing material to merge
             const { data: existingMats } = await supabase.from('factory_raw_materials').select('*')
               .eq('business_id', currentBusiness.id)
               .ilike('name', item.item_name)
               .is('deleted_at', null)
               .limit(1);
             if (existingMats && existingMats.length > 0) {
-              // Merge: add quantity to existing
               await supabase.from('factory_raw_materials').update({
                 quantity: Number(existingMats[0].quantity) + item.quantity,
                 unit_cost: Number(item.unit_price),
               }).eq('id', existingMats[0].id);
+              mergedCount++;
             } else {
               await supabase.from('factory_raw_materials').insert({
                 business_id: currentBusiness.id,
@@ -1000,20 +1014,20 @@ export default function OrdersPage() {
                 min_stock_level: 5,
                 supplier: allocateOrder.customer_name,
               });
+              newCount++;
             }
           } else {
-            // Check if item already exists in stock (merge)
             const existing = activeStock.find(s =>
               s.name.toLowerCase() === item.item_name.toLowerCase() &&
               s.category.toLowerCase() === (item.category || '').toLowerCase() &&
               s.quality.toLowerCase() === (item.quality || '').toLowerCase()
             );
             if (existing) {
-              // Merge: add quantity
               await supabase.from('stock_items').update({
                 quantity: existing.quantity + item.quantity,
                 buying_price: Number(item.unit_price),
               }).eq('id', existing.id);
+              mergedCount++;
             } else {
               await supabase.from('stock_items').insert({
                 business_id: currentBusiness.id,
@@ -1026,10 +1040,10 @@ export default function OrdersPage() {
                 quantity: item.quantity,
                 min_stock_level: 5,
               });
+              newCount++;
             }
           }
         } else {
-          // Record as expense
           const cat = expenseCategory[i] || 'Other';
           if (isFactory) {
             await supabase.from('factory_expenses').insert({
@@ -1053,8 +1067,12 @@ export default function OrdersPage() {
           }
         }
       }
-      toast.success('Items allocated successfully!');
+      const parts = [];
+      if (mergedCount > 0) parts.push(`${mergedCount} merged with existing stock`);
+      if (newCount > 0) parts.push(`${newCount} added as new`);
+      toast.success(`Items allocated! ${parts.join(', ')}`);
       setAllocateOrder(null);
+      await refreshData();
     } catch (err: any) {
       toast.error(err.message || 'Allocation failed');
     } finally {
