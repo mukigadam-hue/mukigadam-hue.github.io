@@ -114,6 +114,26 @@ function BookingDialog({ open, onClose, asset, propertyName }: { open: boolean; 
       expected_payment_date: end.toISOString(),
     } as any);
     if (error) { toast.error(error.message); setSubmitting(false); return; }
+
+    // Auto-save property owner as contact
+    try {
+      const { data: userBiz } = await supabase.from('business_memberships')
+        .select('business_id').eq('user_id', user!.id).limit(1);
+      if (userBiz && userBiz.length > 0) {
+        const myBizId = userBiz[0].business_id;
+        const { data: existingContact } = await supabase.from('business_contacts')
+          .select('id').eq('business_id', myBizId)
+          .eq('contact_business_id', asset.business_id).limit(1);
+        if (!existingContact || existingContact.length === 0) {
+          await supabase.from('business_contacts').insert({
+            business_id: myBizId,
+            contact_business_id: asset.business_id,
+            nickname: asset.business_name || asset.owner_name || 'Property Owner',
+          });
+        }
+      }
+    } catch (e) { /* silent */ }
+
     toast.success('Booking request sent!');
     setSubmitting(false);
     onClose();
