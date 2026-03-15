@@ -78,6 +78,7 @@ export default function SalesPage() {
     }]);
     setSelectedStock('');
     setQuantity('1');
+    // Keep priceType sticky — don't reset it
   }
 
   function addServiceItem() {

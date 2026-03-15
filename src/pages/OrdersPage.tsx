@@ -1847,47 +1847,64 @@ export default function OrdersPage() {
           <DialogHeader><DialogTitle>Allocate Order Items — {allocateOrder?.code}</DialogTitle></DialogHeader>
           <p className="text-xs text-muted-foreground">
             Choose where each item goes: <strong>{isFactory ? 'Input Stock' : 'Stock'}</strong> or <strong>Expenses</strong>.
+            Items matching existing stock will be <strong>merged automatically</strong>.
           </p>
           {allocateOrder && (
             <div className="space-y-3">
-              {allocateOrder.items.map((item, i) => (
-                <div key={i} className="border rounded-lg p-3 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium text-sm">{item.item_name} × {item.quantity}</p>
-                      <p className="text-xs text-muted-foreground">{[item.category, item.quality].filter(Boolean).join(' · ')} — {fmt(Number(item.subtotal))}</p>
+              {allocateOrder.items.map((item, i) => {
+                const mergeTarget = getStockMergeInfo(item.item_name, item.category, item.quality);
+                return (
+                  <div key={i} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm">{item.item_name} × {item.quantity}</p>
+                        <p className="text-xs text-muted-foreground">{[item.category, item.quality].filter(Boolean).join(' · ')} — {fmt(Number(item.subtotal))}</p>
+                      </div>
                     </div>
+                    {/* Merge indicator */}
+                    {allocations[i] === 'stock' && mergeTarget && (
+                      <div className="bg-info/10 border border-info/20 rounded-md px-2 py-1.5 text-[10px] flex items-center gap-1.5">
+                        <RefreshCw className="h-3 w-3 text-info shrink-0" />
+                        <span>Will <strong>merge</strong> with existing stock: <em>{mergeTarget.name}</em> (current qty: {mergeTarget.quantity}) → new qty: {mergeTarget.quantity + item.quantity}</span>
+                      </div>
+                    )}
+                    {allocations[i] === 'stock' && !mergeTarget && !isFactory && (
+                      <div className="bg-success/10 border border-success/20 rounded-md px-2 py-1.5 text-[10px] flex items-center gap-1.5">
+                        <Plus className="h-3 w-3 text-success shrink-0" />
+                        <span>Will be added as <strong>new stock item</strong></span>
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setAllocations(prev => ({ ...prev, [i]: 'stock' }))}
+                        className={`flex-1 flex items-center justify-center gap-1.5 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
+                          allocations[i] === 'stock' ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <Package className="h-3.5 w-3.5" />
+                        {mergeTarget ? 'Merge to Stock' : (isFactory ? 'Input Stock' : 'New Stock')}
+                      </button>
+                      <button
+                        onClick={() => setAllocations(prev => ({ ...prev, [i]: 'expense' }))}
+                        className={`flex-1 flex items-center justify-center gap-1.5 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
+                          allocations[i] === 'expense' ? 'border-destructive bg-destructive/10 text-destructive' : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <Flame className="h-3.5 w-3.5" />
+                        Expense
+                      </button>
+                    </div>
+                    {allocations[i] === 'expense' && (
+                      <Select value={expenseCategory[i] || 'Other'} onValueChange={v => setExpenseCategory(prev => ({ ...prev, [i]: v }))}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Expense category..." /></SelectTrigger>
+                        <SelectContent>
+                          {EXPENSE_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setAllocations(prev => ({ ...prev, [i]: 'stock' }))}
-                      className={`flex-1 flex items-center justify-center gap-1.5 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
-                        allocations[i] === 'stock' ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-muted-foreground/30'
-                      }`}
-                    >
-                      <Package className="h-3.5 w-3.5" />
-                      {isFactory ? 'Input Stock' : 'Stock'}
-                    </button>
-                    <button
-                      onClick={() => setAllocations(prev => ({ ...prev, [i]: 'expense' }))}
-                      className={`flex-1 flex items-center justify-center gap-1.5 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
-                        allocations[i] === 'expense' ? 'border-destructive bg-destructive/10 text-destructive' : 'border-border hover:border-muted-foreground/30'
-                      }`}
-                    >
-                      <Flame className="h-3.5 w-3.5" />
-                      Expense
-                    </button>
-                  </div>
-                  {allocations[i] === 'expense' && (
-                    <Select value={expenseCategory[i] || 'Other'} onValueChange={v => setExpenseCategory(prev => ({ ...prev, [i]: v }))}>
-                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Expense category..." /></SelectTrigger>
-                      <SelectContent>
-                        {EXPENSE_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              ))}
+                );
+              })}
 
               <div className="border-t pt-3 space-y-1.5">
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -1900,6 +1917,16 @@ export default function OrdersPage() {
                 {allocating ? 'Allocating...' : <><CheckCircle className="h-4 w-4 mr-2" />Confirm Allocation</>}
               </Button>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Proof Viewer Dialog (for buyer viewing their own proof) */}
+      <Dialog open={!!viewingProof} onOpenChange={o => { if (!o) setViewingProof(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>📸 Your Payment Proof</DialogTitle></DialogHeader>
+          {viewingProof && (
+            <img src={viewingProof} alt="Payment proof" className="w-full rounded-lg border max-h-80 object-contain" />
           )}
         </DialogContent>
       </Dialog>
