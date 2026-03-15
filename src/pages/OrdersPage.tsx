@@ -42,10 +42,12 @@ export default function OrdersPage() {
         if (notification.type === 'new_order' || notification.type === 'order_confirmed') setTab('customer_inbox');
         else if (notification.type === 'order_priced' || notification.type === 'order_rejected') setTab('my_requests');
         else if (notification.type === 'payment_submitted') setTab('verify_payments');
+        else if (notification.type === 'payment_confirmed') setTab('my_requests');
       }
       // Clear the param after processing
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('highlight_notification');
+      newParams.delete('checkout'); // Don't redirect to checkout
       setSearchParams(newParams, { replace: true });
     }
   }, [highlightNotificationId]);
