@@ -1209,11 +1209,16 @@ export default function OrdersPage() {
                 {supplierProducts.length > 0 && (
                   <div className="bg-muted/30 border rounded-md p-2">
                     <p className="text-[10px] font-semibold text-muted-foreground mb-1">📦 Available items from {prefilledSupplierName || 'supplier'}:</p>
-                    <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+                    <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
                       {supplierProducts.map((p, i) => (
-                        <button key={i} className="text-[10px] px-2 py-0.5 rounded-full border bg-background hover:bg-accent transition-colors"
+                        <button key={i} className="text-[10px] px-2 py-1 rounded-lg border bg-background hover:bg-accent transition-colors text-left"
                           onClick={() => setForm(f => ({ ...f, name: p.name, category: p.category || '', quality: p.quality || '' }))}>
-                          {p.name}
+                          <span className="font-medium">{p.name}</span>
+                          {(p.category || p.quality) && (
+                            <span className="text-muted-foreground ml-1">
+                              {p.category ? `· ${p.category}` : ''}{p.quality ? ` · ${p.quality}` : ''}
+                            </span>
+                          )}
                         </button>
                       ))}
                     </div>
