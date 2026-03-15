@@ -42,10 +42,12 @@ export default function OrdersPage() {
         if (notification.type === 'new_order' || notification.type === 'order_confirmed') setTab('customer_inbox');
         else if (notification.type === 'order_priced' || notification.type === 'order_rejected') setTab('my_requests');
         else if (notification.type === 'payment_submitted') setTab('verify_payments');
+        else if (notification.type === 'payment_confirmed') setTab('my_requests');
       }
       // Clear the param after processing
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('highlight_notification');
+      newParams.delete('checkout'); // Don't redirect to checkout
       setSearchParams(newParams, { replace: true });
     }
   }, [highlightNotificationId]);
@@ -295,21 +297,33 @@ export default function OrdersPage() {
       (!form.quality || s.quality.toLowerCase() === form.quality.toLowerCase())
     ) || activeStock.find(s => s.name.toLowerCase() === form.name.toLowerCase());
 
+    // For requests with supplier products, use supplier's selling prices (retail/wholesale) not buying price
+    const supplierItem = supplierProducts.find(p =>
+      p.name.toLowerCase() === form.name.trim().toLowerCase()
+    );
+
     const unitPrice = isRequest ? 0 : (
       form.unitPrice ? parseFloat(form.unitPrice) : (
-        stockItem ? (form.priceType === 'wholesale' ? Number(stockItem.wholesale_price) : Number(stockItem.retail_price)) : 0
+        supplierItem
+          ? Number(supplierItem.retail_price)
+          : stockItem
+            ? (form.priceType === 'wholesale' ? Number(stockItem.wholesale_price) : Number(stockItem.retail_price))
+            : 0
       )
     );
 
+    // Auto-detect bulk packaging from supplier's stock info
+    const bulkSource = stockItem || supplierItem;
+
     setItems(prev => [...prev, {
       item_name: toSentenceCase(form.name.trim()),
-      category: toSentenceCase(form.category) || stockItem?.category || '',
-      quality: toSentenceCase(form.quality) || stockItem?.quality || '',
+      category: toSentenceCase(form.category) || supplierItem?.category || stockItem?.category || '',
+      quality: toSentenceCase(form.quality) || supplierItem?.quality || stockItem?.quality || '',
       quantity: parseInt(form.quantity) || 1,
       price_type: form.priceType,
       unit_price: unitPrice,
     }]);
-    setForm({ name: '', category: '', quality: '', quantity: '1', priceType: 'retail', unitPrice: '', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
+    setForm(f => ({ name: '', category: '', quality: '', quantity: '1', priceType: f.priceType, unitPrice: '', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' }));
   }
 
   function removeItem(idx: number) { setItems(prev => prev.filter((_, i) => i !== idx)); }
@@ -344,6 +358,24 @@ export default function OrdersPage() {
       grandTotal, type === 'request' ? 'pending' : 'confirmed',
       recipientBusinessId, reqComment
     );
+
+    // Auto-save recipient to contacts after sending an order request
+    if (type === 'request' && recipientBusinessId && currentBusiness) {
+      try {
+        const { data: existing } = await supabase.from('business_contacts')
+          .select('id').eq('business_id', currentBusiness.id)
+          .eq('contact_business_id', recipientBusinessId).limit(1);
+        if (!existing || existing.length === 0) {
+          const contactName = recipientLookup?.name || contacts.find(c => c.contact_business_id === recipientBusinessId)?.business_name || '';
+          await supabase.from('business_contacts').insert({
+            business_id: currentBusiness.id,
+            contact_business_id: recipientBusinessId,
+            nickname: contactName,
+          });
+        }
+      } catch (e) { /* silent */ }
+    }
+
     setItems([]);
     setCustomerName('');
     setSellerName('');
@@ -887,16 +919,9 @@ export default function OrdersPage() {
 
           {/* Completed/Paid actions */}
           {(order.status === 'completed' || order.status === 'paid' || order.transferred_to_sale) && (
-            <>
-              <Button size="sm" variant="ghost" onClick={() => setReceiptOrder(order)}>
-                <ReceiptIcon className="h-3.5 w-3.5 mr-1" />Receipt
-              </Button>
-              {(order.type === 'inbox' || order.type === 'request') && (
-                <Button size="sm" variant="outline" onClick={() => openAllocateDialog(order)}>
-                  <Package className="h-3.5 w-3.5 mr-1" />Allocate Items
-                </Button>
-              )}
-            </>
+            <Button size="sm" variant="ghost" onClick={() => setReceiptOrder(order)}>
+              <ReceiptIcon className="h-3.5 w-3.5 mr-1" />Receipt
+            </Button>
           )}
 
           {/* Supplier can complete receipt after payment confirmed */}
@@ -906,10 +931,18 @@ export default function OrdersPage() {
             </Button>
           )}
 
-          {/* Allocate for confirmed/priced inbox or request orders */}
-          {(order.type === 'inbox' || order.type === 'request') && (order.status === 'priced' || order.status === 'confirmed' || order.status === 'payment_submitted' || order.status === 'paid') && !order.transferred_to_sale && (
+          {/* Allocate Items — single button for inbox/request orders that are priced or beyond */}
+          {(order.type === 'inbox' || order.type === 'request') && 
+           (order.status === 'priced' || order.status === 'confirmed' || order.status === 'payment_submitted' || order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
             <Button size="sm" variant="outline" onClick={() => openAllocateDialog(order)}>
               <Package className="h-3.5 w-3.5 mr-1" />Allocate Items
+            </Button>
+          )}
+
+          {/* View payment proof for buyer's own orders */}
+          {order.type === 'request' && (order as any).proof_url && (
+            <Button size="sm" variant="ghost" onClick={() => setViewingProof((order as any).proof_url)}>
+              <Eye className="h-3.5 w-3.5 mr-1" />View Proof
             </Button>
           )}
 
@@ -945,29 +978,43 @@ export default function OrdersPage() {
     setExpenseCategory(defaultCategories);
   }
 
+  // Check which items already exist in stock for merge info
+  function getStockMergeInfo(itemName: string, category: string, quality: string) {
+    if (isFactory) {
+      // Can't check factory materials from stock array, but allocation logic handles it
+      return null;
+    }
+    return activeStock.find(s =>
+      s.name.toLowerCase() === itemName.toLowerCase() &&
+      s.category.toLowerCase() === (category || '').toLowerCase() &&
+      s.quality.toLowerCase() === (quality || '').toLowerCase()
+    );
+  }
+
   async function handleAllocateItems() {
     if (!allocateOrder || !currentBusiness) return;
     setAllocating(true);
     try {
+      let mergedCount = 0;
+      let newCount = 0;
+
       for (let i = 0; i < allocateOrder.items.length; i++) {
         const item = allocateOrder.items[i];
         const target = allocations[i] || 'stock';
 
         if (target === 'stock') {
-          // Add to stock (business stock or factory input stock)
           if (isFactory) {
-            // Check for existing material to merge
             const { data: existingMats } = await supabase.from('factory_raw_materials').select('*')
               .eq('business_id', currentBusiness.id)
               .ilike('name', item.item_name)
               .is('deleted_at', null)
               .limit(1);
             if (existingMats && existingMats.length > 0) {
-              // Merge: add quantity to existing
               await supabase.from('factory_raw_materials').update({
                 quantity: Number(existingMats[0].quantity) + item.quantity,
                 unit_cost: Number(item.unit_price),
               }).eq('id', existingMats[0].id);
+              mergedCount++;
             } else {
               await supabase.from('factory_raw_materials').insert({
                 business_id: currentBusiness.id,
@@ -979,20 +1026,20 @@ export default function OrdersPage() {
                 min_stock_level: 5,
                 supplier: allocateOrder.customer_name,
               });
+              newCount++;
             }
           } else {
-            // Check if item already exists in stock (merge)
             const existing = activeStock.find(s =>
               s.name.toLowerCase() === item.item_name.toLowerCase() &&
               s.category.toLowerCase() === (item.category || '').toLowerCase() &&
               s.quality.toLowerCase() === (item.quality || '').toLowerCase()
             );
             if (existing) {
-              // Merge: add quantity
               await supabase.from('stock_items').update({
                 quantity: existing.quantity + item.quantity,
                 buying_price: Number(item.unit_price),
               }).eq('id', existing.id);
+              mergedCount++;
             } else {
               await supabase.from('stock_items').insert({
                 business_id: currentBusiness.id,
@@ -1005,10 +1052,10 @@ export default function OrdersPage() {
                 quantity: item.quantity,
                 min_stock_level: 5,
               });
+              newCount++;
             }
           }
         } else {
-          // Record as expense
           const cat = expenseCategory[i] || 'Other';
           if (isFactory) {
             await supabase.from('factory_expenses').insert({
@@ -1032,8 +1079,12 @@ export default function OrdersPage() {
           }
         }
       }
-      toast.success('Items allocated successfully!');
+      const parts = [];
+      if (mergedCount > 0) parts.push(`${mergedCount} merged with existing stock`);
+      if (newCount > 0) parts.push(`${newCount} added as new`);
+      toast.success(`Items allocated! ${parts.join(', ')}`);
       setAllocateOrder(null);
+      await refreshData();
     } catch (err: any) {
       toast.error(err.message || 'Allocation failed');
     } finally {
@@ -1209,11 +1260,16 @@ export default function OrdersPage() {
                 {supplierProducts.length > 0 && (
                   <div className="bg-muted/30 border rounded-md p-2">
                     <p className="text-[10px] font-semibold text-muted-foreground mb-1">📦 Available items from {prefilledSupplierName || 'supplier'}:</p>
-                    <div className="flex flex-wrap gap-1 max-h-24 overflow-y-auto">
+                    <div className="flex flex-wrap gap-1 max-h-32 overflow-y-auto">
                       {supplierProducts.map((p, i) => (
-                        <button key={i} className="text-[10px] px-2 py-0.5 rounded-full border bg-background hover:bg-accent transition-colors"
+                        <button key={i} className="text-[10px] px-2 py-1 rounded-lg border bg-background hover:bg-accent transition-colors text-left"
                           onClick={() => setForm(f => ({ ...f, name: p.name, category: p.category || '', quality: p.quality || '' }))}>
-                          {p.name}
+                          <span className="font-medium">{p.name}</span>
+                          {(p.category || p.quality) && (
+                            <span className="text-muted-foreground ml-1">
+                              {p.category ? `· ${p.category}` : ''}{p.quality ? ` · ${p.quality}` : ''}
+                            </span>
+                          )}
                         </button>
                       ))}
                     </div>
@@ -1803,47 +1859,64 @@ export default function OrdersPage() {
           <DialogHeader><DialogTitle>Allocate Order Items — {allocateOrder?.code}</DialogTitle></DialogHeader>
           <p className="text-xs text-muted-foreground">
             Choose where each item goes: <strong>{isFactory ? 'Input Stock' : 'Stock'}</strong> or <strong>Expenses</strong>.
+            Items matching existing stock will be <strong>merged automatically</strong>.
           </p>
           {allocateOrder && (
             <div className="space-y-3">
-              {allocateOrder.items.map((item, i) => (
-                <div key={i} className="border rounded-lg p-3 space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-medium text-sm">{item.item_name} × {item.quantity}</p>
-                      <p className="text-xs text-muted-foreground">{[item.category, item.quality].filter(Boolean).join(' · ')} — {fmt(Number(item.subtotal))}</p>
+              {allocateOrder.items.map((item, i) => {
+                const mergeTarget = getStockMergeInfo(item.item_name, item.category, item.quality);
+                return (
+                  <div key={i} className="border rounded-lg p-3 space-y-2">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium text-sm">{item.item_name} × {item.quantity}</p>
+                        <p className="text-xs text-muted-foreground">{[item.category, item.quality].filter(Boolean).join(' · ')} — {fmt(Number(item.subtotal))}</p>
+                      </div>
                     </div>
+                    {/* Merge indicator */}
+                    {allocations[i] === 'stock' && mergeTarget && (
+                      <div className="bg-info/10 border border-info/20 rounded-md px-2 py-1.5 text-[10px] flex items-center gap-1.5">
+                        <RefreshCw className="h-3 w-3 text-info shrink-0" />
+                        <span>Will <strong>merge</strong> with existing stock: <em>{mergeTarget.name}</em> (current qty: {mergeTarget.quantity}) → new qty: {mergeTarget.quantity + item.quantity}</span>
+                      </div>
+                    )}
+                    {allocations[i] === 'stock' && !mergeTarget && !isFactory && (
+                      <div className="bg-success/10 border border-success/20 rounded-md px-2 py-1.5 text-[10px] flex items-center gap-1.5">
+                        <Plus className="h-3 w-3 text-success shrink-0" />
+                        <span>Will be added as <strong>new stock item</strong></span>
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setAllocations(prev => ({ ...prev, [i]: 'stock' }))}
+                        className={`flex-1 flex items-center justify-center gap-1.5 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
+                          allocations[i] === 'stock' ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <Package className="h-3.5 w-3.5" />
+                        {mergeTarget ? 'Merge to Stock' : (isFactory ? 'Input Stock' : 'New Stock')}
+                      </button>
+                      <button
+                        onClick={() => setAllocations(prev => ({ ...prev, [i]: 'expense' }))}
+                        className={`flex-1 flex items-center justify-center gap-1.5 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
+                          allocations[i] === 'expense' ? 'border-destructive bg-destructive/10 text-destructive' : 'border-border hover:border-muted-foreground/30'
+                        }`}
+                      >
+                        <Flame className="h-3.5 w-3.5" />
+                        Expense
+                      </button>
+                    </div>
+                    {allocations[i] === 'expense' && (
+                      <Select value={expenseCategory[i] || 'Other'} onValueChange={v => setExpenseCategory(prev => ({ ...prev, [i]: v }))}>
+                        <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Expense category..." /></SelectTrigger>
+                        <SelectContent>
+                          {EXPENSE_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setAllocations(prev => ({ ...prev, [i]: 'stock' }))}
-                      className={`flex-1 flex items-center justify-center gap-1.5 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
-                        allocations[i] === 'stock' ? 'border-primary bg-primary/10 text-primary' : 'border-border hover:border-muted-foreground/30'
-                      }`}
-                    >
-                      <Package className="h-3.5 w-3.5" />
-                      {isFactory ? 'Input Stock' : 'Stock'}
-                    </button>
-                    <button
-                      onClick={() => setAllocations(prev => ({ ...prev, [i]: 'expense' }))}
-                      className={`flex-1 flex items-center justify-center gap-1.5 p-2 rounded-lg border-2 text-xs font-medium transition-all ${
-                        allocations[i] === 'expense' ? 'border-destructive bg-destructive/10 text-destructive' : 'border-border hover:border-muted-foreground/30'
-                      }`}
-                    >
-                      <Flame className="h-3.5 w-3.5" />
-                      Expense
-                    </button>
-                  </div>
-                  {allocations[i] === 'expense' && (
-                    <Select value={expenseCategory[i] || 'Other'} onValueChange={v => setExpenseCategory(prev => ({ ...prev, [i]: v }))}>
-                      <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Expense category..." /></SelectTrigger>
-                      <SelectContent>
-                        {EXPENSE_CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              ))}
+                );
+              })}
 
               <div className="border-t pt-3 space-y-1.5">
                 <div className="flex justify-between text-xs text-muted-foreground">
@@ -1856,6 +1929,16 @@ export default function OrdersPage() {
                 {allocating ? 'Allocating...' : <><CheckCircle className="h-4 w-4 mr-2" />Confirm Allocation</>}
               </Button>
             </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Proof Viewer Dialog (for buyer viewing their own proof) */}
+      <Dialog open={!!viewingProof} onOpenChange={o => { if (!o) setViewingProof(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>📸 Your Payment Proof</DialogTitle></DialogHeader>
+          {viewingProof && (
+            <img src={viewingProof} alt="Payment proof" className="w-full rounded-lg border max-h-80 object-contain" />
           )}
         </DialogContent>
       </Dialog>
