@@ -171,7 +171,9 @@ export default function StockPage() {
 
   async function handleSoftDelete(id: string) {
     setConfirmDelete(null);
-    await deleteStockItem(id);
+    // Track who deleted the item (user's profile name or email)
+    const deletedByName = user?.user_metadata?.full_name || user?.email || 'Unknown';
+    await deleteStockItem(id, deletedByName);
   }
 
   function handleBarcodeScan(code: string) {
