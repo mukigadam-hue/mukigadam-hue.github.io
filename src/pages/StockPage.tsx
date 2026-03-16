@@ -294,11 +294,17 @@ export default function StockPage() {
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!confirmDelete} onOpenChange={o => { if (!o) setConfirmDelete(null); }}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-warning" />Confirm Delete</DialogTitle></DialogHeader>
-          <p className="text-sm text-muted-foreground">This item will be moved to the Recycle Bin. You can restore it later from Settings.</p>
+          <DialogHeader><DialogTitle className="flex items-center gap-2"><AlertTriangle className="h-5 w-5 text-warning" />{isOwnerOrAdmin ? 'Confirm Delete' : 'Cross Out Item'}</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            {isOwnerOrAdmin
+              ? 'This item will be moved to the Recycle Bin. You can restore it later from Settings.'
+              : 'This item will be crossed out and sent to the Recycle Bin. The business owner will review it and can restore or permanently delete it.'}
+          </p>
           <div className="flex gap-3 mt-2">
             <Button variant="outline" className="flex-1" onClick={() => setConfirmDelete(null)}>Cancel</Button>
-            <Button variant="destructive" className="flex-1" onClick={() => confirmDelete && handleSoftDelete(confirmDelete)}>Move to Bin</Button>
+            <Button variant="destructive" className="flex-1" onClick={() => confirmDelete && handleSoftDelete(confirmDelete)}>
+              {isOwnerOrAdmin ? 'Move to Bin' : 'Cross Out'}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
