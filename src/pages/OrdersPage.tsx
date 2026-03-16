@@ -988,8 +988,8 @@ export default function OrdersPage() {
                   <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground" onClick={() => confirmPricesAndPay(order)} disabled={syncing}>
                     <CheckCircle className="h-3.5 w-3.5 mr-1" />{syncing ? 'Processing...' : 'Accept & Pay'}
                   </Button>
-                  <Button size="sm" variant="destructive" onClick={() => { setRejectingOrder(order); setRejectComment(''); }} disabled={syncing}>
-                    🔄 Reject & Re-price
+                  <Button size="sm" variant="destructive" onClick={() => openRejectDialog(order)} disabled={syncing}>
+                    🔄 Negotiate / Cancel
                   </Button>
                 </>
               )}
