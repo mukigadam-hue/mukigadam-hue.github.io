@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { Search, Plus, Building2, Phone, Mail, MapPin, Trash2, Edit2, UserPlus, ExternalLink, HandMetal, Clock, ArrowUpDown } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Search, Plus, Building2, Phone, Mail, MapPin, Trash2, Edit2, UserPlus, ExternalLink, HandMetal, Clock, ArrowUpDown, MessageSquare, Send, Users } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import AdSpace from '@/components/AdSpace';
 
@@ -56,6 +57,10 @@ export default function ContactsPage() {
   const [pokingId, setPokingId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'recent' | 'name'>('recent');
   const [filterQuery, setFilterQuery] = useState('');
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  const [messageTarget, setMessageTarget] = useState<EnrichedContact | null>(null); // null = send to all
+  const [customMessage, setCustomMessage] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   const businessId = currentBusiness?.id;
 
@@ -235,6 +240,38 @@ export default function ContactsPage() {
     }
   }
 
+  async function handleSendMessage() {
+    if (!currentBusiness || !customMessage.trim()) return;
+    setSendingMessage(true);
+    try {
+      const body: any = {
+        senderBusinessId: currentBusiness.id,
+        senderBusinessName: currentBusiness.name,
+        customMessage: customMessage.trim(),
+      };
+      if (messageTarget) {
+        body.recipientBusinessId = messageTarget.contact_business_id;
+      } else {
+        // Send to all contacts
+        body.recipientIds = contacts.map(c => c.contact_business_id);
+      }
+      const res = await supabase.functions.invoke('poke-business', { body });
+      if (res.error || res.data?.error) {
+        toast.error(res.data?.error || res.error?.message || 'Failed to send');
+      } else {
+        const count = res.data?.sent || 1;
+        toast.success(`✅ Message sent to ${count} contact${count !== 1 ? 's' : ''}!`);
+        setMessageDialogOpen(false);
+        setCustomMessage('');
+        setMessageTarget(null);
+      }
+    } catch {
+      toast.error('Failed to send message');
+    } finally {
+      setSendingMessage(false);
+    }
+  }
+
   function getInteractionLabel(lastDate: string | null | undefined) {
     if (!lastDate) return { text: 'No interactions yet', color: 'text-muted-foreground', stale: true };
     const daysDiff = Math.floor((Date.now() - new Date(lastDate).getTime()) / (1000 * 60 * 60 * 24));
@@ -370,6 +407,15 @@ export default function ContactsPage() {
         </div>
       )}
 
+      {/* Send Message to All / Individual */}
+      {contacts.length > 0 && (
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={() => { setMessageTarget(null); setCustomMessage(''); setMessageDialogOpen(true); }}>
+            <Users className="h-3.5 w-3.5" /> Message All ({contacts.length})
+          </Button>
+        </div>
+      )}
+
       <AdSpace variant="banner" />
 
       {/* Contacts List */}
@@ -448,18 +494,28 @@ export default function ContactsPage() {
                             <span className="text-muted-foreground">· {contact.orderCount} order{(contact.orderCount ?? 0) !== 1 ? 's' : ''}</span>
                           )}
                         </div>
-                        {interaction.stale && (
+                        <div className="flex gap-1.5 flex-wrap">
+                          {interaction.stale && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs gap-1"
+                              disabled={pokingId === contact.id}
+                              onClick={() => handlePoke(contact)}
+                            >
+                              <HandMetal className="h-3 w-3" />
+                              {pokingId === contact.id ? 'Sending...' : 'Poke 👋'}
+                            </Button>
+                          )}
                           <Button
                             size="sm"
-                            variant="outline"
+                            variant="ghost"
                             className="h-7 text-xs gap-1"
-                            disabled={pokingId === contact.id}
-                            onClick={() => handlePoke(contact)}
+                            onClick={() => { setMessageTarget(contact); setCustomMessage(''); setMessageDialogOpen(true); }}
                           >
-                            <HandMetal className="h-3 w-3" />
-                            {pokingId === contact.id ? 'Sending...' : 'Poke 👋'}
+                            <MessageSquare className="h-3 w-3" /> Message
                           </Button>
-                        )}
+                        </div>
                       </div>
 
                       {contact.notes && (
@@ -504,6 +560,39 @@ export default function ContactsPage() {
               {viewProfile.email && <div className="flex items-center gap-3 text-sm"><Mail className="h-4 w-4 text-muted-foreground" /><a href={`mailto:${viewProfile.email}`} className="text-primary underline">{viewProfile.email}</a></div>}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Message Dialog */}
+      <Dialog open={messageDialogOpen} onOpenChange={o => { if (!o) { setCustomMessage(''); setMessageTarget(null); } setMessageDialogOpen(o); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              {messageTarget ? `Message to ${messageTarget.nickname || messageTarget.profile?.name || 'Contact'}` : `Message All Contacts (${contacts.length})`}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label className="text-sm">Your message</Label>
+              <Textarea
+                value={customMessage}
+                onChange={e => setCustomMessage(e.target.value)}
+                placeholder="e.g. Hello! We have new stock available. Come check us out!"
+                className="mt-1.5"
+                rows={4}
+              />
+            </div>
+            {!messageTarget && (
+              <p className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
+                📢 This will send a notification to <strong>all {contacts.length}</strong> of your contacts at once.
+              </p>
+            )}
+            <Button className="w-full" disabled={sendingMessage || !customMessage.trim()} onClick={handleSendMessage}>
+              <Send className="h-4 w-4 mr-2" />
+              {sendingMessage ? 'Sending...' : messageTarget ? 'Send Message' : `Send to All (${contacts.length})`}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

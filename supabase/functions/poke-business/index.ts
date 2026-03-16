@@ -20,8 +20,8 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authErr } = await anonClient.auth.getUser();
     if (authErr || !user) throw new Error("Unauthorized");
 
-    const { senderBusinessId, recipientBusinessId, senderBusinessName } = await req.json();
-    if (!senderBusinessId || !recipientBusinessId || !senderBusinessName) {
+    const { senderBusinessId, recipientBusinessId, senderBusinessName, customMessage, recipientIds } = await req.json();
+    if (!senderBusinessId || !senderBusinessName) {
       throw new Error("Missing required fields");
     }
 
@@ -37,15 +37,28 @@ Deno.serve(async (req) => {
     });
     if (!isMember) throw new Error("Not a member of sender business");
 
-    // Send poke notification to recipient
-    await admin.from("notifications").insert({
-      business_id: recipientBusinessId,
-      type: "poke",
-      title: "👋 Poke from " + senderBusinessName,
-      message: `${senderBusinessName} wants to reconnect! It's been a while since your last interaction.`,
-    });
+    const message = customMessage?.trim() || `${senderBusinessName} wants to reconnect! It's been a while since your last interaction.`;
+    const title = customMessage?.trim()
+      ? `💬 Message from ${senderBusinessName}`
+      : `👋 Poke from ${senderBusinessName}`;
 
-    return new Response(JSON.stringify({ success: true }), {
+    // Support sending to multiple recipients (bulk) or single
+    const targets: string[] = recipientIds?.length > 0
+      ? recipientIds
+      : recipientBusinessId ? [recipientBusinessId] : [];
+
+    if (targets.length === 0) throw new Error("No recipients specified");
+
+    const notifications = targets.map((id: string) => ({
+      business_id: id,
+      type: "poke",
+      title,
+      message,
+    }));
+
+    await admin.from("notifications").insert(notifications);
+
+    return new Response(JSON.stringify({ success: true, sent: targets.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err: any) {
