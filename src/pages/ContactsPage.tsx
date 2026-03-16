@@ -494,18 +494,28 @@ export default function ContactsPage() {
                             <span className="text-muted-foreground">· {contact.orderCount} order{(contact.orderCount ?? 0) !== 1 ? 's' : ''}</span>
                           )}
                         </div>
-                        {interaction.stale && (
+                        <div className="flex gap-1.5 flex-wrap">
+                          {interaction.stale && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs gap-1"
+                              disabled={pokingId === contact.id}
+                              onClick={() => handlePoke(contact)}
+                            >
+                              <HandMetal className="h-3 w-3" />
+                              {pokingId === contact.id ? 'Sending...' : 'Poke 👋'}
+                            </Button>
+                          )}
                           <Button
                             size="sm"
-                            variant="outline"
+                            variant="ghost"
                             className="h-7 text-xs gap-1"
-                            disabled={pokingId === contact.id}
-                            onClick={() => handlePoke(contact)}
+                            onClick={() => { setMessageTarget(contact); setCustomMessage(''); setMessageDialogOpen(true); }}
                           >
-                            <HandMetal className="h-3 w-3" />
-                            {pokingId === contact.id ? 'Sending...' : 'Poke 👋'}
+                            <MessageSquare className="h-3 w-3" /> Message
                           </Button>
-                        )}
+                        </div>
                       </div>
 
                       {contact.notes && (
