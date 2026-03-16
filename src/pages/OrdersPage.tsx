@@ -1029,11 +1029,18 @@ export default function OrdersPage() {
             </Button>
           )}
 
-          {/* Allocate Items — single button for inbox/request orders that are priced or beyond */}
-          {(order.type === 'inbox' || order.type === 'request') && 
-           (order.status === 'priced' || order.status === 'confirmed' || order.status === 'payment_submitted' || order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
+          {/* Allocate Items — only for REQUEST orders (buyer receiving items into stock), NOT for inbox/supplier */}
+          {order.type === 'request' && 
+           (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
             <Button size="sm" variant="outline" onClick={() => openAllocateDialog(order)}>
               <Package className="h-3.5 w-3.5 mr-1" />Allocate Items
+            </Button>
+          )}
+
+          {/* Report Issue — for buyer after order is paid/completed */}
+          {order.type === 'request' && (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
+            <Button size="sm" variant="outline" className="text-warning" onClick={() => setDisputeOrder(order)}>
+              <AlertTriangle className="h-3.5 w-3.5 mr-1" />Report Issue
             </Button>
           )}
 
