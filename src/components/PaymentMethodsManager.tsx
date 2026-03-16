@@ -73,11 +73,11 @@ export default function PaymentMethodsManager({ businessId }: { businessId: stri
 
   const fetchMethods = useCallback(async () => {
     const { data } = await supabase
-      .from('business_payment_methods' as any)
+      .from('business_payment_methods')
       .select('*')
       .eq('business_id', businessId)
       .order('created_at', { ascending: true });
-    setMethods((data as any[]) || []);
+    setMethods((data as PaymentMethod[]) || []);
   }, [businessId]);
 
   useEffect(() => { fetchMethods(); }, [fetchMethods]);
@@ -91,14 +91,14 @@ export default function PaymentMethodsManager({ businessId }: { businessId: stri
       return;
     }
     setSaving(true);
-    const { error } = await supabase.from('business_payment_methods' as any).insert({
+    const { error } = await supabase.from('business_payment_methods').insert({
       business_id: businessId,
       provider_type: providerType,
       provider_name: providerName,
       account_name: toTitleCase(accountName.trim()),
       account_number: accountNumber.trim(),
       is_active: true,
-    } as any);
+    });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success(`${providerName} added successfully`);
@@ -110,12 +110,12 @@ export default function PaymentMethodsManager({ businessId }: { businessId: stri
   }
 
   async function toggleActive(id: string, current: boolean) {
-    await supabase.from('business_payment_methods' as any).update({ is_active: !current } as any).eq('id', id);
+    await supabase.from('business_payment_methods').update({ is_active: !current }).eq('id', id);
     fetchMethods();
   }
 
   async function deleteMethod(id: string) {
-    await supabase.from('business_payment_methods' as any).delete().eq('id', id);
+    await supabase.from('business_payment_methods').delete().eq('id', id);
     toast.success('Payment method removed');
     fetchMethods();
   }
@@ -305,12 +305,12 @@ export function PaymentMethodsViewer({ businessId, onSelectMethod }: {
   const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
-    supabase.from('business_payment_methods' as any)
+    supabase.from('business_payment_methods')
       .select('*')
       .eq('business_id', businessId)
       .eq('is_active', true)
       .order('provider_type', { ascending: true })
-      .then(({ data }) => setMethods((data as any[]) || []));
+      .then(({ data }) => setMethods((data as PaymentMethod[]) || []));
   }, [businessId]);
 
   if (methods.length === 0) {
