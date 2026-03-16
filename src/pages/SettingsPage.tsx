@@ -1127,6 +1127,73 @@ export default function SettingsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Leave Business Dialog */}
+      <Dialog open={!!showLeaveDialog} onOpenChange={o => { if (!o) setShowLeaveDialog(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-destructive flex items-center gap-2">
+              <LogOut className="h-5 w-5" /> Leave {(() => {
+                const b = businesses.find(b => b.id === showLeaveDialog);
+                return b?.name || 'Business';
+              })()}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <p className="text-sm text-muted-foreground">
+              You will be removed from this business/property. You will lose access to all its data.
+            </p>
+            {(() => {
+              // Check if this is the user's last entity
+              const totalEntities = businesses.length;
+              if (totalEntities <= 1) {
+                return (
+                  <p className="text-xs text-warning bg-warning/10 border border-warning/20 rounded-lg p-2">
+                    ⚠️ This is your only business/employment. After leaving, you'll be taken back to the registration page where you can choose personal use, or start a new entity.
+                  </p>
+                );
+              }
+              return null;
+            })()}
+            <div className="flex gap-3">
+              <Button variant="outline" className="flex-1" onClick={() => setShowLeaveDialog(null)}>Cancel</Button>
+              <Button variant="destructive" className="flex-1" disabled={leavingBusiness} onClick={async () => {
+                if (!showLeaveDialog || !user) return;
+                setLeavingBusiness(true);
+                try {
+                  // Remove own membership
+                  const { error } = await supabase.from('business_memberships').delete()
+                    .eq('user_id', user.id).eq('business_id', showLeaveDialog);
+                  if (error) throw error;
+
+                  toast.success('You have left the business');
+                  setShowLeaveDialog(null);
+
+                  // Check if user has remaining businesses
+                  const remaining = businesses.filter(b => b.id !== showLeaveDialog);
+                  if (remaining.length > 0) {
+                    setCurrentBusinessId(remaining[0].id);
+                    await refreshData();
+                  } else {
+                    // No businesses left — clear everything and redirect to setup
+                    localStorage.removeItem('biztrack_current_business');
+                    localStorage.removeItem('biztrack_cache_businesses');
+                    localStorage.removeItem('biztrack_cache_memberships');
+                    window.location.reload();
+                  }
+                } catch (err: any) {
+                  toast.error(err.message || 'Failed to leave');
+                } finally {
+                  setLeavingBusiness(false);
+                }
+              }}>
+                <LogOut className="h-4 w-4 mr-2" />
+                {leavingBusiness ? 'Leaving...' : 'Leave'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Account Management */}
       <Card className="shadow-card border-muted">
         <CardContent className="p-4 space-y-4">
