@@ -619,6 +619,7 @@ export default function OrdersPage() {
     }
   }
 
+  // rejectPrices kept for simple reject (no longer primary path)
   async function rejectPrices(order: Order) {
     setSyncing(true);
     try {
