@@ -1925,17 +1925,79 @@ export default function OrdersPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Reject Prices Dialog */}
+      {/* Enhanced Reject/Negotiate Dialog */}
       <Dialog open={!!rejectingOrder} onOpenChange={o => { if (!o) setRejectingOrder(null); }}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Reject Prices</DialogTitle></DialogHeader>
-          <p className="text-xs text-muted-foreground">Tell the supplier why you're rejecting the prices so they can adjust.</p>
-          <Textarea value={rejectComment} onChange={e => setRejectComment(e.target.value)} placeholder="e.g. Prices too high, I expected wholesale rates..." className="min-h-[80px]" />
-          <Button variant="destructive" onClick={() => rejectingOrder && rejectPrices(rejectingOrder)} disabled={syncing} className="w-full">
-            {syncing ? 'Sending...' : '🔄 Reject & Request Re-pricing'}
-          </Button>
+        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>🤝 Negotiate or Cancel Order</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-2">
+              <button onClick={() => setRejectMode('bargain')}
+                className={`p-3 rounded-xl border-2 text-left transition-all ${rejectMode === 'bargain' ? 'border-primary bg-primary/5' : 'border-border'}`}>
+                <Handshake className="h-5 w-5 text-primary mb-1" />
+                <p className="font-semibold text-sm">Bargain</p>
+                <p className="text-[10px] text-muted-foreground">Modify items/quantities & negotiate prices</p>
+              </button>
+              <button onClick={() => setRejectMode('cancel')}
+                className={`p-3 rounded-xl border-2 text-left transition-all ${rejectMode === 'cancel' ? 'border-destructive bg-destructive/5' : 'border-border'}`}>
+                <Ban className="h-5 w-5 text-destructive mb-1" />
+                <p className="font-semibold text-sm">Cancel Order</p>
+                <p className="text-[10px] text-muted-foreground">Cancel entirely, both sides notified</p>
+              </button>
+            </div>
+
+            {rejectMode === 'bargain' && rejectingOrder && (
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">Remove items or reduce quantities, then send back for re-pricing.</p>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {bargainItems.map((item, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm border rounded-lg p-2">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium truncate">{item.item_name}</p>
+                        <p className="text-[10px] text-muted-foreground">{[item.category, item.quality].filter(Boolean).join(' · ')}</p>
+                      </div>
+                      <Input type="number" min="1" className="w-16 h-7 text-xs" value={item.quantity}
+                        onChange={e => setBargainItems(prev => prev.map((it, idx) => idx === i ? { ...it, quantity: parseInt(e.target.value) || 1 } : it))} />
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setBargainItems(prev => prev.filter((_, idx) => idx !== i))}>
+                        <Trash2 className="h-3 w-3 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <Label className="text-xs font-semibold">Comment {rejectMode === 'cancel' ? '(reason) *' : '(optional)'}</Label>
+              <Textarea value={rejectComment} onChange={e => setRejectComment(e.target.value)}
+                placeholder={rejectMode === 'bargain' ? 'e.g. Prices too high, reduced quantities...' : 'e.g. Cannot afford at this time...'}
+                className="min-h-[60px]" />
+            </div>
+
+            {rejectMode === 'bargain' ? (
+              <Button onClick={() => rejectingOrder && handleBargain(rejectingOrder)} disabled={syncing || bargainItems.length === 0} className="w-full">
+                {syncing ? 'Sending...' : <><Handshake className="h-4 w-4 mr-2" />Send Modified Order for Re-pricing</>}
+              </Button>
+            ) : (
+              <Button variant="destructive" onClick={() => rejectingOrder && handleCancelOrder(rejectingOrder)} disabled={syncing || !rejectComment.trim()} className="w-full">
+                {syncing ? 'Cancelling...' : <><Ban className="h-4 w-4 mr-2" />Cancel Order Permanently</>}
+              </Button>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
+
+      {/* Order Dispute Dialog */}
+      {disputeOrder && (
+        <OrderDisputeDialog
+          open={!!disputeOrder}
+          onOpenChange={o => { if (!o) setDisputeOrder(null); }}
+          orderId={disputeOrder.id}
+          orderCode={disputeOrder.code}
+          supplierBusinessId={disputeOrder.business_id}
+          reporterBusinessId={currentBusiness?.id || ''}
+          onSubmitted={() => refreshData()}
+        />
+      )}
 
       {/* Receipt Dialog */}
       <Dialog open={!!receiptOrder} onOpenChange={o => { if (!o) setReceiptOrder(null); }}>
