@@ -110,7 +110,7 @@ export default function PaymentMethodsManager({ businessId }: { businessId: stri
   }
 
   async function toggleActive(id: string, current: boolean) {
-    await supabase.from('business_payment_methods' as any).update({ is_active: !current } as any).eq('id', id);
+    await supabase.from('business_payment_methods').update({ is_active: !current }).eq('id', id);
     fetchMethods();
   }
 
