@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { Search, Plus, Building2, Phone, Mail, MapPin, Trash2, Edit2, UserPlus, ExternalLink, HandMetal, Clock, ArrowUpDown } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { Search, Plus, Building2, Phone, Mail, MapPin, Trash2, Edit2, UserPlus, ExternalLink, HandMetal, Clock, ArrowUpDown, MessageSquare, Send, Users } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import AdSpace from '@/components/AdSpace';
 
