@@ -25,7 +25,7 @@ export interface StockItem {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
-}
+  deleted_by: string;
 
 export interface SaleItem {
   id: string;
