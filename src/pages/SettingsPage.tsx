@@ -956,7 +956,7 @@ export default function SettingsPage() {
                       <Button size="sm" variant="outline" onClick={async () => {
                         await supabase.from('orders').update({ deleted_at: null } as any).eq('id', order.id);
                         toast.success('Order restored');
-                        await (window as any).__biztrack_refresh?.() || window.location.reload();
+                        await refreshData();
                       }}><RotateCcw className="h-3 w-3 mr-1" />Restore</Button>
                     </div>
                   );
