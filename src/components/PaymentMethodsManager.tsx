@@ -91,14 +91,14 @@ export default function PaymentMethodsManager({ businessId }: { businessId: stri
       return;
     }
     setSaving(true);
-    const { error } = await supabase.from('business_payment_methods' as any).insert({
+    const { error } = await supabase.from('business_payment_methods').insert({
       business_id: businessId,
       provider_type: providerType,
       provider_name: providerName,
       account_name: toTitleCase(accountName.trim()),
       account_number: accountNumber.trim(),
       is_active: true,
-    } as any);
+    });
     setSaving(false);
     if (error) { toast.error(error.message); return; }
     toast.success(`${providerName} added successfully`);
