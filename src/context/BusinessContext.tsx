@@ -593,10 +593,13 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     toast.success('Stock item updated!');
   }, []);
 
-  // Soft delete
-  const deleteStockItem = useCallback(async (id: string) => {
-    const { error } = await supabase.from('stock_items').update({ deleted_at: new Date().toISOString() }).eq('id', id);
+  // Soft delete — track who deleted it
+  const deleteStockItem = useCallback(async (id: string, deletedByName?: string) => {
+    const updateData: any = { deleted_at: new Date().toISOString() };
+    if (deletedByName) updateData.deleted_by = deletedByName;
+    const { error } = await supabase.from('stock_items').update(updateData).eq('id', id);
     if (error) { toast.error(error.message); return; }
+    setStock(prev => prev.map(s => s.id === id ? { ...s, ...updateData } as StockItem : s));
     toast.success('Item moved to recycle bin');
   }, []);
 
