@@ -77,7 +77,8 @@ function ItemGalleryDialog({ item, open, onOpenChange }: { item: StockItem; open
 }
 
 export default function StockPage() {
-  const { stock, addStockItem, updateStockItem, deleteStockItem, restoreStockItem, permanentDeleteStockItem } = useBusiness();
+  const { stock, addStockItem, updateStockItem, deleteStockItem, restoreStockItem, permanentDeleteStockItem, userRole } = useBusiness();
+  const { user } = useAuth();
   const { fmt } = useCurrency();
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
@@ -88,6 +89,7 @@ export default function StockPage() {
   const [viewGalleryItem, setViewGalleryItem] = useState<StockItem | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [scannerOpen, setScannerOpen] = useState(false);
+  const isOwnerOrAdmin = userRole === 'owner' || userRole === 'admin';
 
   useEffect(() => {
     const mainEl = document.querySelector('main');
