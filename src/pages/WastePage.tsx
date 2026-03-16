@@ -47,8 +47,7 @@ export default function WastePage() {
 
   // Load waste records from expenses with category 'Waste'
   const wasteExpenses = expenses.filter(e => 
-    e.category === 'Waste' || e.category === 'Expired' || e.category === 'Faulty' || 
-    e.category === 'Returned' || e.category === 'Damaged' || e.category === 'Spoiled'
+    WASTE_TYPES.includes(e.category) || e.category === 'Waste'
   );
 
   const todayWaste = wasteExpenses.filter(e => new Date(e.expense_date).toDateString() === new Date().toDateString());
