@@ -8,6 +8,7 @@ import { Package, TrendingUp, AlertTriangle, XCircle, DollarSign, Factory, Wrenc
 import ImageUpload from '@/components/ImageUpload';
 import QuickAddItem from '@/components/QuickAddItem';
 import AdSpace from '@/components/AdSpace';
+import BannerAd from '@/components/BannerAd';
 import DailyTipBanner from '@/components/DailyTipBanner';
 import AnnouncementsBanner from '@/components/AnnouncementsBanner';
 import WorkerActivityTracker from '@/components/WorkerActivityTracker';
@@ -258,6 +259,8 @@ export default function FactoryDashboard() {
       <WorkerActivityTracker />
 
       <AdSpace variant="banner" />
+
+      <BannerAd position="bottom" />
     </div>
   );
 }
