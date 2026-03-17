@@ -350,7 +350,7 @@ export default function StockPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <p className="font-semibold text-sm truncate">{item.name}</p>
-                            <p className="text-xs text-muted-foreground">{[item.category, item.quality].filter(Boolean).join(' · ')}</p>
+                            <p className="text-xs text-muted-foreground">{[item.category, item.quality, (item as any).unit_type].filter(Boolean).join(' · ')}</p>
                           </div>
                           {item.quantity === 0 ? (
                             <span className="text-[10px] font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full shrink-0">Out</span>
