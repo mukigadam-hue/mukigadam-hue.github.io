@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ClipboardList, Globe, Contact, CalendarCheck, Plus, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AdSpace from '@/components/AdSpace';
+import BannerAd from '@/components/BannerAd';
 
 export default function PersonalDashboard() {
   const { currentBusiness, orders } = useBusiness();
