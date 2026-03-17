@@ -139,6 +139,7 @@ export default function SalesPage() {
         price_type: 'service',
         unit_price: svc.cost,
         subtotal: svc.cost,
+        serial_numbers: '',
       })),
       ...serviceParts.map(part => ({
         stock_item_id: part.stock_item_id,
@@ -149,6 +150,7 @@ export default function SalesPage() {
         price_type: 'part',
         unit_price: part.unit_price,
         subtotal: part.subtotal,
+        serial_numbers: '',
       })),
     ];
 
