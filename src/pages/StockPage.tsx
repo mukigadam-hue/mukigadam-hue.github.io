@@ -225,6 +225,13 @@ export default function StockPage() {
                       <Label>Quality</Label>
                       <Input value={form.quality} onChange={e => setForm(f => ({ ...f, quality: e.target.value }))} onBlur={() => setForm(f => ({ ...f, quality: toSentenceCase(f.quality) }))} placeholder="e.g. New, Grade A..." />
                     </div>
+                   </div>
+                  <div>
+                    <Label>Unit Type</Label>
+                    <Select value={form.unit_type} onValueChange={v => setForm(f => ({ ...f, unit_type: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{UNIT_TYPES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label>Buying/Shopping Price (Cost from supplier)</Label>
@@ -244,8 +251,8 @@ export default function StockPage() {
                   />
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label>Quantity (Total Pieces)</Label>
-                      <Input type="number" min="0" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} required
+                      <Label>Quantity ({form.unit_type})</Label>
+                      <Input type="number" min="0" step="0.01" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} required
                         readOnly={parseInt(form.pieces_per_carton) > 0}
                         className={parseInt(form.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
                       {parseInt(form.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
