@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { HelpCircle, Shield, BookOpen, Store, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Flame, Users, Globe, Settings, Factory, Home, UserPlus, LogIn, CreditCard, BarChart3, Bell, Receipt, AlertTriangle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
