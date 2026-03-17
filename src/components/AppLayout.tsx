@@ -394,6 +394,11 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
           </nav>
 
           <div className="px-3 py-2 border-t border-sidebar-border">
+            <LegalHelpModal trigger={
+              <button className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors mb-1">
+                <HelpCircle className="h-3.5 w-3.5 text-primary" /> Help & Legal
+              </button>
+            } />
             <div className="flex items-center gap-1.5 text-[10px] text-sidebar-foreground mb-1">
               <span>📞</span>
               <a href="mailto:ndamson8@gmail.com" className="hover:text-primary transition-colors truncate">ndamson8@gmail.com</a>
