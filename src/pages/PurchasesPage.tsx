@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Trash2, Package, ScanLine } from 'lucide-react';
@@ -16,6 +17,8 @@ import { BulkPackagingFields } from '@/components/BulkPackagingInfo';
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 
+const UNIT_TYPES = ['Pieces', 'Kilograms', 'Litres', 'Metres', 'Tonnes', 'Rolls', 'Bags', 'Boxes', 'Pairs', 'Sets', 'Bundles', 'Gallons'];
+
 export default function PurchasesPage() {
   const { stock, purchases, addPurchase, updatePurchasePayment, userRole, currentBusiness } = useBusiness();
   const { user } = useAuth();
@@ -23,14 +26,14 @@ export default function PurchasesPage() {
   const userFullName = user?.user_metadata?.full_name || '';
   const roleLabel = userRole === 'owner' ? '(Owner)' : userRole === 'admin' ? '(Admin)' : '(Worker)';
   const [items, setItems] = useState<{
-    item_name: string; category: string; quality: string;
+    item_name: string; category: string; quality: string; unit_type: string;
     quantity: number; unit_price: number; wholesale_price: number; retail_price: number;
     serial_numbers?: string;
   }[]>([]);
   const [supplier, setSupplier] = useState('');
   const [recordedBy, setRecordedBy] = useState(userFullName);
   const [form, setForm] = useState({
-    name: '', category: '', quality: '', quantity: '1',
+    name: '', category: '', quality: '', unit_type: 'Pieces', quantity: '1',
     unit_price: '', wholesale_price: '', retail_price: '',
     pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0',
     serial_numbers: '',
@@ -59,16 +62,14 @@ export default function PurchasesPage() {
       item_name: toSentenceCase(form.name.trim()),
       category: toSentenceCase(form.category.trim()),
       quality: toSentenceCase(form.quality.trim()),
+      unit_type: form.unit_type,
       quantity: parseInt(form.quantity) || 1,
       unit_price: parseFloat(form.unit_price) || 0,
       wholesale_price: parseFloat(form.wholesale_price) || parseFloat(form.unit_price) || 0,
       retail_price: parseFloat(form.retail_price) || parseFloat(form.unit_price) || 0,
-      pieces_per_carton: parseInt(form.pieces_per_carton) || 0,
-      cartons_per_box: parseInt(form.cartons_per_box) || 0,
-      boxes_per_container: parseInt(form.boxes_per_container) || 0,
       serial_numbers: form.serial_numbers.trim() || undefined,
     }]);
-    setForm({ name: '', category: '', quality: '', quantity: '1', unit_price: '', wholesale_price: '', retail_price: '', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0', serial_numbers: '' });
+    setForm({ name: '', category: '', quality: '', unit_type: 'Pieces', quantity: '1', unit_price: '', wholesale_price: '', retail_price: '', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0', serial_numbers: '' });
   }
 
   function removeItem(idx: number) { setItems(prev => prev.filter((_, i) => i !== idx)); }
@@ -188,7 +189,14 @@ export default function PurchasesPage() {
               <Label>Quality</Label>
               <Input value={form.quality} onChange={e => setForm(f => ({ ...f, quality: e.target.value }))} onBlur={() => applyCase('quality')} placeholder="e.g. Grade A..." />
             </div>
-            <div className="w-16"><Label>Qty</Label><Input type="number" min="1" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} /></div>
+            <div className="w-28">
+              <Label>Unit Type</Label>
+              <Select value={form.unit_type} onValueChange={v => setForm(f => ({ ...f, unit_type: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{UNIT_TYPES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <div className="w-16"><Label>Qty</Label><Input type="number" min="0.01" step="0.01" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} /></div>
             <div className="w-24"><Label>Cost/Unit</Label><Input type="number" min="0" step="0.01" value={form.unit_price} onChange={e => setForm(f => ({ ...f, unit_price: e.target.value }))} placeholder="0.00" /></div>
             <div className="w-24"><Label>Wholesale</Label><Input type="number" min="0" step="0.01" value={form.wholesale_price} onChange={e => setForm(f => ({ ...f, wholesale_price: e.target.value }))} placeholder="Auto" /></div>
             <div className="w-24"><Label>Retail</Label><Input type="number" min="0" step="0.01" value={form.retail_price} onChange={e => setForm(f => ({ ...f, retail_price: e.target.value }))} placeholder="Auto" /></div>
@@ -211,19 +219,20 @@ export default function PurchasesPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Item</TableHead><TableHead>Category</TableHead><TableHead>Quality</TableHead>
-                      <TableHead className="text-right">Qty</TableHead><TableHead className="text-right">Cost/Unit</TableHead>
-                      <TableHead className="text-right">Wholesale</TableHead><TableHead className="text-right">Retail</TableHead>
-                      <TableHead className="text-right">Subtotal</TableHead><TableHead></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {items.map((item, i) => (
-                      <TableRow key={i}>
-                        <TableCell className="font-medium">{item.item_name}</TableCell>
-                        <TableCell>{item.category}</TableCell>
-                        <TableCell>{item.quality}</TableCell>
-                        <TableCell className="text-right">{item.quantity}</TableCell>
+                       <TableHead>Item</TableHead><TableHead>Category</TableHead><TableHead>Quality</TableHead><TableHead>Unit</TableHead>
+                       <TableHead className="text-right">Qty</TableHead><TableHead className="text-right">Cost/Unit</TableHead>
+                       <TableHead className="text-right">Wholesale</TableHead><TableHead className="text-right">Retail</TableHead>
+                       <TableHead className="text-right">Subtotal</TableHead><TableHead></TableHead>
+                     </TableRow>
+                   </TableHeader>
+                   <TableBody>
+                     {items.map((item, i) => (
+                       <TableRow key={i}>
+                         <TableCell className="font-medium">{item.item_name}</TableCell>
+                         <TableCell>{item.category}</TableCell>
+                         <TableCell>{item.quality}</TableCell>
+                         <TableCell className="capitalize">{item.unit_type}</TableCell>
+                         <TableCell className="text-right">{item.quantity}</TableCell>
                         <TableCell className="text-right tabular-nums">{fmt(item.unit_price)}</TableCell>
                         <TableCell className="text-right tabular-nums">{fmt(item.wholesale_price)}</TableCell>
                         <TableCell className="text-right tabular-nums">{fmt(item.retail_price)}</TableCell>
@@ -232,7 +241,7 @@ export default function PurchasesPage() {
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell colSpan={7} className="text-right font-bold">Grand Total</TableCell>
+                      <TableCell colSpan={8} className="text-right font-bold">Grand Total</TableCell>
                       <TableCell className="text-right font-bold text-lg text-success tabular-nums">{fmt(grandTotal)}</TableCell>
                       <TableCell></TableCell>
                     </TableRow>

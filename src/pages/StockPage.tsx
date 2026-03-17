@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Search, Pencil, Trash2, RotateCcw, AlertTriangle, Image, X, ScanLine, ArrowUp } from 'lucide-react';
@@ -16,6 +17,8 @@ import AdSpace from '@/components/AdSpace';
 import BulkPackagingInfo, { BulkPackagingFields } from '@/components/BulkPackagingInfo';
 
 import { toSentenceCase } from '@/lib/utils';
+
+const UNIT_TYPES = ['Pieces', 'Kilograms', 'Litres', 'Metres', 'Tonnes', 'Rolls', 'Bags', 'Boxes', 'Pairs', 'Sets', 'Bundles', 'Gallons'];
 
 function ItemGalleryDialog({ item, open, onOpenChange }: { item: StockItem; open: boolean; onOpenChange: (o: boolean) => void }) {
   const { fmt } = useCurrency();
@@ -103,7 +106,7 @@ export default function StockPage() {
     document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
   }
   const [form, setForm] = useState({
-    name: '', category: '', quality: '', barcode: '',
+    name: '', category: '', quality: '', unit_type: 'Pieces', barcode: '',
     buying_price: '', wholesale_price: '', retail_price: '', quantity: '', min_stock_level: '5',
     pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0',
   });
@@ -124,7 +127,7 @@ export default function StockPage() {
   const existingCategories = [...new Set(stock.map(s => s.category).filter(Boolean))];
 
   function resetForm() {
-    setForm({ name: '', category: '', quality: '', barcode: '', buying_price: '', wholesale_price: '', retail_price: '', quantity: '', min_stock_level: '5', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
+    setForm({ name: '', category: '', quality: '', unit_type: 'Pieces', barcode: '', buying_price: '', wholesale_price: '', retail_price: '', quantity: '', min_stock_level: '5', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
     setEditItem(null);
   }
 
@@ -134,6 +137,7 @@ export default function StockPage() {
       name: toSentenceCase(form.name.trim()),
       category: toSentenceCase(form.category.trim()),
       quality: toSentenceCase(form.quality.trim()),
+      unit_type: form.unit_type,
       barcode: form.barcode.trim(),
       buying_price: parseFloat(form.buying_price) || 0,
       wholesale_price: parseFloat(form.wholesale_price) || 0,
@@ -159,7 +163,9 @@ export default function StockPage() {
   function openEdit(item: StockItem) {
     setEditItem(item);
     setForm({
-      name: item.name, category: item.category, quality: item.quality, barcode: item.barcode || '',
+      name: item.name, category: item.category, quality: item.quality,
+      unit_type: (item as any).unit_type || 'Pieces',
+      barcode: item.barcode || '',
       buying_price: String(item.buying_price), wholesale_price: String(item.wholesale_price), retail_price: String(item.retail_price),
       quantity: String(item.quantity), min_stock_level: String(item.min_stock_level),
       pieces_per_carton: String((item as any).pieces_per_carton || 0),
@@ -219,6 +225,13 @@ export default function StockPage() {
                       <Label>Quality</Label>
                       <Input value={form.quality} onChange={e => setForm(f => ({ ...f, quality: e.target.value }))} onBlur={() => setForm(f => ({ ...f, quality: toSentenceCase(f.quality) }))} placeholder="e.g. New, Grade A..." />
                     </div>
+                   </div>
+                  <div>
+                    <Label>Unit Type</Label>
+                    <Select value={form.unit_type} onValueChange={v => setForm(f => ({ ...f, unit_type: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>{UNIT_TYPES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
+                    </Select>
                   </div>
                   <div>
                     <Label>Buying/Shopping Price (Cost from supplier)</Label>
@@ -238,8 +251,8 @@ export default function StockPage() {
                   />
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label>Quantity (Total Pieces)</Label>
-                      <Input type="number" min="0" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} required
+                      <Label>Quantity ({form.unit_type})</Label>
+                      <Input type="number" min="0" step="0.01" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} required
                         readOnly={parseInt(form.pieces_per_carton) > 0}
                         className={parseInt(form.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
                       {parseInt(form.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
@@ -337,7 +350,7 @@ export default function StockPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div>
                             <p className="font-semibold text-sm truncate">{item.name}</p>
-                            <p className="text-xs text-muted-foreground">{[item.category, item.quality].filter(Boolean).join(' · ')}</p>
+                            <p className="text-xs text-muted-foreground">{[item.category, item.quality, (item as any).unit_type].filter(Boolean).join(' · ')}</p>
                           </div>
                           {item.quantity === 0 ? (
                             <span className="text-[10px] font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-full shrink-0">Out</span>
@@ -387,18 +400,19 @@ export default function StockPage() {
                   <TableHead></TableHead>
                   <TableHead>Item</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>Quality</TableHead>
-                  {showBuyingPrice && <TableHead className="text-right bg-info/10 text-info font-semibold">💰 Buying Price</TableHead>}
-                  <TableHead className="text-right">Wholesale</TableHead>
-                  <TableHead className="text-right">Retail</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.length === 0 ? (
-                  <TableRow><TableCell colSpan={showBuyingPrice ? 10 : 9} className="text-center text-muted-foreground py-8">No items found. Add your first stock item.</TableCell></TableRow>
+                   <TableHead>Quality</TableHead>
+                   <TableHead>Unit</TableHead>
+                   {showBuyingPrice && <TableHead className="text-right bg-info/10 text-info font-semibold">💰 Buying Price</TableHead>}
+                   <TableHead className="text-right">Wholesale</TableHead>
+                   <TableHead className="text-right">Retail</TableHead>
+                   <TableHead className="text-right">Qty</TableHead>
+                   <TableHead>Status</TableHead>
+                   <TableHead className="text-right">Actions</TableHead>
+                 </TableRow>
+               </TableHeader>
+               <TableBody>
+                 {filtered.length === 0 ? (
+                   <TableRow><TableCell colSpan={showBuyingPrice ? 11 : 10} className="text-center text-muted-foreground py-8">No items found. Add your first stock item.</TableCell></TableRow>
                 ) : (
                   filtered.map(item => {
                     const thumb = item.image_url_1 || item.image_url_2 || item.image_url_3;
@@ -418,6 +432,7 @@ export default function StockPage() {
                         <TableCell className="font-medium">{item.name}</TableCell>
                         <TableCell>{item.category}</TableCell>
                         <TableCell>{item.quality}</TableCell>
+                        <TableCell className="capitalize">{(item as any).unit_type || 'Pieces'}</TableCell>
                         {showBuyingPrice && (
                           <TableCell className="text-right bg-info/5">
                             <span className="font-semibold text-info tabular-nums">{fmt(Number(item.buying_price))}</span>
