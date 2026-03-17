@@ -30,7 +30,7 @@ export default function QuickAddItem({ open, onOpenChange }: QuickAddItemProps) 
   const [uploading, setUploading] = useState(false);
   const [webcamOpen, setWebcamOpen] = useState(false);
   const [form, setForm] = useState({
-    name: '', category: '', quality: '',
+    name: '', category: '', quality: '', unit_type: 'Pieces',
     buying_price: '', wholesale_price: '', retail_price: '', quantity: '',
   });
 
