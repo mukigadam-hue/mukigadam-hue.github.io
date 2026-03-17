@@ -736,6 +736,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     const purchaseItems = items.map(item => ({
       purchase_id: purchaseData.id, item_name: item.item_name, category: item.category,
       quality: item.quality, quantity: item.quantity, unit_price: item.unit_price, subtotal: item.subtotal,
+      serial_numbers: item.serial_numbers || '',
     }));
     await supabase.from('purchase_items').insert(purchaseItems);
 
