@@ -234,7 +234,7 @@ interface BusinessContextType {
     paymentStatus?: string,
     amountPaid?: number
   ) => Promise<Sale | null>;
-  addPurchase: (items: { item_name: string; category: string; quality: string; quantity: number; unit_price: number; wholesale_price?: number; retail_price?: number; subtotal: number }[], grandTotal: number, supplier: string, recordedBy: string, paymentStatus?: string, amountPaid?: number) => Promise<void>;
+  addPurchase: (items: { item_name: string; category: string; quality: string; quantity: number; unit_price: number; wholesale_price?: number; retail_price?: number; subtotal: number; serial_numbers?: string }[], grandTotal: number, supplier: string, recordedBy: string, paymentStatus?: string, amountPaid?: number) => Promise<void>;
   updateSalePayment: (saleId: string, amountPaid: number, paymentStatus: string) => Promise<void>;
   updatePurchasePayment: (purchaseId: string, amountPaid: number, paymentStatus: string) => Promise<void>;
   addOrder: (type: string, customerName: string, items: { item_name: string; category: string; quality: string; quantity: number; price_type: string; unit_price: number; subtotal: number }[], grandTotal: number, status: string, recipientBusinessId?: string, comment?: string) => Promise<void>;
