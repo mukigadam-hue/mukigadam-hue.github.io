@@ -28,7 +28,7 @@ export default function FactoryPurchases() {
   }[]>([]);
   const [supplier, setSupplier] = useState('');
   const [recordedBy, setRecordedBy] = useState('');
-  const [form, setForm] = useState({ name: '', category: '', unit_type: 'Pieces', quantity: '1', unit_price: '' });
+  const [form, setForm] = useState({ name: '', category: '', unit_type: 'Pieces', quantity: '1', unit_price: '', serial_numbers: '' });
   const [scannerOpen, setScannerOpen] = useState(false);
 
   const activeRM = rawMaterials.filter(r => !r.deleted_at);
