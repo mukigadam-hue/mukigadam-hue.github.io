@@ -13,6 +13,7 @@ interface ReceiptItem {
   priceType?: string;
   unitPrice: number;
   subtotal: number;
+  serialNumbers?: string;
 }
 
 interface ReceiptProps {
