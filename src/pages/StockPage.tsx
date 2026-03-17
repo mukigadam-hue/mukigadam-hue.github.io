@@ -432,6 +432,7 @@ export default function StockPage() {
                         <TableCell className="font-medium">{item.name}</TableCell>
                         <TableCell>{item.category}</TableCell>
                         <TableCell>{item.quality}</TableCell>
+                        <TableCell className="capitalize">{(item as any).unit_type || 'Pieces'}</TableCell>
                         {showBuyingPrice && (
                           <TableCell className="text-right bg-info/5">
                             <span className="font-semibold text-info tabular-nums">{fmt(Number(item.buying_price))}</span>
