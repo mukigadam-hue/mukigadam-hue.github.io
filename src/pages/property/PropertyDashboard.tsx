@@ -214,6 +214,8 @@ export default function PropertyDashboard() {
           </CardContent>
         </Card>
       )}
+
+      <BannerAd position="bottom" />
     </div>
   );
 }

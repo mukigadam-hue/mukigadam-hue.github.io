@@ -259,6 +259,8 @@ export default function FactoryDashboard() {
       <WorkerActivityTracker />
 
       <AdSpace variant="banner" />
+
+      <BannerAd position="bottom" />
     </div>
   );
 }
