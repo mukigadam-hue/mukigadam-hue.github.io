@@ -129,7 +129,7 @@ export default function SalesPage() {
     if (!canSave) return;
 
     const allItems = [
-      ...items.map(item => ({ ...item, subtotal: item.quantity * item.unit_price })),
+      ...items.map(item => ({ ...item, subtotal: item.quantity * item.unit_price, serial_numbers: item.serial_numbers || '' })),
       ...serviceItems.map(svc => ({
         stock_item_id: undefined as any,
         item_name: `[Service] ${svc.service_name}`,
