@@ -161,6 +161,7 @@ export default function FactorySales() {
       const receiptItems = allItems.map(i => ({
         itemName: i.item_name, category: i.category, quality: i.quality,
         quantity: i.quantity, priceType: i.price_type, unitPrice: i.unit_price, subtotal: i.subtotal,
+        serialNumbers: i.serial_numbers || undefined,
       }));
       await saveReceipt({
         business_id: currentBusiness.id, receipt_type: 'sale', transaction_id: sale.id,
