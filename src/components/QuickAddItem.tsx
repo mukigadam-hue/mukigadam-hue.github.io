@@ -181,12 +181,23 @@ export default function QuickAddItem({ open, onOpenChange }: QuickAddItemProps) 
                 <div><Label>Category</Label><Input placeholder="e.g. Phone Parts" value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} /></div>
                 <div><Label>Quality</Label><Input placeholder="e.g. Original" value={form.quality} onChange={e => setForm(f => ({ ...f, quality: e.target.value }))} /></div>
               </div>
+              <div>
+                <Label>Unit Type</Label>
+                <Select value={form.unit_type} onValueChange={v => setForm(f => ({ ...f, unit_type: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {['Pieces', 'Kilograms', 'Litres', 'Metres', 'Tonnes', 'Rolls', 'Bags', 'Boxes', 'Pairs', 'Sets', 'Bundles', 'Gallons'].map(u => (
+                      <SelectItem key={u} value={u}>{u}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="grid grid-cols-3 gap-2">
                 <div><Label>Shopping Price</Label><Input type="number" placeholder="0" value={form.buying_price} onChange={e => setForm(f => ({ ...f, buying_price: e.target.value }))} /></div>
                 <div><Label>Wholesale</Label><Input type="number" placeholder="0" value={form.wholesale_price} onChange={e => setForm(f => ({ ...f, wholesale_price: e.target.value }))} /></div>
                 <div><Label>Retail</Label><Input type="number" placeholder="0" value={form.retail_price} onChange={e => setForm(f => ({ ...f, retail_price: e.target.value }))} /></div>
               </div>
-              <div><Label>Quantity</Label><Input type="number" placeholder="0" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} /></div>
+              <div><Label>Quantity ({form.unit_type})</Label><Input type="number" step="0.01" placeholder="0" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))} /></div>
             </div>
           )}
 
