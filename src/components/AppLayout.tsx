@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { LayoutDashboard, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Settings, Users, LogOut, Building2, Crown, User, Bell, BellDot, Factory, Flame, Boxes, Menu, Contact, Globe, Home, CalendarCheck, MessageSquare, Search, AlertTriangle, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import ProofVideoButton from '@/components/ProofVideoButton';
+import LegalHelpModal from '@/components/LegalHelpModal';
+import { HelpCircle } from 'lucide-react';
 import NetworkStatusBanner from '@/components/NetworkStatusBanner';
 import { useAuth } from '@/context/AuthContext';
 import { APP_VERSION } from '@/version';
@@ -392,6 +394,11 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
           </nav>
 
           <div className="px-3 py-2 border-t border-sidebar-border">
+            <LegalHelpModal trigger={
+              <button className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-[11px] text-sidebar-foreground hover:bg-sidebar-accent/50 transition-colors mb-1">
+                <HelpCircle className="h-3.5 w-3.5 text-primary" /> Help & Legal
+              </button>
+            } />
             <div className="flex items-center gap-1.5 text-[10px] text-sidebar-foreground mb-1">
               <span>📞</span>
               <a href="mailto:ndamson8@gmail.com" className="hover:text-primary transition-colors truncate">ndamson8@gmail.com</a>
@@ -514,6 +521,11 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
             </Link>
 
             <div className="mt-2 pt-2 border-t border-border">
+              <LegalHelpModal trigger={
+                <button className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs text-muted-foreground hover:bg-muted/60 transition-colors mb-1">
+                  <HelpCircle className="h-3.5 w-3.5 text-primary" /> Help & Legal
+                </button>
+              } />
               <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                 <span>📞</span>
                 <a href="mailto:ndamson8@gmail.com" className="hover:text-primary transition-colors truncate">ndamson8@gmail.com</a>

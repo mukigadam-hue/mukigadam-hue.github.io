@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { LogIn, UserPlus, Eye, EyeOff } from 'lucide-react';
+import LegalHelpModal from '@/components/LegalHelpModal';
 
 export default function AuthPage() {
   const { signUp, signIn } = useAuth();
@@ -118,6 +119,10 @@ export default function AuthPage() {
             >
               {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
             </button>
+          </div>
+
+          <div className="flex justify-center pt-1">
+            <LegalHelpModal defaultTab="guide" />
           </div>
         </CardContent>
       </Card>
