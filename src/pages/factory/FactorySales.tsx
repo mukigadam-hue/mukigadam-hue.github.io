@@ -227,6 +227,12 @@ export default function FactorySales() {
               </div>
               <Button onClick={addItem} disabled={!selectedProduct}><Plus className="h-4 w-4 mr-1" />Add</Button>
             </div>
+            {selectedProduct && (
+              <div className="mt-2">
+                <Label className="text-xs text-muted-foreground">Serial Number (optional)</Label>
+                <Input value={serialInput} onChange={e => setSerialInput(e.target.value)} placeholder="e.g. IMEI, S/N..." className="max-w-xs" />
+              </div>
+            )}
           </div>
 
           {/* Service section removed for factory */}

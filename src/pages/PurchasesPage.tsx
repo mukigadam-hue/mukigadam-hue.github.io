@@ -194,6 +194,10 @@ export default function PurchasesPage() {
             <div className="w-24"><Label>Retail</Label><Input type="number" min="0" step="0.01" value={form.retail_price} onChange={e => setForm(f => ({ ...f, retail_price: e.target.value }))} placeholder="Auto" /></div>
             <Button onClick={addItem} disabled={!form.name.trim()}><Plus className="h-4 w-4 mr-1" />Add</Button>
           </div>
+          <div className="mt-2">
+            <Label className="text-xs text-muted-foreground">Serial Number (optional)</Label>
+            <Input value={form.serial_numbers} onChange={e => setForm(f => ({ ...f, serial_numbers: e.target.value }))} placeholder="e.g. IMEI, S/N..." className="max-w-xs" />
+          </div>
           <BulkPackagingFields
             piecesPerCarton={form.pieces_per_carton}
             cartonsPerBox={form.cartons_per_box}

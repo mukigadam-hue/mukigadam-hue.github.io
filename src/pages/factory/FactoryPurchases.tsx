@@ -142,6 +142,10 @@ export default function FactoryPurchases() {
             <div className="w-24"><Label>Unit Cost</Label><Input type="number" min="0" step="0.01" value={form.unit_price} onChange={e => setForm(f => ({ ...f, unit_price: e.target.value }))} /></div>
             <Button onClick={addItem} disabled={!form.name.trim()}><Plus className="h-4 w-4 mr-1" />Add</Button>
           </div>
+          <div className="mt-2">
+            <Label className="text-xs text-muted-foreground">Serial Number (optional)</Label>
+            <Input value={form.serial_numbers} onChange={e => setForm(f => ({ ...f, serial_numbers: e.target.value }))} placeholder="e.g. IMEI, S/N..." className="max-w-xs" />
+          </div>
 
           {items.length > 0 && (
             <>
