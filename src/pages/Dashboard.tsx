@@ -411,6 +411,9 @@ export default function Dashboard() {
       <WorkerActivityTracker />
 
       <AdSpace variant="banner" />
+
+      {/* Native AdMob banner — only shows in Despia native shell */}
+      <BannerAd position="bottom" />
     </div>
   );
 }

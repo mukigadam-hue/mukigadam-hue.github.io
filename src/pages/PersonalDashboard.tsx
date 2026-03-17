@@ -117,6 +117,9 @@ export default function PersonalDashboard() {
           </Link>
         </CardContent>
       </Card>
+
+      {/* Native AdMob banner — only shows in Despia native shell */}
+      <BannerAd position="bottom" />
     </div>
   );
 }

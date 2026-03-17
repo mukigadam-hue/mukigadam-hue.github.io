@@ -12,6 +12,7 @@ import { APP_VERSION } from '@/version';
 import LanguageSelector from '@/components/LanguageSelector';
 import ImageUpload from '@/components/ImageUpload';
 import AdSpace from '@/components/AdSpace';
+import BannerAd from '@/components/BannerAd';
 import DailyTipBanner from '@/components/DailyTipBanner';
 import AnnouncementsBanner from '@/components/AnnouncementsBanner';
 
