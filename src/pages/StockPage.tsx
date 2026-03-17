@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Search, Pencil, Trash2, RotateCcw, AlertTriangle, Image, X, ScanLine, ArrowUp } from 'lucide-react';
@@ -16,6 +17,8 @@ import AdSpace from '@/components/AdSpace';
 import BulkPackagingInfo, { BulkPackagingFields } from '@/components/BulkPackagingInfo';
 
 import { toSentenceCase } from '@/lib/utils';
+
+const UNIT_TYPES = ['Pieces', 'Kilograms', 'Litres', 'Metres', 'Tonnes', 'Rolls', 'Bags', 'Boxes', 'Pairs', 'Sets', 'Bundles', 'Gallons'];
 
 function ItemGalleryDialog({ item, open, onOpenChange }: { item: StockItem; open: boolean; onOpenChange: (o: boolean) => void }) {
   const { fmt } = useCurrency();
