@@ -77,9 +77,11 @@ export default function SalesPage() {
       quantity: qty,
       price_type: priceType,
       unit_price: unitPrice,
+      serial_numbers: serialInput.trim() || undefined,
     }]);
     setSelectedStock('');
     setQuantity('1');
+    setSerialInput('');
     // Keep priceType sticky — don't reset it
   }
 
