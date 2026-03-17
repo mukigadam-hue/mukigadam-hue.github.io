@@ -99,6 +99,11 @@ export default function Receipt({ items, grandTotal, buyerName, sellerName, cust
                       {[item.category, item.quality].filter(Boolean).filter(v => v !== '-').join(' · ')}
                     </p>
                   )}
+                  {item.serialNumbers && (
+                    <p className="text-xs text-info pl-2 font-mono">
+                      S/N: {item.serialNumbers}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
