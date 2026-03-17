@@ -83,6 +83,7 @@ export default function PurchasesPage() {
         quantity: item.quantity, unit_price: item.unit_price,
         wholesale_price: item.wholesale_price, retail_price: item.retail_price,
         subtotal: item.quantity * item.unit_price,
+        serial_numbers: item.serial_numbers || '',
       })),
       grandTotal, supplier.trim() || 'Unknown',
       toTitleCase(recordedBy.trim()) || 'Staff',
