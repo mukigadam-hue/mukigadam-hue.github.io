@@ -113,6 +113,18 @@ function AppContent() {
 function BusinessContent() {
   const { currentBusiness, loading } = useBusiness();
   const navigate = useNavigate();
+  const location = window.location.pathname;
+
+  // Admin route is accessible without a business
+  if (location === '/admin') {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Routes>
+      </Suspense>
+    );
+  }
 
   if (loading) {
     return (
