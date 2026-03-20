@@ -90,14 +90,23 @@ function AppContent() {
     );
   }
 
-  if (!user) return <AuthPage />;
-
   return (
-    <BusinessProvider>
-      <BrowserRouter>
-        <BusinessContent />
-      </BrowserRouter>
-    </BusinessProvider>
+    <BrowserRouter>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          {/* Auth-gated routes */}
+          <Route path="/*" element={
+            !user ? <AuthPage /> : (
+              <BusinessProvider>
+                <BusinessContent />
+              </BusinessProvider>
+            )
+          } />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   );
 }
 
