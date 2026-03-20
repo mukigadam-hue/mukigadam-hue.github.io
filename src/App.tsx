@@ -30,6 +30,8 @@ const CheckoutPage = lazy(() => import("./pages/CheckoutPage"));
 const WastePage = lazy(() => import("./pages/WastePage"));
 const RegisterBusinessPage = lazy(() => import("./pages/RegisterBusinessPage"));
 const PersonalDashboard = lazy(() => import("./pages/PersonalDashboard"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 
 // Factory pages
 const FactoryDashboard = lazy(() => import("./pages/factory/FactoryDashboard"));
@@ -88,20 +90,41 @@ function AppContent() {
     );
   }
 
-  if (!user) return <AuthPage />;
-
   return (
-    <BusinessProvider>
-      <BrowserRouter>
-        <BusinessContent />
-      </BrowserRouter>
-    </BusinessProvider>
+    <BrowserRouter>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          {/* Auth-gated routes */}
+          <Route path="/*" element={
+            !user ? <AuthPage /> : (
+              <BusinessProvider>
+                <BusinessContent />
+              </BusinessProvider>
+            )
+          } />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   );
 }
 
 function BusinessContent() {
   const { currentBusiness, loading } = useBusiness();
   const navigate = useNavigate();
+  const location = window.location.pathname;
+
+  // Admin route is accessible without a business
+  if (location === '/admin') {
+    return (
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Routes>
+      </Suspense>
+    );
+  }
 
   if (loading) {
     return (
