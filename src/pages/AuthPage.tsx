@@ -57,8 +57,18 @@ export default function AuthPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 auth-gradient">
-      <Card className="w-full max-w-md shadow-xl border-0 bg-card/95 backdrop-blur-sm">
+    <div className="min-h-screen flex flex-col items-center justify-start p-4 auth-gradient overflow-y-auto">
+      {/* Hero Section */}
+      <div className="w-full max-w-2xl text-center pt-10 pb-8 px-4">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-primary-foreground drop-shadow-lg leading-tight mb-4">
+          BizTrack: Track Your Business Growth in Real-Time
+        </h1>
+        <p className="text-sm sm:text-base text-primary-foreground/80 leading-relaxed max-w-xl mx-auto">
+          The simplest way to manage your expenses, sales, make orders, discover other related business around, book properties, monitor your workers and stock everywhere, automated calculations in your business and inventory. This app will simplify everything.
+        </p>
+      </div>
+
+      <Card className="w-full max-w-md shadow-xl border-0 bg-card/95 backdrop-blur-sm mb-10">
         <CardContent className="p-6 space-y-6">
           <div className="text-center space-y-2">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground text-3xl mb-2">
