@@ -605,14 +605,18 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const restoreStockItem = useCallback(async (id: string) => {
-    const { error } = await supabase.from('stock_items').update({ deleted_at: null }).eq('id', id);
+    const { error } = await supabase.from('stock_items').update({ deleted_at: null, deleted_by: '' }).eq('id', id);
     if (error) { toast.error(error.message); return; }
+    // Optimistic UI update
+    setStock(prev => prev.map(s => s.id === id ? { ...s, deleted_at: null, deleted_by: '' } as StockItem : s));
     toast.success('Item restored to stock!');
   }, []);
 
   const permanentDeleteStockItem = useCallback(async (id: string) => {
     const { error } = await supabase.from('stock_items').delete().eq('id', id);
     if (error) { toast.error(error.message); return; }
+    // Optimistic UI update — remove from local state immediately
+    setStock(prev => prev.filter(s => s.id !== id));
     toast.success('Item permanently deleted');
   }, []);
 
