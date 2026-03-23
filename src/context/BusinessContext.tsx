@@ -320,8 +320,16 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) {
-      setBusinesses([]);
-      setMemberships([]);
+      // Only clear cache if actually signed out (no stored session)
+      // Don't clear on transient auth loading
+      const hasSession = localStorage.getItem('sb-evuswzfmrfkmlcdsphgu-auth-token');
+      if (!hasSession) {
+        setBusinesses([]);
+        setMemberships([]);
+        localStorage.removeItem('biztrack_cache_businesses');
+        localStorage.removeItem('biztrack_cache_memberships');
+        localStorage.removeItem('biztrack_current_business');
+      }
       setLoading(false);
       return;
     }
@@ -605,14 +613,18 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const restoreStockItem = useCallback(async (id: string) => {
-    const { error } = await supabase.from('stock_items').update({ deleted_at: null }).eq('id', id);
+    const { error } = await supabase.from('stock_items').update({ deleted_at: null, deleted_by: '' }).eq('id', id);
     if (error) { toast.error(error.message); return; }
+    // Optimistic UI update
+    setStock(prev => prev.map(s => s.id === id ? { ...s, deleted_at: null, deleted_by: '' } as StockItem : s));
     toast.success('Item restored to stock!');
   }, []);
 
   const permanentDeleteStockItem = useCallback(async (id: string) => {
     const { error } = await supabase.from('stock_items').delete().eq('id', id);
     if (error) { toast.error(error.message); return; }
+    // Optimistic UI update — remove from local state immediately
+    setStock(prev => prev.filter(s => s.id !== id));
     toast.success('Item permanently deleted');
   }, []);
 

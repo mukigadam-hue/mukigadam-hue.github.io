@@ -121,12 +121,31 @@
     @apply border-border;
   }
 
+  html {
+    /* Fix scrolling on old Android/iOS devices */
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+    height: 100%;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Ensure scrolling works on old devices */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    min-height: 100%;
+    position: relative;
+  }
+
+  /* Fix for old WebView and older browsers that freeze with overflow:hidden on body */
+  #root {
+    min-height: 100vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   /* Better touch targets on mobile */
