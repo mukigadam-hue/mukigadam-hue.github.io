@@ -24,6 +24,7 @@ import { calculateMobileMoneyCharge } from '@/lib/mobileMoneyCharges';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
+import { useSubmitLock } from '@/hooks/useSubmitLock';
 
 export default function OrdersPage() {
   const { stock, orders, addOrder, updateOrder, completeOrderToSale, saveReceipt, currentBusiness, addStockItem, addExpense, refreshData, notifications, userRole } = useBusiness();
