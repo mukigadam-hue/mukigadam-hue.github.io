@@ -16,6 +16,7 @@ import type { Sale } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
+import { useSubmitLock } from '@/hooks/useSubmitLock';
 
 export default function FactorySales() {
   const { stock, sales, addSale, saveReceipt, currentBusiness, updateSalePayment } = useBusiness();
