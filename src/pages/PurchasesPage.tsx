@@ -274,8 +274,8 @@ export default function PurchasesPage() {
                   </div>
                 )}
               </div>
-              <Button onClick={handleSave} className="w-full">
-                <Package className="h-4 w-4 mr-2" />Record Purchase — {fmt(grandTotal)}
+              <Button onClick={() => withLock(handleSave)} className="w-full" disabled={submitLocked}>
+                <Package className="h-4 w-4 mr-2" />{submitLocked ? 'Saving...' : `Record Purchase — ${fmt(grandTotal)}`}
               </Button>
             </>
           )}

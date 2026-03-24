@@ -502,8 +502,8 @@ export default function SalesPage() {
               {!buyerName.trim() || !sellerName.trim() ? (
                 <p className="text-xs text-destructive text-center">⚠️ Buyer name and Seller name are required before saving.</p>
               ) : null}
-              <Button onClick={handleSave} className="w-full" disabled={!canSave}>
-                <ShoppingCart className="h-4 w-4 mr-2" />Record Sale — {fmt(grandTotal)}
+              <Button onClick={() => withLock(handleSave)} className="w-full" disabled={!canSave || submitLocked}>
+                <ShoppingCart className="h-4 w-4 mr-2" />{submitLocked ? 'Saving...' : `Record Sale — ${fmt(grandTotal)}`}
               </Button>
             </>
           )}
