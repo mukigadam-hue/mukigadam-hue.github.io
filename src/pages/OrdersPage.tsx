@@ -1493,9 +1493,13 @@ export default function OrdersPage() {
                     </TableBody>
                   </Table>
                 </div>
-                <Button onClick={() => handleCreateOrder(orderMode)} className="w-full">
-                  {orderMode === 'my_order' && <><FileText className="h-4 w-4 mr-2" />Save Order — {fmt(grandTotal)}</>}
-                  {orderMode === 'request' && <><Send className="h-4 w-4 mr-2" />Send to Supplier ({items.length} items)</>}
+                <Button onClick={() => withLock(() => handleCreateOrder(orderMode))} className="w-full" disabled={submitLocked}>
+                  {submitLocked ? 'Saving...' : (
+                    <>
+                      {orderMode === 'my_order' && <><FileText className="h-4 w-4 mr-2" />Save Order — {fmt(grandTotal)}</>}
+                      {orderMode === 'request' && <><Send className="h-4 w-4 mr-2" />Send to Supplier ({items.length} items)</>}
+                    </>
+                  )}
                 </Button>
               </>
             )}
