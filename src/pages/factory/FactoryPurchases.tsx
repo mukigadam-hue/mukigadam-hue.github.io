@@ -21,6 +21,7 @@ export default function FactoryPurchases() {
   const { rawMaterials, addRawMaterial, updateRawMaterial, refreshFactory } = useFactory();
   const { purchases, addPurchase, stock } = useBusiness();
   const { fmt } = useCurrency();
+  const { locked: submitLocked, withLock } = useSubmitLock();
 
   const [items, setItems] = useState<{
     item_name: string; category: string; unit_type: string;

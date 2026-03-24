@@ -21,6 +21,7 @@ import { useSubmitLock } from '@/hooks/useSubmitLock';
 export default function FactorySales() {
   const { stock, sales, addSale, saveReceipt, currentBusiness, updateSalePayment } = useBusiness();
   const { fmt } = useCurrency();
+  const { locked: submitLocked, withLock } = useSubmitLock();
 
   const activeProducts = stock.filter(s => !s.deleted_at);
 
