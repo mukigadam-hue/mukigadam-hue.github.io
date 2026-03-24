@@ -496,6 +496,12 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'businesses', filter: `id=eq.${currentBusinessId}` }, (payload) => {
         if (payload.new) {
           setBusinesses(prev => prev.map(b => b.id === currentBusinessId ? { ...b, ...payload.new } as Business : b));
+          // Sync currency across devices
+          const newCurrency = (payload.new as any).currency_symbol;
+          if (newCurrency) {
+            localStorage.setItem('biztrack_currency_symbol', newCurrency);
+            window.dispatchEvent(new CustomEvent('biztrack_currency_changed', { detail: newCurrency }));
+          }
         }
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'sales', filter: `business_id=eq.${currentBusinessId}` }, () => debounce('sales', reloadSales))
