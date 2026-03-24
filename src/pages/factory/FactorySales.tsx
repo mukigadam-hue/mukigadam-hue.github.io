@@ -298,8 +298,8 @@ export default function FactorySales() {
                   </div>
                 )}
               </div>
-              <Button onClick={handleSave} className="w-full" disabled={!canSave}>
-                <TrendingUp className="h-4 w-4 mr-2" />Complete Sale — {fmt(grandTotal)}
+              <Button onClick={() => withLock(handleSave)} className="w-full" disabled={!canSave || submitLocked}>
+                <TrendingUp className="h-4 w-4 mr-2" />{submitLocked ? 'Saving...' : `Complete Sale — ${fmt(grandTotal)}`}
               </Button>
             </>
           )}

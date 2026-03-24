@@ -180,8 +180,8 @@ export default function FactoryPurchases() {
                   </TableBody>
                 </Table>
               </div>
-              <Button onClick={handleSave} className="w-full">
-                <ShoppingCart className="h-4 w-4 mr-2" />Record Purchase — {fmt(grandTotal)}
+              <Button onClick={() => withLock(handleSave)} className="w-full" disabled={submitLocked}>
+                <ShoppingCart className="h-4 w-4 mr-2" />{submitLocked ? 'Saving...' : `Record Purchase — ${fmt(grandTotal)}`}
               </Button>
             </>
           )}
