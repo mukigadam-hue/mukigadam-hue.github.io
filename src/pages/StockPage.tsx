@@ -110,6 +110,7 @@ export default function StockPage() {
   const [form, setForm] = useState({
     name: '', category: '', quality: '', unit_type: 'Pieces', barcode: '',
     buying_price: '', wholesale_price: '', retail_price: '', quantity: '', min_stock_level: '5',
+    tax_rate: '0',
     pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0',
   });
 
