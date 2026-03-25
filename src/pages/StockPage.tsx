@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Search, Pencil, Trash2, RotateCcw, AlertTriangle, Image, X, ScanLine, ArrowUp } from 'lucide-react';
-import BarcodeScanner from '@/components/BarcodeScanner';
+import BarcodeScanHandler from '@/components/BarcodeScanHandler';
 import type { StockItem } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
 import BulkPackagingInfo, { BulkPackagingFields } from '@/components/BulkPackagingInfo';

@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Trash2, ShoppingCart, Receipt as ReceiptIcon, Wrench, Package, ScanLine } from 'lucide-react';
 import Receipt from '@/components/Receipt';
-import BarcodeScanner from '@/components/BarcodeScanner';
+import BarcodeScanHandler from '@/components/BarcodeScanHandler';
 import { toast } from 'sonner';
 import type { Sale } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
