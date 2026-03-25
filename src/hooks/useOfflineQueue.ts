@@ -50,7 +50,7 @@ function saveQueue(queue: QueuedOperation[]) {
 
 export function enqueueOfflineOperation(op: Omit<QueuedOperation, 'id' | 'timestamp'>) {
   const queue = getQueue();
-  queue.push({ ...op, id: crypto.randomUUID(), timestamp: Date.now() });
+  queue.push({ ...op, id: crypto.randomUUID(), timestamp: Date.now() } as QueuedOperation);
   saveQueue(queue);
 }
 
@@ -249,6 +249,9 @@ async function syncActionOperation(op: QueuedOperation) {
 
       return { optimisticIds: op.optimisticIds || [] };
     }
+
+    default:
+      return { optimisticIds: [] as string[] };
   }
 }
 
