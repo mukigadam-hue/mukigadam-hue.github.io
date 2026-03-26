@@ -286,9 +286,9 @@ export default function PropertyBrowse() {
     if (prefilledPropertyId) {
       loadPropertyAssets();
     } else {
-      searchAssets(); // Auto-search on mount
+      searchAssets(); // Auto-search on mount and filter changes
     }
-  }, []);
+  }, [category, location]);
 
   async function loadPropertyAssets() {
     if (!prefilledPropertyId) return;
