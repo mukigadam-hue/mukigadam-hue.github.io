@@ -18,6 +18,11 @@ import { toast } from 'sonner';
 import { toTitleCase, toSentenceCase } from '@/lib/utils';
 import AdSpace, { withInlineAds } from '@/components/AdSpace';
 import { PaymentMethodsViewer } from '@/components/PaymentMethodsManager';
+import ImageLightbox from '@/components/ImageLightbox';
+import { toast } from 'sonner';
+import { toTitleCase, toSentenceCase } from '@/lib/utils';
+import AdSpace, { withInlineAds } from '@/components/AdSpace';
+import { PaymentMethodsViewer } from '@/components/PaymentMethodsManager';
 
 const PAYMENT_FREQUENCIES = [
   { value: 'monthly', label: 'Every Month' },
@@ -271,6 +276,8 @@ export default function PropertyBrowse() {
   const [results, setResults] = useState<SearchAsset[]>([]);
   const [loading, setLoading] = useState(false);
   const [contactAsset, setContactAsset] = useState<SearchAsset | null>(null);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxTitle, setLightboxTitle] = useState('');
 
   // Booking dialog state
   const [bookingAsset, setBookingAsset] = useState<any>(null);
