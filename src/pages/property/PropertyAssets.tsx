@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import ImageLightbox from '@/components/ImageLightbox';
 import { useProperty, PropertyAsset } from '@/context/PropertyContext';
 import { useBusiness } from '@/context/BusinessContext';
 import { useCurrency } from '@/hooks/useCurrency';
