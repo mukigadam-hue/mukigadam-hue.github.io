@@ -349,6 +349,12 @@ export default function PropertyAssets() {
           })}
         </div>
       )}
+      <ImageLightbox
+        images={lightboxImages}
+        open={lightboxImages.length > 0}
+        onOpenChange={(o) => { if (!o) setLightboxImages([]); }}
+        title={lightboxTitle}
+      />
     </div>
   );
 }
