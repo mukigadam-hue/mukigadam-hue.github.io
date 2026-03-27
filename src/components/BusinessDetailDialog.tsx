@@ -221,11 +221,12 @@ export default function BusinessDetailDialog({ business, open, onOpenChange, onO
                 <p className="text-sm text-muted-foreground">No {isProperty ? 'assets' : 'products'} listed yet</p>
               </div>
             ) : (
-              <ProductsWithLightbox products={products} fmt={fmt} />
+              <>
+                <ProductsWithLightbox products={products} fmt={fmt} />
                 <p className="text-[10px] text-muted-foreground text-center pt-2">
                   💡 Use the "{actionLabel}" button above to start {isProperty ? 'a booking' : 'an order'}
                 </p>
-              </div>
+              </>
             )}
           </TabsContent>
 
