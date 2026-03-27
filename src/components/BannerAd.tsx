@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useAdRefresh } from '@/hooks/useAdRefresh';
 
 declare global {
   interface Window {
@@ -20,63 +21,61 @@ const GOOGLE_TEST_AD_ID = 'ca-app-pub-3940256099942544/6300978111';
 interface BannerAdProps {
   position?: 'top' | 'bottom';
   className?: string;
+  slotId?: string;
 }
 
-/**
- * Native AdMob banner via Despia SDK.
- * Only renders when running inside a native (Despia) shell.
- */
-export default function BannerAd({ position = 'bottom', className }: BannerAdProps) {
+export default function BannerAd({ position = 'bottom', className, slotId }: BannerAdProps) {
+  const id = slotId || `banner-${position}`;
+  const { refreshKey, onAdLoaded } = useAdRefresh(id);
   const [isNative, setIsNative] = useState(false);
   const [adLoaded, setAdLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const loadingRef = useRef(false);
 
   useEffect(() => {
-    // Only attempt to load if running inside Despia native shell
-    if (!window.despia) {
-      return;
-    }
-
+    if (!window.despia) return;
     setIsNative(true);
 
+    let cancelled = false;
     const loadAd = async () => {
+      if (loadingRef.current) return;
+      loadingRef.current = true;
       try {
-        if (window.despia?.AdMob) {
-          await window.despia.AdMob.showBanner({
-            adId: GOOGLE_TEST_AD_ID,
-            position,
-            autoShow: true,
-          });
+        // Destroy previous instance first
+        await window.despia?.AdMob?.hideBanner().catch(() => {});
+        if (cancelled) return;
+        await window.despia?.AdMob?.showBanner({
+          adId: GOOGLE_TEST_AD_ID,
+          position,
+          autoShow: true,
+        });
+        if (!cancelled) {
           setAdLoaded(true);
+          setError(null);
+          onAdLoaded();
         }
       } catch (err: any) {
-        console.warn('BannerAd: Failed to load AdMob banner', err);
-        setError(err?.message || 'Ad failed to load');
+        if (!cancelled) setError(err?.message || 'Ad failed');
+      } finally {
+        loadingRef.current = false;
       }
     };
-
     loadAd();
 
-    // Cleanup: hide banner when component unmounts
     return () => {
-      if (window.despia?.AdMob) {
-        window.despia.AdMob.hideBanner().catch(() => {});
-      }
+      cancelled = true;
+      window.despia?.AdMob?.hideBanner().catch(() => {});
     };
-  }, [position]);
+  }, [position, refreshKey, onAdLoaded]);
 
-  // Don't render anything if not in a native environment
   if (!isNative) return null;
 
-  // Reserve space for the native ad banner
   return (
     <div
-      className={`w-full flex items-center justify-center ${className ?? ''}`}
-      style={{ minHeight: adLoaded ? 50 : 0 }}
+      className={`w-full flex items-center justify-center transition-none ${className ?? ''}`}
+      style={{ minHeight: 50 }}
     >
-      {error && (
-        <p className="text-[10px] text-muted-foreground">{error}</p>
-      )}
+      {error && <p className="text-[10px] text-muted-foreground">{error}</p>}
     </div>
   );
 }

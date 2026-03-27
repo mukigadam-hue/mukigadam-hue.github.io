@@ -1,21 +1,28 @@
 import { cn } from '@/lib/utils';
 import { usePremium } from '@/hooks/usePremium';
+import { useAdRefresh } from '@/hooks/useAdRefresh';
 
 interface AdSpaceProps {
   variant?: 'banner' | 'inline' | 'compact';
   className?: string;
+  slotId?: string;
 }
 
 /**
  * Native ad placeholder. Hidden for premium users.
+ * Auto-refreshes every 60s while visible.
  */
-export default function AdSpace({ variant = 'banner', className }: AdSpaceProps) {
+export default function AdSpace({ variant = 'banner', className, slotId }: AdSpaceProps) {
   const { showAds } = usePremium();
+  const id = slotId || `adspace-${variant}`;
+  const { refreshKey } = useAdRefresh(id);
+
   if (!showAds) return null;
   return (
     <div
+      key={refreshKey}
       className={cn(
-        'flex items-center justify-center rounded-lg border border-dashed border-muted-foreground/25 bg-muted/40 text-muted-foreground/50 select-none',
+        'flex items-center justify-center rounded-lg border border-dashed border-muted-foreground/25 bg-muted/40 text-muted-foreground/50 select-none transition-none',
         variant === 'banner' && 'h-20 w-full',
         variant === 'inline' && 'h-16 w-full',
         variant === 'compact' && 'h-12 w-full',
