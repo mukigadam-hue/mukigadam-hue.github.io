@@ -293,15 +293,6 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<Notification[]>(EMPTY_NOTIFICATIONS);
   const [loading, setLoading] = useState(() => readJson<Business[]>(BUSINESS_CACHE_KEYS.businesses, []).length === 0 && navigator.onLine);
 
-  const currentBusiness = businesses.find(b => b.id === currentBusinessId) || null;
-  const userRole = memberships.find(m => m.business_id === currentBusinessId)?.role || null;
-
-  useEffect(() => {
-    if (!currentBusinessId && businesses.length > 0) {
-      setCurrentBusinessId(businesses[0].id);
-    }
-  }, [businesses, currentBusinessId, setCurrentBusinessId]);
-
   const setCurrentBusinessId = useCallback((id: string) => {
     const nextId = id || null;
     setCurrentBusinessIdState(nextId);
@@ -311,6 +302,15 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       removeStorageKeys([BUSINESS_CACHE_KEYS.currentBusiness]);
     }
   }, []);
+
+  const currentBusiness = businesses.find(b => b.id === currentBusinessId) || null;
+  const userRole = memberships.find(m => m.business_id === currentBusinessId)?.role || null;
+
+  useEffect(() => {
+    if (!currentBusinessId && businesses.length > 0) {
+      setCurrentBusinessId(businesses[0].id);
+    }
+  }, [businesses, currentBusinessId, setCurrentBusinessId]);
 
   // Persist cache on data change
   useEffect(() => { writeJson(BUSINESS_CACHE_KEYS.businesses, businesses); }, [businesses]);
