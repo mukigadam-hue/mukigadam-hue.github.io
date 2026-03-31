@@ -1191,14 +1191,16 @@ export default function OrdersPage() {
               }).eq('id', existing.id);
               mergedCount++;
             } else {
+              const buyPrice = Number(item.unit_price);
+              // Set wholesale/retail with reasonable default markups if item is new
               await supabase.from('stock_items').insert({
                 business_id: currentBusiness.id,
                 name: item.item_name,
                 category: item.category || '',
                 quality: item.quality || '',
-                buying_price: Number(item.unit_price),
-                wholesale_price: Number(item.unit_price),
-                retail_price: Number(item.unit_price),
+                buying_price: buyPrice,
+                wholesale_price: Math.round(buyPrice * 1.15),
+                retail_price: Math.round(buyPrice * 1.3),
                 quantity: item.quantity,
                 min_stock_level: 5,
               });
