@@ -1061,20 +1061,32 @@ export default function OrdersPage() {
             </Button>
           )}
 
-          {/* Allocate Items — only for REQUEST orders (buyer receiving items into stock), NOT for inbox/supplier */}
-          {order.type === 'request' && 
-           (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
-            <Button size="sm" variant="outline" onClick={() => openAllocateDialog(order)}>
-              <Package className="h-3.5 w-3.5 mr-1" />Allocate Items
-            </Button>
-          )}
+           {/* Supplier: View disputes on inbox orders */}
+           {order.type === 'inbox' && (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
+             <Button size="sm" variant="outline" className="text-warning" onClick={async () => {
+               const d = await loadDisputes(order.id);
+               if (d.length === 0) { toast.info('No disputes on this order'); return; }
+               setDisputes(d);
+               setDisputeViewOrder(order);
+             }}>
+               <AlertTriangle className="h-3.5 w-3.5 mr-1" />Disputes
+             </Button>
+           )}
 
-          {/* Report Issue — for buyer after order is paid/completed */}
-          {order.type === 'request' && (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
-            <Button size="sm" variant="outline" className="text-warning" onClick={() => setDisputeOrder(order)}>
-              <AlertTriangle className="h-3.5 w-3.5 mr-1" />Report Issue
-            </Button>
-          )}
+          {/* Allocate Items — only for REQUEST orders (buyer receiving items into stock), NOT for inbox/supplier */}
+           {order.type === 'request' && 
+            (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
+             <Button size="sm" variant="outline" onClick={() => openAllocateDialog(order)}>
+               <Package className="h-3.5 w-3.5 mr-1" />Allocate Items
+             </Button>
+           )}
+
+           {/* Report Issue — for buyer after order is paid/completed */}
+           {order.type === 'request' && (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
+             <Button size="sm" variant="outline" className="text-warning" onClick={() => setDisputeOrder(order)}>
+               <AlertTriangle className="h-3.5 w-3.5 mr-1" />Report Issue
+             </Button>
+           )}
 
           {/* View payment proof for buyer's own orders */}
           {order.type === 'request' && (order as any).proof_url && (
