@@ -871,8 +871,10 @@ export default function OrdersPage() {
       : null;
     const rejectionReason = rejectionNotification?.message?.match(/Reason: "([^"]+)"/)?.[1] || null;
 
+    const isHighlighted = highlightOrderCode && order.code === highlightOrderCode;
+
     return (
-      <div className={`border rounded-lg p-3 space-y-2 ${order.status === 'rejected' ? 'border-destructive/40 bg-destructive/5' : ''}`}>
+      <div className={`border rounded-lg p-3 space-y-2 transition-all ${order.status === 'rejected' ? 'border-destructive/40 bg-destructive/5' : ''} ${isHighlighted ? 'ring-2 ring-warning border-warning bg-warning/5 animate-pulse' : ''}`}>
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2 flex-wrap">

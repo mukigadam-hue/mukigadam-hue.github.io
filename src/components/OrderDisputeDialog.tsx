@@ -75,12 +75,17 @@ export default function OrderDisputeDialog({
       } as any);
       if (error) throw error;
 
-      // Send notification to supplier
+      // Get reporter business name for the notification
+      let reporterName = 'A customer';
+      const { data: reporterBiz } = await supabase.from('businesses').select('name').eq('id', reporterBusinessId).single();
+      if (reporterBiz) reporterName = reporterBiz.name;
+
+      // Send notification to supplier with complainant name and order code
       await supabase.from('notifications').insert({
         business_id: supplierBusinessId,
         type: 'order_dispute',
-        title: '⚠️ Order Dispute Raised',
-        message: `Dispute on order ${orderCode}: ${disputeType} — "${description.trim().slice(0, 100)}"`,
+        title: `⚠️ Dispute from ${reporterName}`,
+        message: `${reporterName} reported "${disputeType}" issue on order ${orderCode}: "${description.trim().slice(0, 80)}"`,
       });
 
       toast.success('Dispute submitted! Supplier will be notified.');
