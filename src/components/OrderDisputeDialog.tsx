@@ -28,6 +28,7 @@ export default function OrderDisputeDialog({
   const [previews, setPreviews] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
@@ -75,12 +76,17 @@ export default function OrderDisputeDialog({
       } as any);
       if (error) throw error;
 
-      // Send notification to supplier
+      // Get reporter business name for the notification
+      let reporterName = 'A customer';
+      const { data: reporterBiz } = await supabase.from('businesses').select('name').eq('id', reporterBusinessId).single();
+      if (reporterBiz) reporterName = reporterBiz.name;
+
+      // Send notification to supplier with complainant name and order code
       await supabase.from('notifications').insert({
         business_id: supplierBusinessId,
         type: 'order_dispute',
-        title: '⚠️ Order Dispute Raised',
-        message: `Dispute on order ${orderCode}: ${disputeType} — "${description.trim().slice(0, 100)}"`,
+        title: `⚠️ Dispute from ${reporterName}`,
+        message: `${reporterName} reported "${disputeType}" issue on order ${orderCode}: "${description.trim().slice(0, 80)}"`,
       });
 
       toast.success('Dispute submitted! Supplier will be notified.');
@@ -153,16 +159,26 @@ export default function OrderDisputeDialog({
                 </div>
               ))}
               {photos.length < 5 && (
-                <button
-                  onClick={() => fileRef.current?.click()}
-                  className="w-16 h-16 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-0.5 text-muted-foreground hover:border-primary/50 transition-colors"
-                >
-                  <Camera className="h-4 w-4" />
-                  <span className="text-[8px]">Add</span>
-                </button>
+                <>
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    className="w-16 h-16 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-0.5 text-muted-foreground hover:border-primary/50 transition-colors"
+                  >
+                    <Upload className="h-4 w-4" />
+                    <span className="text-[8px]">Upload</span>
+                  </button>
+                  <button
+                    onClick={() => cameraRef.current?.click()}
+                    className="w-16 h-16 border-2 border-dashed rounded-lg flex flex-col items-center justify-center gap-0.5 text-muted-foreground hover:border-primary/50 transition-colors"
+                  >
+                    <Camera className="h-4 w-4" />
+                    <span className="text-[8px]">Camera</span>
+                  </button>
+                </>
               )}
             </div>
             <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFiles} />
+            <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFiles} />
           </div>
 
           <Button onClick={handleSubmit} className="w-full" disabled={submitting || !description.trim()}>

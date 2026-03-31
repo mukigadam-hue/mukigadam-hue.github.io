@@ -180,6 +180,8 @@ function getNotificationRoute(type: string): string {
     case 'new_service': return '/services';
     case 'complaint': return '/bookings';
     case 'team': return '/team';
+    case 'order_dispute': return '/orders';
+    case 'dispute_response': return '/orders';
     default: return '/';
   }
 }

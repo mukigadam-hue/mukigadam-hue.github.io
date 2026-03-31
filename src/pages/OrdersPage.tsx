@@ -38,7 +38,9 @@ export default function OrdersPage() {
   const roleLabel = userRole === 'owner' ? 'Owner' : userRole === 'admin' ? 'Admin' : 'Worker';
   const highlightNotificationId = searchParams.get('highlight_notification');
 
-  // Auto-switch to relevant tab based on notification
+   // Auto-switch to relevant tab based on notification
+  const [highlightOrderCode, setHighlightOrderCode] = useState<string | null>(null);
+
   useEffect(() => {
     if (highlightNotificationId) {
       const notification = notifications.find(n => n.id === highlightNotificationId);
@@ -47,14 +49,28 @@ export default function OrdersPage() {
         else if (notification.type === 'order_priced' || notification.type === 'order_rejected') setTab('my_requests');
         else if (notification.type === 'payment_submitted') setTab('verify_payments');
         else if (notification.type === 'payment_confirmed') setTab('my_requests');
+        else if (notification.type === 'order_dispute') setTab('inbox');
+        else if (notification.type === 'dispute_response') setTab('my_requests');
+
+        // Extract order code from notification message for highlighting
+        const codeMatch = notification.message?.match(/order\s+([A-Z0-9-]+)/i);
+        if (codeMatch) setHighlightOrderCode(codeMatch[1]);
       }
       // Clear the param after processing
       const newParams = new URLSearchParams(searchParams);
       newParams.delete('highlight_notification');
-      newParams.delete('checkout'); // Don't redirect to checkout
+      newParams.delete('checkout');
       setSearchParams(newParams, { replace: true });
     }
   }, [highlightNotificationId]);
+
+  // Clear highlight after 5 seconds
+  useEffect(() => {
+    if (highlightOrderCode) {
+      const timer = setTimeout(() => setHighlightOrderCode(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightOrderCode]);
 
   // Payment verification state
   const [verifyFilter, setVerifyFilter] = useState<'pending' | 'paid' | 'all'>('pending');
@@ -447,6 +463,7 @@ export default function OrdersPage() {
   const [disputeOrder, setDisputeOrder] = useState<Order | null>(null);
   const [disputes, setDisputes] = useState<any[]>([]);
   const [respondingDispute, setRespondingDispute] = useState<any>(null);
+  const [disputeViewOrder, setDisputeViewOrder] = useState<Order | null>(null);
 
   // Bulk delete state
   const [bulkSelectMode, setBulkSelectMode] = useState(false);
@@ -855,8 +872,10 @@ export default function OrdersPage() {
       : null;
     const rejectionReason = rejectionNotification?.message?.match(/Reason: "([^"]+)"/)?.[1] || null;
 
+    const isHighlighted = highlightOrderCode && order.code === highlightOrderCode;
+
     return (
-      <div className={`border rounded-lg p-3 space-y-2 ${order.status === 'rejected' ? 'border-destructive/40 bg-destructive/5' : ''}`}>
+      <div className={`border rounded-lg p-3 space-y-2 transition-all ${order.status === 'rejected' ? 'border-destructive/40 bg-destructive/5' : ''} ${isHighlighted ? 'ring-2 ring-warning border-warning bg-warning/5 animate-pulse' : ''}`}>
         <div className="flex justify-between items-start">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -1043,20 +1062,32 @@ export default function OrdersPage() {
             </Button>
           )}
 
-          {/* Allocate Items — only for REQUEST orders (buyer receiving items into stock), NOT for inbox/supplier */}
-          {order.type === 'request' && 
-           (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
-            <Button size="sm" variant="outline" onClick={() => openAllocateDialog(order)}>
-              <Package className="h-3.5 w-3.5 mr-1" />Allocate Items
-            </Button>
-          )}
+           {/* Supplier: View disputes on inbox orders */}
+           {order.type === 'inbox' && (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
+             <Button size="sm" variant="outline" className="text-warning" onClick={async () => {
+               const d = await loadDisputes(order.id);
+               if (d.length === 0) { toast.info('No disputes on this order'); return; }
+               setDisputes(d);
+               setDisputeViewOrder(order);
+             }}>
+               <AlertTriangle className="h-3.5 w-3.5 mr-1" />Disputes
+             </Button>
+           )}
 
-          {/* Report Issue — for buyer after order is paid/completed */}
-          {order.type === 'request' && (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
-            <Button size="sm" variant="outline" className="text-warning" onClick={() => setDisputeOrder(order)}>
-              <AlertTriangle className="h-3.5 w-3.5 mr-1" />Report Issue
-            </Button>
-          )}
+          {/* Allocate Items — only for REQUEST orders (buyer receiving items into stock), NOT for inbox/supplier */}
+           {order.type === 'request' && 
+            (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
+             <Button size="sm" variant="outline" onClick={() => openAllocateDialog(order)}>
+               <Package className="h-3.5 w-3.5 mr-1" />Allocate Items
+             </Button>
+           )}
+
+           {/* Report Issue — for buyer after order is paid/completed */}
+           {order.type === 'request' && (order.status === 'paid' || order.status === 'completed' || order.transferred_to_sale) && (
+             <Button size="sm" variant="outline" className="text-warning" onClick={() => setDisputeOrder(order)}>
+               <AlertTriangle className="h-3.5 w-3.5 mr-1" />Report Issue
+             </Button>
+           )}
 
           {/* View payment proof for buyer's own orders */}
           {order.type === 'request' && (order as any).proof_url && (
@@ -1160,14 +1191,16 @@ export default function OrdersPage() {
               }).eq('id', existing.id);
               mergedCount++;
             } else {
+              const buyPrice = Number(item.unit_price);
+              // Set wholesale/retail with reasonable default markups if item is new
               await supabase.from('stock_items').insert({
                 business_id: currentBusiness.id,
                 name: item.item_name,
                 category: item.category || '',
                 quality: item.quality || '',
-                buying_price: Number(item.unit_price),
-                wholesale_price: Number(item.unit_price),
-                retail_price: Number(item.unit_price),
+                buying_price: buyPrice,
+                wholesale_price: Math.round(buyPrice * 1.15),
+                retail_price: Math.round(buyPrice * 1.3),
                 quantity: item.quantity,
                 min_stock_level: 5,
               });
@@ -2035,6 +2068,68 @@ export default function OrdersPage() {
           supplierBusinessId={disputeOrder.business_id}
           reporterBusinessId={currentBusiness?.id || ''}
           onSubmitted={() => refreshData()}
+        />
+      )}
+
+      {/* Supplier Dispute Viewer Dialog */}
+      <Dialog open={!!disputeViewOrder} onOpenChange={o => { if (!o) { setDisputeViewOrder(null); setDisputes([]); } }}>
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-warning" /> Disputes — {disputeViewOrder?.code}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {disputes.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">No disputes found.</p>
+            ) : disputes.map((d: any) => (
+              <div key={d.id} className="border rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold capitalize bg-warning/10 text-warning px-2 py-0.5 rounded-full">⚠️ {d.dispute_type}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${d.status === 'responded' ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                    {d.status === 'responded' ? '✅ Responded' : '🔴 Open'}
+                  </span>
+                </div>
+                <p className="text-sm">{d.description}</p>
+                <p className="text-[10px] text-muted-foreground">📅 {new Date(d.created_at).toLocaleString()}</p>
+                {d.photo_urls && (d.photo_urls as string[]).length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {(d.photo_urls as string[]).map((url: string, i: number) => (
+                      <img key={i} src={url} alt="Dispute photo" className="w-20 h-20 object-cover rounded-lg border cursor-pointer hover:opacity-80 transition-opacity" onClick={() => window.open(url, '_blank')} />
+                    ))}
+                  </div>
+                )}
+                {d.supplier_response && (
+                  <div className="bg-muted/50 rounded-md p-2 text-xs space-y-1">
+                    <p className="font-semibold">💬 Your Response:</p>
+                    <p>{d.supplier_response}</p>
+                    {d.resolution && <p className="text-muted-foreground">Resolution: {d.resolution}</p>}
+                  </div>
+                )}
+                {d.status !== 'responded' && (
+                  <Button size="sm" variant="outline" className="w-full" onClick={() => { setRespondingDispute(d); }}>
+                    <MessageSquare className="h-3.5 w-3.5 mr-1" />Respond
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dispute Response Dialog */}
+      {respondingDispute && (
+        <DisputeResponseDialog
+          open={!!respondingDispute}
+          onOpenChange={o => { if (!o) setRespondingDispute(null); }}
+          dispute={respondingDispute}
+          onResponded={async () => {
+            if (disputeViewOrder) {
+              const d = await loadDisputes(disputeViewOrder.id);
+              setDisputes(d);
+            }
+            setRespondingDispute(null);
+          }}
         />
       )}
 
