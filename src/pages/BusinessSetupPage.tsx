@@ -313,6 +313,11 @@ export default function BusinessSetupPage() {
               </div>
               <div><Label>Address</Label><Input value={address} onChange={e => setAddress(e.target.value)} placeholder="123 Main St" /></div>
               <div>
+                <Label>District / Region / Province</Label>
+                <Input value={district} onChange={e => setDistrict(e.target.value)} placeholder="e.g. Kampala, Nairobi, Lagos..." />
+                <p className="text-[10px] text-muted-foreground mt-0.5">This helps customers near you find your business</p>
+              </div>
+              <div>
                 <Label>Contact</Label>
                 <Input value={contact} onChange={e => setContact(e.target.value)} 
                   placeholder={selectedCountry ? `${selectedCountry.phonePrefix} ...` : '+1 234 567 890'} />
