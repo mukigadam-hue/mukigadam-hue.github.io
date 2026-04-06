@@ -64,10 +64,15 @@ export default function BusinessSetupPage() {
     if (!countryCode) { toast.error('Please select your country'); return; }
     setLoading(true);
     await createBusiness(name.trim(), address.trim(), contact.trim(), email.trim(), countryCode);
-    if (businessType !== 'business') {
+    if (businessType !== 'business' || district.trim()) {
       const { data } = await supabase.from('businesses').select('id').order('created_at', { ascending: false }).limit(1).single();
       if (data) {
-        await supabase.from('businesses').update({ business_type: businessType } as any).eq('id', data.id);
+        const updates: any = {};
+        if (businessType !== 'business') updates.business_type = businessType;
+        if (district.trim()) updates.district = district.trim();
+        if (Object.keys(updates).length > 0) {
+          await supabase.from('businesses').update(updates).eq('id', data.id);
+        }
       }
     }
     setLoading(false);
@@ -80,10 +85,11 @@ export default function BusinessSetupPage() {
     if (!countryCode) { toast.error('Please select your country'); return; }
     setLoading(true);
     await createBusiness(name.trim(), address.trim(), contact.trim(), email.trim(), countryCode);
-    // Set as personal type
     const { data } = await supabase.from('businesses').select('id').order('created_at', { ascending: false }).limit(1).single();
     if (data) {
-      await supabase.from('businesses').update({ business_type: 'personal', is_discoverable: false } as any).eq('id', data.id);
+      const updates: any = { business_type: 'personal', is_discoverable: false };
+      if (district.trim()) updates.district = district.trim();
+      await supabase.from('businesses').update(updates).eq('id', data.id);
     }
     setLoading(false);
     window.location.reload();
