@@ -156,13 +156,26 @@ export default function DiscoverPage() {
         </div>
 
         {myCountry && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button variant={filterCountry ? 'default' : 'outline'} size="sm" className="text-xs gap-1.5" onClick={() => setFilterCountry(true)}>
               {myCountryData?.flag} Near me ({myCountryData?.name})
             </Button>
             <Button variant={!filterCountry ? 'default' : 'outline'} size="sm" className="text-xs gap-1.5" onClick={() => setFilterCountry(false)}>
               <Globe className="h-3 w-3" /> All countries
             </Button>
+          </div>
+        )}
+
+        {/* District / Region / Province filter */}
+        {filterCountry && myCountry && (
+          <div className="relative">
+            <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Filter by District / Region / Province..."
+              value={districtFilter}
+              onChange={e => setDistrictFilter(e.target.value)}
+              className="pl-8 h-9 text-sm"
+            />
           </div>
         )}
       </div>
