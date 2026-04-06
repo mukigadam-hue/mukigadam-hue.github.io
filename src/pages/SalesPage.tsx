@@ -114,7 +114,7 @@ export default function SalesPage() {
   function addServicePart() {
     const stockItem = activeStock.find(s => s.id === selectedPartStock);
     if (!stockItem) return;
-    const qty = parseInt(partQty) || 1;
+    const qty = parseFloat(partQty) || 1;
     const maxQty = stockItem.quantity - serviceParts.filter(p => p.stock_item_id === stockItem.id).reduce((s, p) => s + p.quantity, 0);
     if (qty > maxQty) return;
     setServiceParts(prev => [...prev, {
