@@ -332,20 +332,29 @@ export default function SalesPage() {
           {/* Stock Items */}
           <div>
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">📦 Stock Items</p>
-            <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-3 sm:items-end">
-              <div className="w-full sm:flex-1 sm:min-w-[200px]">
-                <Label>Item</Label>
+            <div className="space-y-3">
+              <div className="w-full">
+                <Label>Search & Select Item</Label>
+                <Input
+                  placeholder="Type to search items by name, category, quality..."
+                  value={stockSearch}
+                  onChange={e => setStockSearch(e.target.value)}
+                  className="mb-1.5"
+                />
                 <div className="flex gap-1.5">
-                  <Select value={selectedStock} onValueChange={setSelectedStock}>
+                  <Select value={selectedStock} onValueChange={v => { setSelectedStock(v); setStockSearch(''); }}>
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Select item..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {activeStock.filter(s => s.quantity > 0).map(s => (
+                      {filteredStock.map(s => (
                         <SelectItem key={s.id} value={s.id}>
                           {s.name}{s.category ? ` · ${s.category}` : ''}{s.quality ? ` · ${s.quality}` : ''} (qty: {s.quantity})
                         </SelectItem>
                       ))}
+                      {filteredStock.length === 0 && (
+                        <div className="px-3 py-2 text-xs text-muted-foreground">No items found</div>
+                      )}
                     </SelectContent>
                   </Select>
                   <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setScannerOpen(true)} title="Scan barcode">
@@ -353,9 +362,9 @@ export default function SalesPage() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2 sm:contents">
-                <div className="sm:w-20"><Label>Qty</Label><Input type="number" min="1" value={quantity} onChange={e => setQuantity(e.target.value)} /></div>
-                <div className="sm:w-32">
+              <div className="grid grid-cols-3 gap-2">
+                <div><Label>Qty</Label><Input type="number" min="0.01" step="0.01" value={quantity} onChange={e => setQuantity(e.target.value)} /></div>
+                <div>
                   <Label>Price Type</Label>
                   <Select value={priceType} onValueChange={v => setPriceType(v as 'wholesale' | 'retail')}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
@@ -365,7 +374,24 @@ export default function SalesPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div>
+                  <Label>Alt. Price <span className="text-[10px] text-muted-foreground">(optional)</span></Label>
+                  <Input type="number" min="0" step="0.01" value={customPrice} onChange={e => setCustomPrice(e.target.value)} placeholder="Custom..." />
+                </div>
               </div>
+              {selectedStock && (() => {
+                const si = activeStock.find(s => s.id === selectedStock);
+                if (!si) return null;
+                const basePrice = priceType === 'wholesale' ? Number(si.wholesale_price) : Number(si.retail_price);
+                const effectivePrice = customPrice.trim() ? (parseFloat(customPrice) || basePrice) : basePrice;
+                const qty = parseFloat(quantity) || 0;
+                return (
+                  <div className="text-xs text-muted-foreground bg-muted/40 rounded p-2">
+                    {customPrice.trim() && <span className="text-warning font-medium mr-2">⚡ Custom price: {fmt(effectivePrice)}</span>}
+                    Subtotal: <span className="font-bold text-foreground">{fmt(qty * effectivePrice)}</span>
+                  </div>
+                );
+              })()}
               <Button onClick={addItem} disabled={!selectedStock} className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-1" />Add Item</Button>
             </div>
             {selectedStock && (
