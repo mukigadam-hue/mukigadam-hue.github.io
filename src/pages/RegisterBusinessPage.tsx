@@ -19,6 +19,7 @@ export default function RegisterBusinessPage() {
   const [businessType, setBusinessType] = useState<'business' | 'factory' | 'property' | null>(null);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
+  const [district, setDistrict] = useState('');
   const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
   const [countryCode, setCountryCode] = useState('');
