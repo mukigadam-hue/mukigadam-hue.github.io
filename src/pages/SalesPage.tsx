@@ -31,7 +31,7 @@ export default function SalesPage() {
   const [items, setItems] = useState<{
     stock_item_id: string; item_name: string; category: string;
     quality: string; quantity: number; price_type: string; unit_price: number;
-    serial_numbers?: string;
+    serial_numbers?: string; custom_price?: number;
   }[]>([]);
   const [serialInput, setSerialInput] = useState('');
   const [serviceItems, setServiceItems] = useState<{
@@ -46,6 +46,7 @@ export default function SalesPage() {
   const [selectedStock, setSelectedStock] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [priceType, setPriceType] = useState<'wholesale' | 'retail'>('retail');
+  const [customPrice, setCustomPrice] = useState('');
   const [svcForm, setSvcForm] = useState({ service_name: '', description: '', cost: '' });
   const [buyerName, setBuyerName] = useState('');
   const [sellerName, setSellerName] = useState(userFullName);
@@ -58,6 +59,7 @@ export default function SalesPage() {
   // Service parts selection
   const [selectedPartStock, setSelectedPartStock] = useState('');
   const [partQty, setPartQty] = useState('1');
+  const [stockSearch, setStockSearch] = useState('');
 
   const { locked: submitLocked, withLock } = useSubmitLock();
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -66,24 +68,36 @@ export default function SalesPage() {
   const todaySales = sales.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const previousSales = sales.filter(s => new Date(s.created_at).toDateString() !== new Date().toDateString());
 
+  // Filter stock items by search text
+  const filteredStock = activeStock.filter(s => {
+    if (s.quantity <= 0) return false;
+    if (!stockSearch) return true;
+    const q = stockSearch.toLowerCase();
+    return s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q) || s.quality.toLowerCase().includes(q);
+  });
+
   function addItem() {
     const stockItem = activeStock.find(s => s.id === selectedStock);
     if (!stockItem) return;
-    const qty = parseInt(quantity) || 1;
-    const unitPrice = priceType === 'wholesale' ? Number(stockItem.wholesale_price) : Number(stockItem.retail_price);
+    const qty = parseFloat(quantity) || 1;
+    const basePrice = priceType === 'wholesale' ? Number(stockItem.wholesale_price) : Number(stockItem.retail_price);
+    const unitPrice = customPrice.trim() ? (parseFloat(customPrice) || basePrice) : basePrice;
     setItems(prev => [...prev, {
       stock_item_id: stockItem.id,
       item_name: stockItem.name,
       category: stockItem.category,
       quality: stockItem.quality,
       quantity: qty,
-      price_type: priceType,
+      price_type: customPrice.trim() ? 'custom' : priceType,
       unit_price: unitPrice,
       serial_numbers: serialInput.trim() || undefined,
+      custom_price: customPrice.trim() ? unitPrice : undefined,
     }]);
     setSelectedStock('');
     setQuantity('1');
     setSerialInput('');
+    setCustomPrice('');
+    setStockSearch('');
     // Keep priceType sticky — don't reset it
   }
 
