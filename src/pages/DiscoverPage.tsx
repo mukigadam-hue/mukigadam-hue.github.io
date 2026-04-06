@@ -230,6 +230,12 @@ export default function DiscoverPage() {
                 )}
 
                 <div className="space-y-1.5 text-xs text-muted-foreground">
+                  {biz.district && (
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                      <span className="font-medium text-foreground">{biz.district}</span>
+                    </div>
+                  )}
                   {biz.address && (
                     <div className="flex items-center gap-1.5">
                       <MapPin className="h-3 w-3 shrink-0" />
