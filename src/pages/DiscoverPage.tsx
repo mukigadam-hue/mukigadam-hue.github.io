@@ -39,6 +39,7 @@ export default function DiscoverPage() {
   const [selectedBiz, setSelectedBiz] = useState<DiscoveredBusiness | null>(null);
   const [filterCountry, setFilterCountry] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'business' | 'factory' | 'property'>('all');
+  const [districtFilter, setDistrictFilter] = useState('');
 
   const myCountry = (currentBusiness as any)?.country_code || '';
 
