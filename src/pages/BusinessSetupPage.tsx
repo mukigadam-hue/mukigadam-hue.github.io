@@ -23,6 +23,7 @@ export default function BusinessSetupPage() {
   const [businessType, setBusinessType] = useState<'business' | 'factory' | 'property'>('business');
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
+  const [district, setDistrict] = useState('');
   const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
   const [countryCode, setCountryCode] = useState('');
