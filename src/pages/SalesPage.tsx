@@ -450,7 +450,7 @@ export default function SalesPage() {
                 </div>
                 <div className="w-16">
                   <Label className="text-xs">Qty</Label>
-                  <Input type="number" min="1" value={partQty} onChange={e => setPartQty(e.target.value)} />
+                  <Input type="number" min="0.01" step="0.01" value={partQty} onChange={e => setPartQty(e.target.value)} />
                 </div>
                 <Button size="sm" variant="outline" onClick={addServicePart} disabled={!selectedPartStock}>
                   <Plus className="h-3.5 w-3.5 mr-1" />Add Part
