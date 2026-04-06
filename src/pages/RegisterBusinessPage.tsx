@@ -19,6 +19,7 @@ export default function RegisterBusinessPage() {
   const [businessType, setBusinessType] = useState<'business' | 'factory' | 'property' | null>(null);
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
+  const [district, setDistrict] = useState('');
   const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
   const [countryCode, setCountryCode] = useState('');
@@ -52,10 +53,15 @@ export default function RegisterBusinessPage() {
     if (!countryCode) { toast.error('Please select your country'); return; }
     setLoading(true);
     await createBusiness(name.trim(), address.trim(), contact.trim(), email.trim(), countryCode);
-    if (businessType !== 'business') {
+    if (businessType !== 'business' || district.trim()) {
       const { data } = await supabase.from('businesses').select('id').order('created_at', { ascending: false }).limit(1).single();
       if (data) {
-        await supabase.from('businesses').update({ business_type: businessType } as any).eq('id', data.id);
+        const updates: any = {};
+        if (businessType !== 'business') updates.business_type = businessType;
+        if (district.trim()) updates.district = district.trim();
+        if (Object.keys(updates).length > 0) {
+          await supabase.from('businesses').update(updates).eq('id', data.id);
+        }
       }
     }
     setLoading(false);
@@ -128,6 +134,11 @@ export default function RegisterBusinessPage() {
                 <Input value={name} onChange={e => setName(e.target.value)} required placeholder={businessType === 'factory' ? 'My Factory' : businessType === 'property' ? 'My Rentals' : 'My Shop'} />
               </div>
               <div><Label>Address</Label><Input value={address} onChange={e => setAddress(e.target.value)} placeholder="123 Main St" /></div>
+              <div>
+                <Label>District / Region / Province</Label>
+                <Input value={district} onChange={e => setDistrict(e.target.value)} placeholder="e.g. Kampala, Nairobi, Lagos..." />
+                <p className="text-[10px] text-muted-foreground mt-0.5">Helps nearby customers discover your business</p>
+              </div>
               <div>
                 <Label>Contact</Label>
                 <Input value={contact} onChange={e => setContact(e.target.value)} placeholder={selectedCountry ? `${selectedCountry.phonePrefix} ...` : '+1 234 567 890'} />

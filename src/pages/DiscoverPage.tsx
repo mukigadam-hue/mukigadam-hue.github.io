@@ -23,6 +23,7 @@ interface DiscoveredBusiness {
   business_code: string | null;
   products_description: string;
   country_code: string;
+  district: string;
 }
 
 export default function DiscoverPage() {
@@ -38,18 +39,19 @@ export default function DiscoverPage() {
   const [selectedBiz, setSelectedBiz] = useState<DiscoveredBusiness | null>(null);
   const [filterCountry, setFilterCountry] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'business' | 'factory' | 'property'>('all');
+  const [districtFilter, setDistrictFilter] = useState('');
 
   const myCountry = (currentBusiness as any)?.country_code || '';
 
   const searchBusinesses = useCallback(async (searchQuery: string) => {
     if (!navigator.onLine) {
-      // Offline: filter cached results
       const cached: DiscoveredBusiness[] = (() => { try { return JSON.parse(localStorage.getItem('biztrack_cache_discover') || '[]'); } catch { return []; } })();
       const q = searchQuery.toLowerCase();
       const filtered = cached.filter(b =>
-        (!q || b.name.toLowerCase().includes(q) || b.address?.toLowerCase().includes(q) || b.products_description?.toLowerCase().includes(q)) &&
+        (!q || b.name.toLowerCase().includes(q) || b.address?.toLowerCase().includes(q) || b.products_description?.toLowerCase().includes(q) || (b.district && b.district.toLowerCase().includes(q))) &&
         (filterType === 'all' || b.business_type === filterType) &&
-        (!filterCountry || !myCountry || b.country_code === myCountry)
+        (!filterCountry || !myCountry || b.country_code === myCountry) &&
+        (!districtFilter || (b.district && b.district.toLowerCase().includes(districtFilter.toLowerCase())))
       );
       setResults(filtered);
       setHasSearched(true);
@@ -62,13 +64,13 @@ export default function DiscoverPage() {
         _limit: 30,
         _offset: 0,
         _country_code: filterCountry ? myCountry : '',
+        _district: districtFilter.trim(),
       });
       if (error) throw error;
       const allResults = (data as DiscoveredBusiness[]) || [];
       const displayResults = filterType === 'all' ? allResults : allResults.filter(b => b.business_type === filterType);
       setResults(displayResults);
       setHasSearched(true);
-      // Merge into cache for offline use
       try {
         const existing: DiscoveredBusiness[] = JSON.parse(localStorage.getItem('biztrack_cache_discover') || '[]');
         const merged = [...existing];
@@ -85,7 +87,7 @@ export default function DiscoverPage() {
     } finally {
       setLoading(false);
     }
-  }, [filterCountry, filterType, myCountry]);
+  }, [filterCountry, filterType, myCountry, districtFilter]);
 
   useEffect(() => {
     searchBusinesses('');
@@ -154,13 +156,26 @@ export default function DiscoverPage() {
         </div>
 
         {myCountry && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Button variant={filterCountry ? 'default' : 'outline'} size="sm" className="text-xs gap-1.5" onClick={() => setFilterCountry(true)}>
               {myCountryData?.flag} Near me ({myCountryData?.name})
             </Button>
             <Button variant={!filterCountry ? 'default' : 'outline'} size="sm" className="text-xs gap-1.5" onClick={() => setFilterCountry(false)}>
               <Globe className="h-3 w-3" /> All countries
             </Button>
+          </div>
+        )}
+
+        {/* District / Region / Province filter */}
+        {filterCountry && myCountry && (
+          <div className="relative">
+            <MapPin className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Filter by District / Region / Province..."
+              value={districtFilter}
+              onChange={e => setDistrictFilter(e.target.value)}
+              className="pl-8 h-9 text-sm"
+            />
           </div>
         )}
       </div>
@@ -215,6 +230,12 @@ export default function DiscoverPage() {
                 )}
 
                 <div className="space-y-1.5 text-xs text-muted-foreground">
+                  {biz.district && (
+                    <div className="flex items-center gap-1.5">
+                      <MapPin className="h-3 w-3 shrink-0 text-primary" />
+                      <span className="font-medium text-foreground">{biz.district}</span>
+                    </div>
+                  )}
                   {biz.address && (
                     <div className="flex items-center gap-1.5">
                       <MapPin className="h-3 w-3 shrink-0" />

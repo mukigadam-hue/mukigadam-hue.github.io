@@ -31,7 +31,7 @@ export default function SalesPage() {
   const [items, setItems] = useState<{
     stock_item_id: string; item_name: string; category: string;
     quality: string; quantity: number; price_type: string; unit_price: number;
-    serial_numbers?: string;
+    serial_numbers?: string; custom_price?: number;
   }[]>([]);
   const [serialInput, setSerialInput] = useState('');
   const [serviceItems, setServiceItems] = useState<{
@@ -46,6 +46,7 @@ export default function SalesPage() {
   const [selectedStock, setSelectedStock] = useState('');
   const [quantity, setQuantity] = useState('1');
   const [priceType, setPriceType] = useState<'wholesale' | 'retail'>('retail');
+  const [customPrice, setCustomPrice] = useState('');
   const [svcForm, setSvcForm] = useState({ service_name: '', description: '', cost: '' });
   const [buyerName, setBuyerName] = useState('');
   const [sellerName, setSellerName] = useState(userFullName);
@@ -58,6 +59,7 @@ export default function SalesPage() {
   // Service parts selection
   const [selectedPartStock, setSelectedPartStock] = useState('');
   const [partQty, setPartQty] = useState('1');
+  const [stockSearch, setStockSearch] = useState('');
 
   const { locked: submitLocked, withLock } = useSubmitLock();
   const [scannerOpen, setScannerOpen] = useState(false);
@@ -66,24 +68,36 @@ export default function SalesPage() {
   const todaySales = sales.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const previousSales = sales.filter(s => new Date(s.created_at).toDateString() !== new Date().toDateString());
 
+  // Filter stock items by search text
+  const filteredStock = activeStock.filter(s => {
+    if (s.quantity <= 0) return false;
+    if (!stockSearch) return true;
+    const q = stockSearch.toLowerCase();
+    return s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q) || s.quality.toLowerCase().includes(q);
+  });
+
   function addItem() {
     const stockItem = activeStock.find(s => s.id === selectedStock);
     if (!stockItem) return;
-    const qty = parseInt(quantity) || 1;
-    const unitPrice = priceType === 'wholesale' ? Number(stockItem.wholesale_price) : Number(stockItem.retail_price);
+    const qty = parseFloat(quantity) || 1;
+    const basePrice = priceType === 'wholesale' ? Number(stockItem.wholesale_price) : Number(stockItem.retail_price);
+    const unitPrice = customPrice.trim() ? (parseFloat(customPrice) || basePrice) : basePrice;
     setItems(prev => [...prev, {
       stock_item_id: stockItem.id,
       item_name: stockItem.name,
       category: stockItem.category,
       quality: stockItem.quality,
       quantity: qty,
-      price_type: priceType,
+      price_type: customPrice.trim() ? 'custom' : priceType,
       unit_price: unitPrice,
       serial_numbers: serialInput.trim() || undefined,
+      custom_price: customPrice.trim() ? unitPrice : undefined,
     }]);
     setSelectedStock('');
     setQuantity('1');
     setSerialInput('');
+    setCustomPrice('');
+    setStockSearch('');
     // Keep priceType sticky — don't reset it
   }
 
@@ -100,7 +114,7 @@ export default function SalesPage() {
   function addServicePart() {
     const stockItem = activeStock.find(s => s.id === selectedPartStock);
     if (!stockItem) return;
-    const qty = parseInt(partQty) || 1;
+    const qty = parseFloat(partQty) || 1;
     const maxQty = stockItem.quantity - serviceParts.filter(p => p.stock_item_id === stockItem.id).reduce((s, p) => s + p.quantity, 0);
     if (qty > maxQty) return;
     setServiceParts(prev => [...prev, {
@@ -251,18 +265,18 @@ export default function SalesPage() {
 
   const availablePartsStock = activeStock.filter(s => s.quantity > 0);
 
-  function handleScanExistingItem(item: any, quantity: number) {
+  function handleScanExistingItem(item: any, qty: number) {
     const unitPrice = priceType === 'wholesale' ? Number(item.wholesale_price) : Number(item.retail_price);
     setItems(prev => [...prev, {
       stock_item_id: item.id,
       item_name: item.name,
       category: item.category,
       quality: item.quality,
-      quantity,
+      quantity: qty,
       price_type: priceType,
       unit_price: unitPrice,
     }]);
-    toast.success(`${item.name} × ${quantity} added to sale`);
+    toast.success(`${item.name} × ${qty} added to sale`);
   }
   function handleScanNewItem() {
     toast.success('New item created — scan again to add to sale');
@@ -318,20 +332,29 @@ export default function SalesPage() {
           {/* Stock Items */}
           <div>
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">📦 Stock Items</p>
-            <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:gap-3 sm:items-end">
-              <div className="w-full sm:flex-1 sm:min-w-[200px]">
-                <Label>Item</Label>
+            <div className="space-y-3">
+              <div className="w-full">
+                <Label>Search & Select Item</Label>
+                <Input
+                  placeholder="Type to search items by name, category, quality..."
+                  value={stockSearch}
+                  onChange={e => setStockSearch(e.target.value)}
+                  className="mb-1.5"
+                />
                 <div className="flex gap-1.5">
-                  <Select value={selectedStock} onValueChange={setSelectedStock}>
+                  <Select value={selectedStock} onValueChange={v => { setSelectedStock(v); setStockSearch(''); }}>
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Select item..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {activeStock.filter(s => s.quantity > 0).map(s => (
+                      {filteredStock.map(s => (
                         <SelectItem key={s.id} value={s.id}>
                           {s.name}{s.category ? ` · ${s.category}` : ''}{s.quality ? ` · ${s.quality}` : ''} (qty: {s.quantity})
                         </SelectItem>
                       ))}
+                      {filteredStock.length === 0 && (
+                        <div className="px-3 py-2 text-xs text-muted-foreground">No items found</div>
+                      )}
                     </SelectContent>
                   </Select>
                   <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setScannerOpen(true)} title="Scan barcode">
@@ -339,9 +362,9 @@ export default function SalesPage() {
                   </Button>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2 sm:contents">
-                <div className="sm:w-20"><Label>Qty</Label><Input type="number" min="1" value={quantity} onChange={e => setQuantity(e.target.value)} /></div>
-                <div className="sm:w-32">
+              <div className="grid grid-cols-3 gap-2">
+                <div><Label>Qty</Label><Input type="number" min="0.01" step="0.01" value={quantity} onChange={e => setQuantity(e.target.value)} /></div>
+                <div>
                   <Label>Price Type</Label>
                   <Select value={priceType} onValueChange={v => setPriceType(v as 'wholesale' | 'retail')}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
@@ -351,7 +374,24 @@ export default function SalesPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div>
+                  <Label>Alt. Price <span className="text-[10px] text-muted-foreground">(optional)</span></Label>
+                  <Input type="number" min="0" step="0.01" value={customPrice} onChange={e => setCustomPrice(e.target.value)} placeholder="Custom..." />
+                </div>
               </div>
+              {selectedStock && (() => {
+                const si = activeStock.find(s => s.id === selectedStock);
+                if (!si) return null;
+                const basePrice = priceType === 'wholesale' ? Number(si.wholesale_price) : Number(si.retail_price);
+                const effectivePrice = customPrice.trim() ? (parseFloat(customPrice) || basePrice) : basePrice;
+                const qty = parseFloat(quantity) || 0;
+                return (
+                  <div className="text-xs text-muted-foreground bg-muted/40 rounded p-2">
+                    {customPrice.trim() && <span className="text-warning font-medium mr-2">⚡ Custom price: {fmt(effectivePrice)}</span>}
+                    Subtotal: <span className="font-bold text-foreground">{fmt(qty * effectivePrice)}</span>
+                  </div>
+                );
+              })()}
               <Button onClick={addItem} disabled={!selectedStock} className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-1" />Add Item</Button>
             </div>
             {selectedStock && (
@@ -410,7 +450,7 @@ export default function SalesPage() {
                 </div>
                 <div className="w-16">
                   <Label className="text-xs">Qty</Label>
-                  <Input type="number" min="1" value={partQty} onChange={e => setPartQty(e.target.value)} />
+                  <Input type="number" min="0.01" step="0.01" value={partQty} onChange={e => setPartQty(e.target.value)} />
                 </div>
                 <Button size="sm" variant="outline" onClick={addServicePart} disabled={!selectedPartStock}>
                   <Plus className="h-3.5 w-3.5 mr-1" />Add Part

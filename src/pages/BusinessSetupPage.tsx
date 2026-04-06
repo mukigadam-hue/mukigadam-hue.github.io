@@ -23,6 +23,7 @@ export default function BusinessSetupPage() {
   const [businessType, setBusinessType] = useState<'business' | 'factory' | 'property'>('business');
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
+  const [district, setDistrict] = useState('');
   const [contact, setContact] = useState('');
   const [email, setEmail] = useState('');
   const [countryCode, setCountryCode] = useState('');
@@ -63,10 +64,15 @@ export default function BusinessSetupPage() {
     if (!countryCode) { toast.error('Please select your country'); return; }
     setLoading(true);
     await createBusiness(name.trim(), address.trim(), contact.trim(), email.trim(), countryCode);
-    if (businessType !== 'business') {
+    if (businessType !== 'business' || district.trim()) {
       const { data } = await supabase.from('businesses').select('id').order('created_at', { ascending: false }).limit(1).single();
       if (data) {
-        await supabase.from('businesses').update({ business_type: businessType } as any).eq('id', data.id);
+        const updates: any = {};
+        if (businessType !== 'business') updates.business_type = businessType;
+        if (district.trim()) updates.district = district.trim();
+        if (Object.keys(updates).length > 0) {
+          await supabase.from('businesses').update(updates).eq('id', data.id);
+        }
       }
     }
     setLoading(false);
@@ -79,10 +85,11 @@ export default function BusinessSetupPage() {
     if (!countryCode) { toast.error('Please select your country'); return; }
     setLoading(true);
     await createBusiness(name.trim(), address.trim(), contact.trim(), email.trim(), countryCode);
-    // Set as personal type
     const { data } = await supabase.from('businesses').select('id').order('created_at', { ascending: false }).limit(1).single();
     if (data) {
-      await supabase.from('businesses').update({ business_type: 'personal', is_discoverable: false } as any).eq('id', data.id);
+      const updates: any = { business_type: 'personal', is_discoverable: false };
+      if (district.trim()) updates.district = district.trim();
+      await supabase.from('businesses').update(updates).eq('id', data.id);
     }
     setLoading(false);
     window.location.reload();
@@ -305,6 +312,11 @@ export default function BusinessSetupPage() {
                   placeholder={businessType === 'factory' ? 'My Factory' : businessType === 'property' ? 'My Rentals' : 'My Shop'} />
               </div>
               <div><Label>Address</Label><Input value={address} onChange={e => setAddress(e.target.value)} placeholder="123 Main St" /></div>
+              <div>
+                <Label>District / Region / Province</Label>
+                <Input value={district} onChange={e => setDistrict(e.target.value)} placeholder="e.g. Kampala, Nairobi, Lagos..." />
+                <p className="text-[10px] text-muted-foreground mt-0.5">This helps customers near you find your business</p>
+              </div>
               <div>
                 <Label>Contact</Label>
                 <Input value={contact} onChange={e => setContact(e.target.value)} 

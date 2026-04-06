@@ -145,15 +145,15 @@ export default function StockPage() {
       buying_price: parseFloat(form.buying_price) || 0,
       wholesale_price: parseFloat(form.wholesale_price) || 0,
       retail_price: parseFloat(form.retail_price) || 0,
-      quantity: parseInt(form.quantity) || 0,
-      min_stock_level: parseInt(form.min_stock_level) || 5,
+      quantity: parseFloat(form.quantity) || 0,
+      min_stock_level: parseFloat(form.min_stock_level) || 5,
       tax_rate: parseFloat(form.tax_rate) || 0,
       image_url_1: editItem?.image_url_1 || '',
       image_url_2: editItem?.image_url_2 || '',
       image_url_3: editItem?.image_url_3 || '',
-      pieces_per_carton: parseInt(form.pieces_per_carton) || 0,
-      cartons_per_box: parseInt(form.cartons_per_box) || 0,
-      boxes_per_container: parseInt(form.boxes_per_container) || 0,
+      pieces_per_carton: parseFloat(form.pieces_per_carton) || 0,
+      cartons_per_box: parseFloat(form.cartons_per_box) || 0,
+      boxes_per_container: parseFloat(form.boxes_per_container) || 0,
     };
     if (editItem) {
       await updateStockItem(editItem.id, itemData);
@@ -213,6 +213,9 @@ export default function StockPage() {
           <div className="flex gap-1.5 flex-wrap">
             <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setShowBuyingPrice(v => !v)}>
               {showBuyingPrice ? '← Hide' : '💰 Show'} Buying Price
+            </Button>
+            <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => setScannerOpen(true)}>
+              <ScanLine className="h-3.5 w-3.5 mr-1" /> Scan
             </Button>
             <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm(); }}>
               <DialogTrigger asChild>

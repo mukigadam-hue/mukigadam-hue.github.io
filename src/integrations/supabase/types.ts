@@ -534,6 +534,7 @@ export type Database = {
           country_code: string
           created_at: string
           currency_symbol: string
+          district: string
           email: string
           id: string
           is_discoverable: boolean
@@ -552,6 +553,7 @@ export type Database = {
           country_code?: string
           created_at?: string
           currency_symbol?: string
+          district?: string
           email?: string
           id?: string
           is_discoverable?: boolean
@@ -570,6 +572,7 @@ export type Database = {
           country_code?: string
           created_at?: string
           currency_symbol?: string
+          district?: string
           email?: string
           id?: string
           is_discoverable?: boolean
@@ -2342,6 +2345,28 @@ export type Database = {
               business_type: string
               contact: string
               country_code: string
+              email: string
+              id: string
+              logo_url: string
+              name: string
+              products_description: string
+            }[]
+          }
+        | {
+            Args: {
+              _country_code?: string
+              _district?: string
+              _limit?: number
+              _offset?: number
+              _query?: string
+            }
+            Returns: {
+              address: string
+              business_code: string
+              business_type: string
+              contact: string
+              country_code: string
+              district: string
               email: string
               id: string
               logo_url: string
