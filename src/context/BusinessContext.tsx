@@ -1119,13 +1119,16 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
   const generateInviteCode = useCallback(async (type: 'worker' | 'customer' = 'worker'): Promise<string | null> => {
     if (!currentBusinessId || !user) return null;
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    // Prefix invite code with country code from the current business
+    const countryPrefix = currentBusiness?.country_code ? currentBusiness.country_code.toUpperCase() + '-' : '';
+    const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const code = countryPrefix + randomPart;
     const { error } = await supabase.from('invite_codes').insert({
       business_id: currentBusinessId, code, created_by: user.id, type,
     } as any);
     if (error) { toast.error(error.message); return null; }
     return code;
-  }, [currentBusinessId, user]);
+  }, [currentBusinessId, user, currentBusiness]);
 
   const redeemInviteCode = useCallback(async (code: string): Promise<boolean> => {
     if (!user) return false;
