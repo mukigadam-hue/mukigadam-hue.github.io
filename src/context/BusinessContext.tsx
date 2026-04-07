@@ -860,8 +860,31 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Optimistic update: immediately show purchase in list
+    const tempId = crypto.randomUUID();
+    const optimisticPurchase = {
+      ...purchasePayload,
+      id: tempId,
+      created_at: new Date().toISOString(),
+      items: items.map(item => ({
+        id: crypto.randomUUID(), purchase_id: tempId,
+        item_name: item.item_name, category: item.category, quality: item.quality,
+        quantity: item.quantity, unit_price: item.unit_price, subtotal: item.subtotal,
+        serial_numbers: item.serial_numbers || '', created_at: new Date().toISOString(),
+      })),
+    } as Purchase;
+    setPurchases(prev => [optimisticPurchase, ...prev]);
+
     const { data: purchaseData, error } = await supabase.from('purchases').insert(purchasePayload as any).select().single();
-    if (error || !purchaseData) { toast.error(error?.message || 'Failed'); return; }
+    if (error || !purchaseData) {
+      // Rollback optimistic update
+      setPurchases(prev => prev.filter(p => p.id !== tempId));
+      toast.error(error?.message || 'Failed');
+      return;
+    }
+
+    // Replace optimistic with real data
+    setPurchases(prev => prev.map(p => p.id === tempId ? { ...optimisticPurchase, id: purchaseData.id } : p));
 
     const purchaseItems = items.map(item => ({
       purchase_id: purchaseData.id, item_name: item.item_name, category: item.category,
