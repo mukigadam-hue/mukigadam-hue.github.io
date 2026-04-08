@@ -2317,63 +2317,28 @@ export type Database = {
           name: string
         }[]
       }
-      search_businesses:
-        | {
-            Args: { _limit?: number; _offset?: number; _query?: string }
-            Returns: {
-              address: string
-              business_code: string
-              business_type: string
-              contact: string
-              email: string
-              id: string
-              logo_url: string
-              name: string
-              products_description: string
-            }[]
-          }
-        | {
-            Args: {
-              _country_code?: string
-              _limit?: number
-              _offset?: number
-              _query?: string
-            }
-            Returns: {
-              address: string
-              business_code: string
-              business_type: string
-              contact: string
-              country_code: string
-              email: string
-              id: string
-              logo_url: string
-              name: string
-              products_description: string
-            }[]
-          }
-        | {
-            Args: {
-              _country_code?: string
-              _district?: string
-              _limit?: number
-              _offset?: number
-              _query?: string
-            }
-            Returns: {
-              address: string
-              business_code: string
-              business_type: string
-              contact: string
-              country_code: string
-              district: string
-              email: string
-              id: string
-              logo_url: string
-              name: string
-              products_description: string
-            }[]
-          }
+      search_businesses: {
+        Args: {
+          _country_code?: string
+          _district?: string
+          _limit?: number
+          _offset?: number
+          _query?: string
+        }
+        Returns: {
+          address: string
+          business_code: string
+          business_type: string
+          contact: string
+          country_code: string
+          district: string
+          email: string
+          id: string
+          logo_url: string
+          name: string
+          products_description: string
+        }[]
+      }
       search_property_assets: {
         Args: {
           _category?: string
