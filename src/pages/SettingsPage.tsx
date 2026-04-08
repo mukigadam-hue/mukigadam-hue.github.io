@@ -25,7 +25,7 @@ function AddBusinessDialog({ onCreated, defaultType = 'business' }: { onCreated:
   const { createBusiness, currentBusiness } = useBusiness();
   const [open, setOpen] = useState(false);
   const [businessType, setBusinessType] = useState<'business' | 'factory' | 'property'>(defaultType);
-  const [form, setForm] = useState({ name: '', address: '', contact: '', email: '' });
+  const [form, setForm] = useState({ name: '', address: '', contact: '', email: '', district: '' });
   const [countryCode, setCountryCode] = useState('');
   const [countrySearch, setCountrySearch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,13 +46,18 @@ function AddBusinessDialog({ onCreated, defaultType = 'business' }: { onCreated:
     if (!countryCode) { toast.error('Please select a country'); return; }
     setLoading(true);
     await createBusiness(form.name.trim(), form.address.trim(), form.contact.trim(), form.email.trim(), countryCode);
-    if (businessType !== 'business') {
+    if (businessType !== 'business' || form.district.trim()) {
       const { data } = await supabase.from('businesses').select('id').order('created_at', { ascending: false }).limit(1).single();
       if (data) {
-        await supabase.from('businesses').update({ business_type: businessType } as any).eq('id', data.id);
+        const updates: any = {};
+        if (businessType !== 'business') updates.business_type = businessType;
+        if (form.district.trim()) updates.district = form.district.trim();
+        if (Object.keys(updates).length > 0) {
+          await supabase.from('businesses').update(updates).eq('id', data.id);
+        }
       }
     }
-    setForm({ name: '', address: '', contact: '', email: '' });
+    setForm({ name: '', address: '', contact: '', email: '', district: '' });
     setOpen(false);
     setLoading(false);
     onCreated();
@@ -120,6 +125,11 @@ function AddBusinessDialog({ onCreated, defaultType = 'business' }: { onCreated:
           </div>
           <div><Label>{nameLabel} *</Label><Input placeholder={namePlaceholder} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
           <div><Label>Address</Label><Input placeholder="Location" value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} /></div>
+          <div>
+            <Label>District / Region / Province</Label>
+            <Input placeholder="e.g. Kampala, Nairobi, Lagos..." value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value }))} />
+            <p className="text-[10px] text-muted-foreground mt-0.5">Helps nearby customers discover your business</p>
+          </div>
           <div><Label>Contact</Label><Input placeholder={selectedCountry ? `${selectedCountry.phonePrefix} ...` : 'Phone number'} value={form.contact} onChange={e => setForm(f => ({ ...f, contact: e.target.value }))} /></div>
           <div><Label>Email</Label><Input type="email" placeholder="email@example.com" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
           <Button type="submit" className="w-full" disabled={loading}>
@@ -278,6 +288,7 @@ export default function SettingsPage() {
     address: currentBusiness?.address || '',
     contact: currentBusiness?.contact || '',
     email: currentBusiness?.email || '',
+    district: (currentBusiness as any)?.district || '',
   });
   const [settingsPassword, setSettingsPassword] = useState(currentBusiness?.settings_password || '');
   const [currencyInput, setCurrencyInput] = useState(currency);
@@ -305,6 +316,7 @@ export default function SettingsPage() {
       address: currentBusiness?.address || '',
       contact: currentBusiness?.contact || '',
       email: currentBusiness?.email || '',
+      district: (currentBusiness as any)?.district || '',
     });
     setSettingsPassword(currentBusiness?.settings_password || '');
   }, [currentBusiness?.id]);
@@ -398,9 +410,13 @@ export default function SettingsPage() {
     return role !== null && role !== 'owner';
   });
 
+  const [saving, setSaving] = useState(false);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    await updateBusiness({ name: form.name.trim(), address: form.address.trim(), contact: form.contact.trim(), email: form.email.trim() });
+    setSaving(true);
+    await updateBusiness({ name: form.name.trim(), address: form.address.trim(), contact: form.contact.trim(), email: form.email.trim(), district: form.district.trim() } as any);
+    setSaving(false);
   }
 
   async function handleSavePassword() {
@@ -1224,9 +1240,16 @@ export default function SettingsPage() {
           <form onSubmit={handleSubmit} className="space-y-3">
             <div><Label>Business Name</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
             <div><Label>Address</Label><Input value={form.address} onChange={e => setForm(f => ({ ...f, address: e.target.value }))} /></div>
+            <div>
+              <Label>District / Region / Province</Label>
+              <Input value={form.district} onChange={e => setForm(f => ({ ...f, district: e.target.value }))} placeholder="e.g. Kampala, Nairobi, Lagos..." />
+              <p className="text-[10px] text-muted-foreground mt-0.5">Helps nearby customers discover your business</p>
+            </div>
             <div><Label>Contact</Label><Input value={form.contact} onChange={e => setForm(f => ({ ...f, contact: e.target.value }))} /></div>
             <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} /></div>
-            <Button type="submit" className="w-full"><Save className="h-4 w-4 mr-2" />Save Changes</Button>
+            <Button type="submit" className="w-full" disabled={saving}>
+              <Save className="h-4 w-4 mr-2" />{saving ? 'Saving...' : 'Save Changes'}
+            </Button>
           </form>
         </CardContent>
       </Card>

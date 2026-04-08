@@ -85,12 +85,12 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
     try {
       const file = new File([blob], name, { type });
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Receipt', text: 'Here is your receipt' });
+        await navigator.share({ files: [file], title: 'Receipt' });
         toast.success('Shared successfully!');
         return true;
       }
     } catch (err: any) {
-      if (err.name === 'AbortError') return true; // user cancelled, don't show fallback
+      if (err.name === 'AbortError') return true;
     }
     return false;
   }
@@ -131,37 +131,39 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
     if (!shareDialog) return;
     setBusy(true);
     try {
+      // Upload the actual file to get a direct public URL to the image/pdf
       const shareUrl = shareDialog.url || await uploadShareFile(shareDialog.blob, shareDialog.name);
       setShareDialog(current => current ? { ...current, url: shareUrl } : current);
 
-      const message = encodeURIComponent(`Here is your receipt 🧾\n${shareUrl}`);
-      const shareUrlEncoded = encodeURIComponent(shareUrl);
+      // For WhatsApp: share the direct file URL so it renders as an image/pdf preview
+      const fileUrl = shareUrl;
       let url = '';
 
       switch (platform) {
         case 'whatsapp':
-          url = `https://wa.me/?text=${message}`;
+          // Send just the file URL so WhatsApp renders an image/pdf preview
+          url = `https://wa.me/?text=${encodeURIComponent(fileUrl)}`;
           break;
         case 'telegram':
-          url = `https://t.me/share/url?url=${shareUrlEncoded}&text=${encodeURIComponent('Here is your receipt 🧾')}`;
+          url = `https://t.me/share/url?url=${encodeURIComponent(fileUrl)}`;
           break;
         case 'email':
-          url = `mailto:?subject=${encodeURIComponent('Receipt')}&body=${message}`;
+          url = `mailto:?subject=${encodeURIComponent('Receipt')}&body=${encodeURIComponent('Here is your receipt:\n' + fileUrl)}`;
           break;
         case 'x':
-          url = `https://x.com/intent/tweet?text=${encodeURIComponent('Here is your receipt 🧾')}&url=${shareUrlEncoded}`;
+          url = `https://x.com/intent/tweet?url=${encodeURIComponent(fileUrl)}`;
           break;
         case 'facebook':
-          url = `https://www.facebook.com/sharer/sharer.php?u=${shareUrlEncoded}`;
+          url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fileUrl)}`;
           break;
       }
 
       if (url) window.open(url, '_blank', 'noopener,noreferrer');
-      toast.success('Receipt file link is ready and included in the share.');
+      toast.success('Receipt shared!');
       setShareDialog(null);
     } catch {
       downloadBlob(shareDialog.blob, shareDialog.name);
-      toast.error('Could not create a shareable receipt link, so the file was downloaded instead.');
+      toast.error('Could not create a shareable link. File downloaded instead.');
     } finally {
       setBusy(false);
     }
@@ -200,29 +202,52 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
     }
   }
 
-  function handlePrint() {
+  async function handlePrint() {
     if (!receiptRef.current) return;
-    const printWindow = window.open('', '_blank', 'width=400,height=600');
-    if (!printWindow) { toast.error('Pop-up blocked. Please allow pop-ups.'); return; }
+    setBusy(true);
+    try {
+      // Generate image and print it — works reliably across devices and with receipt printers
+      const canvas = await getCanvas();
+      if (!canvas) { toast.error('Failed to generate receipt for printing'); return; }
+      const imgData = canvas.toDataURL('image/png');
 
-    const styles = Array.from(document.styleSheets)
-      .map(sheet => {
-        try { return Array.from(sheet.cssRules).map(r => r.cssText).join('\n'); }
-        catch { return ''; }
-      }).join('\n');
+      const printWindow = window.open('', '_blank', 'width=400,height=600');
+      if (!printWindow) {
+        // Fallback: try native share with print-capable apps
+        const blob = await generateImageBlob();
+        if (blob) {
+          const shared = await tryNativeShare(blob, `${fileName}.png`, 'image/png');
+          if (!shared) {
+            downloadBlob(blob, `${fileName}.png`);
+            toast.info('Pop-up blocked. Receipt image downloaded — open it and print from your gallery.');
+          }
+        }
+        return;
+      }
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html><head><title>Receipt</title>
-      <style>
-        ${styles}
-        body { margin: 0; padding: 16px; background: white; }
-        @media print { body { padding: 0; } }
-      </style>
-      </head><body>${receiptRef.current.innerHTML}</body></html>
-    `);
-    printWindow.document.close();
-    printWindow.onload = () => { printWindow.print(); printWindow.close(); };
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html><head><title>Receipt</title>
+        <style>
+          * { margin: 0; padding: 0; }
+          body { display: flex; justify-content: center; background: white; }
+          img { max-width: 100%; height: auto; }
+          @media print { 
+            body { margin: 0; }
+            img { width: 80mm; }
+          }
+        </style>
+        </head><body><img src="${imgData}" /></body></html>
+      `);
+      printWindow.document.close();
+      printWindow.onload = () => {
+        setTimeout(() => { printWindow.print(); printWindow.close(); }, 300);
+      };
+    } catch {
+      toast.error('Print failed');
+    } finally {
+      setBusy(false);
+    }
   }
 
   const socialPlatforms = [
