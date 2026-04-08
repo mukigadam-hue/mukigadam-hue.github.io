@@ -46,10 +46,15 @@ function AddBusinessDialog({ onCreated, defaultType = 'business' }: { onCreated:
     if (!countryCode) { toast.error('Please select a country'); return; }
     setLoading(true);
     await createBusiness(form.name.trim(), form.address.trim(), form.contact.trim(), form.email.trim(), countryCode);
-    if (businessType !== 'business') {
+    if (businessType !== 'business' || form.district.trim()) {
       const { data } = await supabase.from('businesses').select('id').order('created_at', { ascending: false }).limit(1).single();
       if (data) {
-        await supabase.from('businesses').update({ business_type: businessType } as any).eq('id', data.id);
+        const updates: any = {};
+        if (businessType !== 'business') updates.business_type = businessType;
+        if (form.district.trim()) updates.district = form.district.trim();
+        if (Object.keys(updates).length > 0) {
+          await supabase.from('businesses').update(updates).eq('id', data.id);
+        }
       }
     }
     setForm({ name: '', address: '', contact: '', email: '' });
