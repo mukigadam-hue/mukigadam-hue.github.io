@@ -354,7 +354,7 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
               })}
             </div>
 
-            <Select value={currentBusiness?.id || ''} onValueChange={v => { navigate('/'); setCurrentBusinessId(v); }}>
+            <Select value={currentBusiness?.id || undefined} onValueChange={v => { navigate('/'); setCurrentBusinessId(v); }}>
               <SelectTrigger className="w-full bg-sidebar-accent/30 border-sidebar-border text-sidebar-foreground text-xs h-9">
                 <Building2 className="h-3 w-3 mr-1" />
                 <SelectValue placeholder={t('nav.switchBusiness')} />
