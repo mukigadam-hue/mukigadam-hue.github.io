@@ -202,29 +202,52 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
     }
   }
 
-  function handlePrint() {
+  async function handlePrint() {
     if (!receiptRef.current) return;
-    const printWindow = window.open('', '_blank', 'width=400,height=600');
-    if (!printWindow) { toast.error('Pop-up blocked. Please allow pop-ups.'); return; }
+    setBusy(true);
+    try {
+      // Generate image and print it — works reliably across devices and with receipt printers
+      const canvas = await getCanvas();
+      if (!canvas) { toast.error('Failed to generate receipt for printing'); return; }
+      const imgData = canvas.toDataURL('image/png');
 
-    const styles = Array.from(document.styleSheets)
-      .map(sheet => {
-        try { return Array.from(sheet.cssRules).map(r => r.cssText).join('\n'); }
-        catch { return ''; }
-      }).join('\n');
+      const printWindow = window.open('', '_blank', 'width=400,height=600');
+      if (!printWindow) {
+        // Fallback: try native share with print-capable apps
+        const blob = await generateImageBlob();
+        if (blob) {
+          const shared = await tryNativeShare(blob, `${fileName}.png`, 'image/png');
+          if (!shared) {
+            downloadBlob(blob, `${fileName}.png`);
+            toast.info('Pop-up blocked. Receipt image downloaded — open it and print from your gallery.');
+          }
+        }
+        return;
+      }
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html><head><title>Receipt</title>
-      <style>
-        ${styles}
-        body { margin: 0; padding: 16px; background: white; }
-        @media print { body { padding: 0; } }
-      </style>
-      </head><body>${receiptRef.current.innerHTML}</body></html>
-    `);
-    printWindow.document.close();
-    printWindow.onload = () => { printWindow.print(); printWindow.close(); };
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html><head><title>Receipt</title>
+        <style>
+          * { margin: 0; padding: 0; }
+          body { display: flex; justify-content: center; background: white; }
+          img { max-width: 100%; height: auto; }
+          @media print { 
+            body { margin: 0; }
+            img { width: 80mm; }
+          }
+        </style>
+        </head><body><img src="${imgData}" /></body></html>
+      `);
+      printWindow.document.close();
+      printWindow.onload = () => {
+        setTimeout(() => { printWindow.print(); printWindow.close(); }, 300);
+      };
+    } catch {
+      toast.error('Print failed');
+    } finally {
+      setBusy(false);
+    }
   }
 
   const socialPlatforms = [
