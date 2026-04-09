@@ -215,9 +215,12 @@ export default function FactoryTeam() {
                 <h2 className="text-sm font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> 👔 Invite My Worker to App</h2>
                 <p className="text-xs text-muted-foreground">As the <strong>owner/boss</strong>, generate a code and send it to your worker. They will enter it on their phone to join your factory team.</p>
                 {workerCode ? (
-                  <div className="rounded-lg p-3 text-center bg-primary/5">
-                    <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
-                    <p className="text-xs text-muted-foreground mt-1">🔐 Send this code to your worker — Expires in 7 days</p>
+                  <div className="space-y-2">
+                    <div className="rounded-lg p-3 text-center bg-primary/5">
+                      <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
+                      <p className="text-xs text-muted-foreground mt-1">🔐 Send this code to your worker — Expires in 7 days</p>
+                    </div>
+                    <FactoryShareButtons code={workerCode} />
                   </div>
                 ) : (
                   <Button onClick={handleGenCode} disabled={loading} size="sm">Generate Code for My Worker</Button>
