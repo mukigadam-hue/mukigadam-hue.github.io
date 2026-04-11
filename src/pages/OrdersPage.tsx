@@ -1383,6 +1383,16 @@ export default function OrdersPage() {
                                           onClick={() => {
                                             setSelectedContactBusinessId(c.contact_business_id);
                                             setContactPickerOpen(false);
+                                            // Load supplier products for easy selection
+                                            supabase.rpc('get_business_public_products', { _business_id: c.contact_business_id }).then(({ data }) => {
+                                              if (data && data.length > 0) {
+                                                setSupplierProducts(data as any[]);
+                                                setPrefilledSupplierName(c.nickname || c.business_name || 'Supplier');
+                                              } else {
+                                                setSupplierProducts([]);
+                                                setPrefilledSupplierName('');
+                                              }
+                                            });
                                           }}
                                         >
                                           <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-sm">🏪</div>
