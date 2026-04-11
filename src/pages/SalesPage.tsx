@@ -360,7 +360,7 @@ export default function SalesPage() {
                   className="mb-1.5"
                 />
                 <div className="flex gap-1.5">
-                  <Select value={selectedStock} onValueChange={v => { setSelectedStock(v); setStockSearch(''); }}>
+                  <Select value={selectedStock} onValueChange={handleSelectStock}>
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Select item..." />
                     </SelectTrigger>
@@ -381,7 +381,11 @@ export default function SalesPage() {
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div><Label>Qty</Label><Input type="number" min="0.01" step="0.01" value={quantity} onChange={e => setQuantity(e.target.value)} /></div>
+                <div><Label>Qty</Label><Input type="number" min="0.01" step="0.01" value={quantity} onChange={e => setQuantity(e.target.value)}
+                  readOnly={parseInt(bulkPkg.pieces_per_carton) > 0}
+                  className={parseInt(bulkPkg.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
+                  {parseInt(bulkPkg.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
+                </div>
                 <div>
                   <Label>Price Type</Label>
                   <Select value={priceType} onValueChange={v => setPriceType(v as 'wholesale' | 'retail')}>
@@ -398,32 +402,25 @@ export default function SalesPage() {
                 </div>
               </div>
 
-              {/* Bulk selling toggle */}
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 text-xs cursor-pointer">
-                  <input type="checkbox" checked={bulkMode} onChange={e => { setBulkMode(e.target.checked); setBulkQty('1'); }} className="rounded" />
-                  📦 Bulk Selling
-                </label>
-                {bulkMode && (
-                  <div className="flex items-center gap-1.5">
-                    <Label className="text-xs whitespace-nowrap">× Packs:</Label>
-                    <Input type="number" min="1" value={bulkQty} onChange={e => setBulkQty(e.target.value)} className="w-20 h-8 text-sm" />
-                    <span className="text-xs text-muted-foreground">Total: {(parseFloat(quantity) || 1) * (parseFloat(bulkQty) || 1)}</span>
-                  </div>
-                )}
-              </div>
+              <BulkPackagingFields
+                piecesPerCarton={bulkPkg.pieces_per_carton}
+                cartonsPerBox={bulkPkg.cartons_per_box}
+                boxesPerContainer={bulkPkg.boxes_per_container}
+                onChange={(field, value) => setBulkPkg(f => ({ ...f, [field]: value }))}
+                onQuantityCalculated={(total) => { setQuantity(String(total)); setBulkQuantity(String(total)); }}
+                currentQuantity={quantity}
+              />
 
               {selectedStock && (() => {
                 const si = activeStock.find(s => s.id === selectedStock);
                 if (!si) return null;
                 const basePrice = priceType === 'wholesale' ? Number(si.wholesale_price) : Number(si.retail_price);
                 const effectivePrice = customPrice.trim() ? (parseFloat(customPrice) || basePrice) : basePrice;
-                const totalQty = bulkMode ? (parseFloat(quantity) || 1) * (parseFloat(bulkQty) || 1) : (parseFloat(quantity) || 0);
+                const totalQty = parseFloat(quantity) || 0;
                 return (
                   <div className="text-xs text-muted-foreground bg-muted/40 rounded p-2">
                     {customPrice.trim() && <span className="text-warning font-medium mr-2">⚡ Custom price: {fmt(effectivePrice)}</span>}
                     Subtotal: <span className="font-bold text-foreground">{fmt(totalQty * effectivePrice)}</span>
-                    {bulkMode && <span className="ml-2 text-primary">({parseFloat(bulkQty) || 1} packs × {parseFloat(quantity) || 1} = {totalQty})</span>}
                   </div>
                 );
               })()}
