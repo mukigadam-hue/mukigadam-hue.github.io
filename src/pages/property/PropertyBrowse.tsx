@@ -392,18 +392,32 @@ export default function PropertyBrowse() {
                   </button>
                 )}
                 <CardContent className="p-3 space-y-2">
-                  <h3 className="font-semibold text-sm">{asset.name}</h3>
+                  <div className="flex items-start justify-between">
+                    <h3 className="font-semibold text-sm">{asset.name}</h3>
+                    {asset.is_available ? (
+                      <Badge variant="default" className="text-[9px] bg-green-500/10 text-green-600 border-green-500/20 shrink-0">🟢 Available</Badge>
+                    ) : (
+                      <Badge variant="default" className="text-[9px] bg-red-500/10 text-red-600 border-red-500/20 shrink-0">🔴 Occupied</Badge>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" />{asset.location}</p>
                   <p className="text-xs">{asset.category === 'house' ? '🏠' : asset.category === 'land' ? '🏞️' : asset.category === 'vehicle' ? '🚗' : '🚢'} {asset.sub_category || asset.category}</p>
                   {asset.description && <p className="text-xs text-muted-foreground line-clamp-2">{asset.description}</p>}
+                  {asset.total_rooms > 0 && <p className="text-[10px] text-muted-foreground">🚪 {asset.total_rooms} rooms {asset.room_size ? `· ${asset.room_size}` : ''}</p>}
                   <div className="flex gap-2 text-xs font-medium">
                     {asset.hourly_price > 0 && <Badge variant="outline">{fmt(asset.hourly_price)}/hr</Badge>}
                     {asset.daily_price > 0 && <Badge variant="outline">{fmt(asset.daily_price)}/day</Badge>}
                     {asset.monthly_price > 0 && <Badge variant="outline">{fmt(asset.monthly_price)}/mo</Badge>}
                   </div>
-                  <Button size="sm" className="w-full h-8 text-xs gap-1" onClick={() => handleBookAsset(asset, prefilledPropertyName)}>
-                    <CalendarCheck className="h-3 w-3" /> Book Now
-                  </Button>
+                  {asset.is_available ? (
+                    <Button size="sm" className="w-full h-8 text-xs gap-1" onClick={() => handleBookAsset(asset, prefilledPropertyName)}>
+                      <CalendarCheck className="h-3 w-3" /> Book Now
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="secondary" className="w-full h-8 text-xs" disabled>
+                      Currently Occupied
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
