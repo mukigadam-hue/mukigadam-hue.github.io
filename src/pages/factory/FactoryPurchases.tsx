@@ -15,6 +15,7 @@ import AdSpace from '@/components/AdSpace';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import { useSubmitLock } from '@/hooks/useSubmitLock';
+import { BulkPackagingFields } from '@/components/BulkPackagingInfo';
 const UNIT_TYPES = ['Pieces', 'Kilograms', 'Litres', 'Metres', 'Tonnes', 'Rolls', 'Bags', 'Boxes', 'Pairs', 'Sets', 'Bundles', 'Gallons'];
 
 export default function FactoryPurchases() {
