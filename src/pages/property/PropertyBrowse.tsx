@@ -48,6 +48,10 @@ interface SearchAsset {
   business_name: string;
   business_contact: string;
   is_available?: boolean;
+  total_rooms?: number;
+  room_size?: string;
+  booked_units?: number;
+  available_units?: number;
 }
 
 function BookingDialog({ open, onClose, asset, propertyName }: { open: boolean; onClose: () => void; asset: any; propertyName?: string }) {
