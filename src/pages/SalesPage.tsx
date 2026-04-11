@@ -382,16 +382,33 @@ export default function SalesPage() {
                   <Input type="number" min="0" step="0.01" value={customPrice} onChange={e => setCustomPrice(e.target.value)} placeholder="Custom..." />
                 </div>
               </div>
+
+              {/* Bulk selling toggle */}
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2 text-xs cursor-pointer">
+                  <input type="checkbox" checked={bulkMode} onChange={e => { setBulkMode(e.target.checked); setBulkQty('1'); }} className="rounded" />
+                  📦 Bulk Selling
+                </label>
+                {bulkMode && (
+                  <div className="flex items-center gap-1.5">
+                    <Label className="text-xs whitespace-nowrap">× Packs:</Label>
+                    <Input type="number" min="1" value={bulkQty} onChange={e => setBulkQty(e.target.value)} className="w-20 h-8 text-sm" />
+                    <span className="text-xs text-muted-foreground">Total: {(parseFloat(quantity) || 1) * (parseFloat(bulkQty) || 1)}</span>
+                  </div>
+                )}
+              </div>
+
               {selectedStock && (() => {
                 const si = activeStock.find(s => s.id === selectedStock);
                 if (!si) return null;
                 const basePrice = priceType === 'wholesale' ? Number(si.wholesale_price) : Number(si.retail_price);
                 const effectivePrice = customPrice.trim() ? (parseFloat(customPrice) || basePrice) : basePrice;
-                const qty = parseFloat(quantity) || 0;
+                const totalQty = bulkMode ? (parseFloat(quantity) || 1) * (parseFloat(bulkQty) || 1) : (parseFloat(quantity) || 0);
                 return (
                   <div className="text-xs text-muted-foreground bg-muted/40 rounded p-2">
                     {customPrice.trim() && <span className="text-warning font-medium mr-2">⚡ Custom price: {fmt(effectivePrice)}</span>}
-                    Subtotal: <span className="font-bold text-foreground">{fmt(qty * effectivePrice)}</span>
+                    Subtotal: <span className="font-bold text-foreground">{fmt(totalQty * effectivePrice)}</span>
+                    {bulkMode && <span className="ml-2 text-primary">({parseFloat(bulkQty) || 1} packs × {parseFloat(quantity) || 1} = {totalQty})</span>}
                   </div>
                 );
               })()}
