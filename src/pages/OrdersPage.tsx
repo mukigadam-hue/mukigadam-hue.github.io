@@ -1469,16 +1469,55 @@ export default function OrdersPage() {
               </div>
             )}
 
+            {/* Smart Search Picker for Orders */}
+            <div className="space-y-2">
+              <Label className="text-sm font-semibold flex items-center gap-1.5">
+                <Search className="h-3.5 w-3.5" /> Search & Select Item
+              </Label>
+              <div className="flex gap-1.5">
+                <Input
+                  className="flex-1"
+                  value={orderStockSearch}
+                  onChange={e => { setOrderStockSearch(e.target.value); setShowOrderStockPicker(true); }}
+                  onFocus={() => setShowOrderStockPicker(true)}
+                  placeholder="🔍 Search items by name, category, quality..."
+                />
+                <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setScannerOpen(true)} title="Scan barcode">
+                  <ScanLine className="h-4 w-4" />
+                </Button>
+              </div>
+              {showOrderStockPicker && orderFilteredStock.length > 0 && (
+                <div className="max-h-48 overflow-y-auto rounded-lg border border-border bg-card shadow-md">
+                  {orderFilteredStock.slice(0, 30).map(s => (
+                    <button
+                      key={s.id}
+                      type="button"
+                      onClick={() => selectOrderStockItem(s)}
+                      className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-muted/60 text-sm border-b border-border last:border-0"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <span className="font-medium text-foreground">{s.name}</span>
+                        {s.category && <span className="text-xs ml-1.5 text-muted-foreground">· {s.category}</span>}
+                        {s.quality && <span className="text-xs ml-1.5 px-1.5 py-0.5 rounded bg-primary/10 text-primary">{s.quality}</span>}
+                      </div>
+                      <span className="text-xs text-muted-foreground ml-2 whitespace-nowrap">Qty: {s.quantity}</span>
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => { setShowOrderStockPicker(false); setForm(f => ({ ...f, name: orderStockSearch })); setOrderStockSearch(''); }}
+                    className="w-full px-3 py-2 text-left text-sm text-primary font-medium hover:bg-primary/5 border-t border-border"
+                  >
+                    ➕ Add as new item: "{orderStockSearch || '...'}"
+                  </button>
+                </div>
+              )}
+            </div>
+
             <div className="flex flex-wrap gap-3 items-end">
               <div className="flex-1 min-w-[150px]">
-                <Label>Item</Label>
-                <div className="flex gap-1.5">
-                  <Input className="flex-1" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onBlur={() => applyCase('name')} list="order-suggestions" placeholder="Item name..." />
-                  <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setScannerOpen(true)} title="Scan barcode">
-                    <ScanLine className="h-4 w-4" />
-                  </Button>
-                </div>
-                <datalist id="order-suggestions">{suggestions.map(s => <option key={s} value={s} />)}</datalist>
+                <Label>Item Name</Label>
+                <Input className="flex-1" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onBlur={() => applyCase('name')} placeholder="Auto-filled from picker" />
               </div>
               <div className="w-28">
                 <Label>Category</Label>
@@ -1508,6 +1547,9 @@ export default function OrdersPage() {
               </div>
               {orderMode !== 'request' && (
                 <div className="w-24"><Label>Price</Label><Input type="number" min="0" step="0.01" value={form.unitPrice} onChange={e => setForm(f => ({ ...f, unitPrice: e.target.value }))} placeholder="Auto" /></div>
+              )}
+              {orderMode !== 'request' && (
+                <div className="w-24"><Label>Alt. Price <span className="text-[10px] text-muted-foreground">(bargain)</span></Label><Input type="number" min="0" step="0.01" value={form.customPrice} onChange={e => setForm(f => ({ ...f, customPrice: e.target.value }))} placeholder="Custom" /></div>
               )}
               <Button onClick={addItem} disabled={!form.name.trim()}><Plus className="h-4 w-4 mr-1" />Add</Button>
             </div>
