@@ -31,7 +31,7 @@ export default function FactoryPurchases() {
   }[]>([]);
   const [supplier, setSupplier] = useState('');
   const [recordedBy, setRecordedBy] = useState('');
-  const [form, setForm] = useState({ name: '', category: '', unit_type: 'Pieces', quantity: '1', unit_price: '', serial_numbers: '' });
+  const [form, setForm] = useState({ name: '', category: '', unit_type: 'Pieces', quantity: '1', unit_price: '', serial_numbers: '', pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
   const [scannerOpen, setScannerOpen] = useState(false);
   const [stockSearch, setStockSearch] = useState('');
   const [showStockPicker, setShowStockPicker] = useState(false);
