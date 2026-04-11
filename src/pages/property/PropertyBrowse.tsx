@@ -47,6 +47,7 @@ interface SearchAsset {
   features: string;
   business_name: string;
   business_contact: string;
+  is_available?: boolean;
 }
 
 function BookingDialog({ open, onClose, asset, propertyName }: { open: boolean; onClose: () => void; asset: any; propertyName?: string }) {
