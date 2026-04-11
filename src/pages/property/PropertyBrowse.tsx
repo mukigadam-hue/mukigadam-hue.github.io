@@ -528,13 +528,13 @@ export default function PropertyBrowse() {
                 )}
                 <p className="text-xs text-muted-foreground">By: {asset.business_name}</p>
                 <div className="flex gap-1 pt-1">
-                  {(asset as any).is_available !== false ? (
+                  {((asset as any).available_units ?? ((asset as any).is_available !== false ? 1 : 0)) > 0 ? (
                     <Button size="sm" className="flex-1 h-7 text-xs gap-1" onClick={() => handleBookAsset(asset, asset.business_name)}>
                       <CalendarCheck className="h-3 w-3" /> Book Now
                     </Button>
                   ) : (
                     <Button size="sm" variant="secondary" className="flex-1 h-7 text-xs" disabled>
-                      Occupied
+                      Fully Occupied
                     </Button>
                   )}
                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => copyAssetCode(asset.id)}>
