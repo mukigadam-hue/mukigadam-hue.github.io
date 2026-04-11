@@ -261,8 +261,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const { businesses, currentBusiness, setCurrentBusinessId, userRole, memberships, notifications } = useBusiness();
+  const { businesses, currentBusiness, setCurrentBusinessId, userRole, memberships, notifications, refreshData } = useBusiness();
+  const queryClient = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await queryClient.invalidateQueries();
+      await refreshData();
+      toast.success('Data refreshed');
+    } catch {
+      toast.error('Refresh failed');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [queryClient, refreshData]);
 
   const isFactory = (currentBusiness as any)?.business_type === 'factory';
   const isProperty = (currentBusiness as any)?.business_type === 'property';
