@@ -11,6 +11,7 @@ import { FactoryProvider } from "@/context/FactoryContext";
 import { PropertyProvider } from "@/context/PropertyContext";
 import AppLayout from "@/components/AppLayout";
 import AuthPage from "./pages/AuthPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 import BusinessSetupPage from "./pages/BusinessSetupPage";
 
 // Lazy-load all page components for faster initial load
