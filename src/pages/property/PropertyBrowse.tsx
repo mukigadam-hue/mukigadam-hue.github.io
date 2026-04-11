@@ -301,8 +301,8 @@ export default function PropertyBrowse() {
       .from('property_assets')
       .select('*')
       .eq('business_id', prefilledPropertyId)
-      .eq('is_available', true)
       .is('deleted_at', null)
+      .order('is_available', { ascending: false })
       .order('created_at', { ascending: false });
     setPropertyAssets(data || []);
     setLoadingPropertyAssets(false);
