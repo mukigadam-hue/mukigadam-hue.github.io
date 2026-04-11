@@ -703,6 +703,11 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const permanentDeleteStockItem = useCallback(async (id: string) => {
+    // Nullify foreign key references before deleting
+    await Promise.all([
+      supabase.from('sale_items').update({ stock_item_id: null } as any).eq('stock_item_id', id),
+      supabase.from('factory_production').update({ product_stock_id: null } as any).eq('product_stock_id', id),
+    ]);
     const { error } = await supabase.from('stock_items').delete().eq('id', id);
     if (error) { toast.error(error.message); return; }
     setStock(prev => prev.filter(s => s.id !== id));
