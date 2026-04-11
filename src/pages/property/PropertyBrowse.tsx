@@ -473,7 +473,11 @@ export default function PropertyBrowse() {
               <CardContent className="p-3 space-y-2">
                 <div className="flex items-start justify-between">
                   <h3 className="font-semibold text-sm">{asset.name}</h3>
-                  <Badge variant="default" className="text-[9px] bg-success/10 text-success border-success/20 shrink-0">✅ Available</Badge>
+                  {(asset as any).is_available !== false ? (
+                    <Badge variant="default" className="text-[9px] bg-green-500/10 text-green-600 border-green-500/20 shrink-0">🟢 Available</Badge>
+                  ) : (
+                    <Badge variant="default" className="text-[9px] bg-red-500/10 text-red-600 border-red-500/20 shrink-0">🔴 Occupied</Badge>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground flex items-center gap-1"><MapPin className="h-3 w-3" />{asset.location}</p>
                 <p className="text-xs">{asset.category === 'house' ? '🏠' : asset.category === 'land' ? '🏞️' : asset.category === 'vehicle' ? '🚗' : '🚢'} {asset.sub_category || asset.category}</p>
@@ -494,9 +498,15 @@ export default function PropertyBrowse() {
                 )}
                 <p className="text-xs text-muted-foreground">By: {asset.business_name}</p>
                 <div className="flex gap-1 pt-1">
-                  <Button size="sm" className="flex-1 h-7 text-xs gap-1" onClick={() => handleBookAsset(asset, asset.business_name)}>
-                    <CalendarCheck className="h-3 w-3" /> Book Now
-                  </Button>
+                  {(asset as any).is_available !== false ? (
+                    <Button size="sm" className="flex-1 h-7 text-xs gap-1" onClick={() => handleBookAsset(asset, asset.business_name)}>
+                      <CalendarCheck className="h-3 w-3" /> Book Now
+                    </Button>
+                  ) : (
+                    <Button size="sm" variant="secondary" className="flex-1 h-7 text-xs" disabled>
+                      Occupied
+                    </Button>
+                  )}
                   <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => copyAssetCode(asset.id)}>
                     <Copy className="h-3 w-3" />
                   </Button>
