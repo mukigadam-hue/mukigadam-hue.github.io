@@ -768,43 +768,50 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       return optimistic;
     }
 
+    // Optimistic: update UI immediately
+    const tempId = crypto.randomUUID();
+    const optimisticSale = { ...salePayload, id: tempId, created_at: new Date().toISOString(), items: items.map(i => ({ ...i, id: crypto.randomUUID(), sale_id: tempId, created_at: new Date().toISOString() })) as any, customer_name: customerName } as Sale;
+    setSales(prev => [optimisticSale, ...prev]);
+    setStock(prev => prev.map(stockItem => {
+      const matchedItem = items.find(item => {
+        if (item.price_type === 'service') return false;
+        if (item.stock_item_id) return item.stock_item_id === stockItem.id;
+        return stockItem.name.toLowerCase() === item.item_name.toLowerCase()
+          && (stockItem.category || '').toLowerCase() === (item.category || '').toLowerCase()
+          && (stockItem.quality || '').toLowerCase() === (item.quality || '').toLowerCase();
+      });
+      if (!matchedItem) return stockItem;
+      return { ...stockItem, quantity: Math.max(0, Number(stockItem.quantity) - Number(matchedItem.quantity)) } as StockItem;
+    }));
+    toast.success('Sale recorded!');
+
     const { data: saleData, error: saleError } = await supabase.from('sales').insert(salePayload as any).select().single();
-    if (saleError || !saleData) { toast.error(saleError?.message || 'Failed'); return null; }
+    if (saleError || !saleData) { toast.error(saleError?.message || 'Failed to save sale'); setSales(prev => prev.filter(s => s.id !== tempId)); return null; }
+
+    // Replace optimistic with real
+    setSales(prev => prev.map(s => s.id === tempId ? { ...s, id: saleData.id } as Sale : s));
 
     const saleItems = items.map(item => ({
-      sale_id: saleData.id,
-      stock_item_id: item.stock_item_id || null,
-      item_name: item.item_name,
-      category: item.category,
-      quality: item.quality,
-      quantity: item.quantity,
-      price_type: item.price_type,
-      unit_price: item.unit_price,
-      subtotal: item.subtotal,
-      serial_numbers: item.serial_numbers || '',
+      sale_id: saleData.id, stock_item_id: item.stock_item_id || null,
+      item_name: item.item_name, category: item.category, quality: item.quality,
+      quantity: item.quantity, price_type: item.price_type, unit_price: item.unit_price,
+      subtotal: item.subtotal, serial_numbers: item.serial_numbers || '',
     }));
-    await supabase.from('sale_items').insert(saleItems);
 
+    // Fire all DB writes in parallel
     const currentStock = stock;
-    for (const item of items) {
-      if (item.price_type === 'service') continue;
-      if (item.stock_item_id) {
-        const stockItem = currentStock.find(s => s.id === item.stock_item_id);
-        if (stockItem) {
-          await supabase.from('stock_items').update({ quantity: Math.max(0, stockItem.quantity - item.quantity) }).eq('id', item.stock_item_id);
-        }
-      } else {
-        const stockItem = currentStock.find(s =>
-          s.name.toLowerCase() === item.item_name.toLowerCase() &&
-          s.category.toLowerCase() === (item.category || '').toLowerCase() &&
-          s.quality.toLowerCase() === (item.quality || '').toLowerCase()
-        ) || currentStock.find(s => s.name.toLowerCase() === item.item_name.toLowerCase());
-        if (stockItem) {
-          await supabase.from('stock_items').update({ quantity: Math.max(0, stockItem.quantity - item.quantity) }).eq('id', stockItem.id);
-        }
+    const stockUpdates = items.filter(item => item.price_type !== 'service').map(item => {
+      const stockItem = item.stock_item_id
+        ? currentStock.find(s => s.id === item.stock_item_id)
+        : currentStock.find(s => s.name.toLowerCase() === item.item_name.toLowerCase() && s.category.toLowerCase() === (item.category || '').toLowerCase() && s.quality.toLowerCase() === (item.quality || '').toLowerCase())
+          || currentStock.find(s => s.name.toLowerCase() === item.item_name.toLowerCase());
+      if (stockItem) {
+        return supabase.from('stock_items').update({ quantity: Math.max(0, stockItem.quantity - item.quantity) }).eq('id', stockItem.id);
       }
-    }
-    toast.success('Sale recorded!');
+      return null;
+    }).filter(Boolean);
+
+    await Promise.all([supabase.from('sale_items').insert(saleItems), ...stockUpdates]);
     return { ...saleData, items: saleItems as any, customer_name: customerName } as Sale;
   }, [currentBusinessId, stock]);
 
