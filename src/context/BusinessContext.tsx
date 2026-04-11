@@ -153,7 +153,7 @@ export interface Business {
   owner_id: string;
   business_type: string;
   business_code: string;
-  settings_password: string;
+  settings_password?: string; // No longer fetched from DB for security
   country_code: string;
   district: string;
   currency_symbol: string;
