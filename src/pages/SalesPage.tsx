@@ -14,6 +14,7 @@ import BarcodeScanHandler from '@/components/BarcodeScanHandler';
 import { toast } from 'sonner';
 import type { Sale } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
+import { BulkPackagingFields } from '@/components/BulkPackagingInfo';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -60,8 +61,8 @@ export default function SalesPage() {
   const [selectedPartStock, setSelectedPartStock] = useState('');
   const [partQty, setPartQty] = useState('1');
   const [stockSearch, setStockSearch] = useState('');
-  const [bulkMode, setBulkMode] = useState(false);
-  const [bulkQty, setBulkQty] = useState('1');
+  const [bulkPkg, setBulkPkg] = useState({ pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
+  const [bulkQuantity, setBulkQuantity] = useState('');
   const { locked: submitLocked, withLock } = useSubmitLock();
   const [scannerOpen, setScannerOpen] = useState(false);
   const [partScannerOpen, setPartScannerOpen] = useState(false);
@@ -77,11 +78,25 @@ export default function SalesPage() {
     return s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q) || s.quality.toLowerCase().includes(q);
   });
 
+  // When stock item is selected, load its packaging config
+  function handleSelectStock(id: string) {
+    setSelectedStock(id);
+    setStockSearch('');
+    const item = activeStock.find(s => s.id === id);
+    if (item) {
+      setBulkPkg({
+        pieces_per_carton: String(item.pieces_per_carton || 0),
+        cartons_per_box: String(item.cartons_per_box || 0),
+        boxes_per_container: String(item.boxes_per_container || 0),
+      });
+      setBulkQuantity(quantity);
+    }
+  }
+
   function addItem() {
     const stockItem = activeStock.find(s => s.id === selectedStock);
     if (!stockItem) return;
-    const qty = parseFloat(quantity) || 1;
-    const finalQty = bulkMode ? qty * (parseFloat(bulkQty) || 1) : qty;
+    const finalQty = parseInt(bulkPkg.pieces_per_carton) > 0 ? (parseFloat(bulkQuantity) || parseFloat(quantity) || 1) : (parseFloat(quantity) || 1);
     const basePrice = priceType === 'wholesale' ? Number(stockItem.wholesale_price) : Number(stockItem.retail_price);
     const unitPrice = customPrice.trim() ? (parseFloat(customPrice) || basePrice) : basePrice;
     setItems(prev => [...prev, {
@@ -100,8 +115,8 @@ export default function SalesPage() {
     setSerialInput('');
     setCustomPrice('');
     setStockSearch('');
-    setBulkQty('1');
-    // Keep priceType sticky — don't reset it
+    setBulkPkg({ pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
+    setBulkQuantity('');
   }
 
   function addServiceItem() {
