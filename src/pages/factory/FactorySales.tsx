@@ -14,6 +14,7 @@ import BarcodeScanner from '@/components/BarcodeScanner';
 import { toast } from 'sonner';
 import type { Sale } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
+import { BulkPackagingFields } from '@/components/BulkPackagingInfo';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -51,9 +52,9 @@ export default function FactorySales() {
   const [editAmountPaid, setEditAmountPaid] = useState('');
   const [stockSearch, setStockSearch] = useState('');
 
-  // Bulk selling
-  const [bulkMode, setBulkMode] = useState(false);
-  const [bulkQty, setBulkQty] = useState('1');
+  // Bulk packaging
+  const [bulkPkg, setBulkPkg] = useState({ pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
+  const [bulkQuantity, setBulkQuantity] = useState('');
 
   const [activeTab, setActiveTab] = useState<'today' | 'previous'>('today');
   const todaySales = sales.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
@@ -67,11 +68,24 @@ export default function FactorySales() {
     return s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q) || (s.quality || '').toLowerCase().includes(q);
   });
 
+  function handleSelectProduct(id: string) {
+    setSelectedProduct(id);
+    setStockSearch('');
+    const item = activeProducts.find(p => p.id === id);
+    if (item) {
+      setBulkPkg({
+        pieces_per_carton: String(item.pieces_per_carton || 0),
+        cartons_per_box: String(item.cartons_per_box || 0),
+        boxes_per_container: String(item.boxes_per_container || 0),
+      });
+      setBulkQuantity(qty);
+    }
+  }
+
   function addItem() {
     const product = activeProducts.find(p => p.id === selectedProduct);
     if (!product) return;
-    const q = parseFloat(qty) || 1;
-    const finalQty = bulkMode ? q * (parseFloat(bulkQty) || 1) : q;
+    const finalQty = parseInt(bulkPkg.pieces_per_carton) > 0 ? (parseFloat(bulkQuantity) || parseFloat(qty) || 1) : (parseFloat(qty) || 1);
     const basePrice = priceType === 'wholesale' ? Number(product.wholesale_price) : Number(product.retail_price);
     const unitPrice = customPrice.trim() ? (parseFloat(customPrice) || basePrice) : basePrice;
     setItems(prev => [...prev, {
@@ -82,7 +96,9 @@ export default function FactorySales() {
       serial_numbers: serialInput.trim() || undefined,
       custom_price: customPrice.trim() ? unitPrice : undefined,
     }]);
-    setSelectedProduct(''); setQty('1'); setSerialInput(''); setCustomPrice(''); setStockSearch(''); setBulkQty('1');
+    setSelectedProduct(''); setQty('1'); setSerialInput(''); setCustomPrice(''); setStockSearch('');
+    setBulkPkg({ pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
+    setBulkQuantity('');
   }
 
   function removeItem(idx: number) { setItems(prev => prev.filter((_, i) => i !== idx)); }
@@ -155,7 +171,7 @@ export default function FactorySales() {
                   className="mb-1.5"
                 />
                 <div className="flex gap-1.5">
-                  <Select value={selectedProduct} onValueChange={v => { setSelectedProduct(v); setStockSearch(''); }}>
+                  <Select value={selectedProduct} onValueChange={handleSelectProduct}>
                     <SelectTrigger className="flex-1">
                       <SelectValue placeholder="Select item..." />
                     </SelectTrigger>
@@ -176,7 +192,11 @@ export default function FactorySales() {
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div><Label>Qty</Label><Input type="number" min="0.01" step="0.01" value={qty} onChange={e => setQty(e.target.value)} /></div>
+                <div><Label>Qty</Label><Input type="number" min="0.01" step="0.01" value={qty} onChange={e => setQty(e.target.value)}
+                  readOnly={parseInt(bulkPkg.pieces_per_carton) > 0}
+                  className={parseInt(bulkPkg.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
+                  {parseInt(bulkPkg.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
+                </div>
                 <div>
                   <Label>Price Type</Label>
                   <Select value={priceType} onValueChange={v => setPriceType(v as 'wholesale' | 'retail')}>
@@ -193,20 +213,14 @@ export default function FactorySales() {
                 </div>
               </div>
 
-              {/* Bulk selling toggle */}
-              <div className="flex items-center gap-3">
-                <label className="flex items-center gap-2 text-xs cursor-pointer">
-                  <input type="checkbox" checked={bulkMode} onChange={e => { setBulkMode(e.target.checked); setBulkQty('1'); }} className="rounded" />
-                  📦 Bulk Selling
-                </label>
-                {bulkMode && (
-                  <div className="flex items-center gap-1.5">
-                    <Label className="text-xs whitespace-nowrap">× Packs:</Label>
-                    <Input type="number" min="1" value={bulkQty} onChange={e => setBulkQty(e.target.value)} className="w-20 h-8 text-sm" />
-                    <span className="text-xs text-muted-foreground">Total: {(parseFloat(qty) || 1) * (parseFloat(bulkQty) || 1)}</span>
-                  </div>
-                )}
-              </div>
+              <BulkPackagingFields
+                piecesPerCarton={bulkPkg.pieces_per_carton}
+                cartonsPerBox={bulkPkg.cartons_per_box}
+                boxesPerContainer={bulkPkg.boxes_per_container}
+                onChange={(field, value) => setBulkPkg(f => ({ ...f, [field]: value }))}
+                onQuantityCalculated={(total) => { setQty(String(total)); setBulkQuantity(String(total)); }}
+                currentQuantity={qty}
+              />
 
               {/* Preview */}
               {selectedProduct && (() => {
@@ -214,12 +228,11 @@ export default function FactorySales() {
                 if (!si) return null;
                 const basePrice = priceType === 'wholesale' ? Number(si.wholesale_price) : Number(si.retail_price);
                 const effectivePrice = customPrice.trim() ? (parseFloat(customPrice) || basePrice) : basePrice;
-                const totalQty = bulkMode ? (parseFloat(qty) || 1) * (parseFloat(bulkQty) || 1) : (parseFloat(qty) || 0);
+                const totalQty = parseFloat(qty) || 0;
                 return (
                   <div className="text-xs text-muted-foreground bg-muted/40 rounded p-2">
                     {customPrice.trim() && <span className="text-warning font-medium mr-2">⚡ Custom price: {fmt(effectivePrice)}</span>}
                     Subtotal: <span className="font-bold text-foreground">{fmt(totalQty * effectivePrice)}</span>
-                    {bulkMode && <span className="ml-2 text-primary">({parseFloat(bulkQty) || 1} packs × {parseFloat(qty) || 1} = {totalQty})</span>}
                   </div>
                 );
               })()}
