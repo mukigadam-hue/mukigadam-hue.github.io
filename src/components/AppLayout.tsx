@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { LayoutDashboard, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Settings, Users, LogOut, Building2, Crown, User, Bell, BellDot, Factory, Flame, Boxes, Menu, Contact, Globe, Home, CalendarCheck, MessageSquare, Search, AlertTriangle, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { LayoutDashboard, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Settings, Users, LogOut, Building2, Crown, User, Bell, BellDot, Factory, Flame, Boxes, Menu, Contact, Globe, Home, CalendarCheck, MessageSquare, Search, AlertTriangle, ChevronLeft, ChevronRight, Plus, RefreshCw } from 'lucide-react';
 import ProofVideoButton from '@/components/ProofVideoButton';
 import LegalHelpModal from '@/components/LegalHelpModal';
 import { HelpCircle } from 'lucide-react';
@@ -9,9 +9,11 @@ import NetworkStatusBanner from '@/components/NetworkStatusBanner';
 import { useAuth } from '@/context/AuthContext';
 import { APP_VERSION } from '@/version';
 import { useBusiness } from '@/context/BusinessContext';
+import { useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { toast } from 'sonner';
 
 function useNavItems() {
   const { t } = useTranslation();
@@ -259,8 +261,23 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();
-  const { businesses, currentBusiness, setCurrentBusinessId, userRole, memberships, notifications } = useBusiness();
+  const { businesses, currentBusiness, setCurrentBusinessId, userRole, memberships, notifications, refreshData } = useBusiness();
+  const queryClient = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await queryClient.invalidateQueries();
+      await refreshData();
+      toast.success('Data refreshed');
+    } catch {
+      toast.error('Refresh failed');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [queryClient, refreshData]);
 
   const isFactory = (currentBusiness as any)?.business_type === 'factory';
   const isProperty = (currentBusiness as any)?.business_type === 'property';
@@ -330,7 +347,12 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
               </h1>
               <p className="text-xs text-sidebar-muted mt-1">{isPersonal ? 'Personal Account' : isProperty ? t('nav.propertyManager', 'Property Manager') : isFactory ? t('nav.factoryManager') : t('nav.businessManager')}</p>
             </div>
-            <NotificationsPanel />
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleRefresh} disabled={refreshing} title="Refresh all data">
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              </Button>
+              <NotificationsPanel />
+            </div>
           </div>
 
           <div className="px-3 pt-3 space-y-2">
@@ -418,6 +440,13 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
         </aside>
 
         <main className="flex-1 overflow-y-auto pb-20 md:pb-10">
+          {/* Mobile refresh bar */}
+          <div className="md:hidden flex items-center justify-between px-3 pt-2 pb-1">
+            <span className="text-xs font-semibold text-muted-foreground truncate">{currentBusiness?.name}</span>
+            <Button variant="ghost" size="sm" className="h-7 px-2 gap-1 text-xs" onClick={handleRefresh} disabled={refreshing}>
+              <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh
+            </Button>
+          </div>
           <div className="p-3 sm:p-4 md:p-6 max-w-7xl mx-auto animate-fade-in">{children}</div>
           {/* Desktop prev/next page nav */}
           <DesktopPageNav navItems={navItems} pathname={pathname} />
