@@ -215,6 +215,14 @@ export default function FactoryPurchases() {
             <Label className="text-xs text-muted-foreground">Serial Number (optional)</Label>
             <Input value={form.serial_numbers} onChange={e => setForm(f => ({ ...f, serial_numbers: e.target.value }))} placeholder="e.g. IMEI, S/N..." className="max-w-xs" />
           </div>
+          <BulkPackagingFields
+            piecesPerCarton={form.pieces_per_carton}
+            cartonsPerBox={form.cartons_per_box}
+            boxesPerContainer={form.boxes_per_container}
+            onChange={(field, value) => setForm(f => ({ ...f, [field]: value }))}
+            onQuantityCalculated={(total) => setForm(f => ({ ...f, quantity: String(total) }))}
+            currentQuantity={form.quantity}
+          />
 
           {items.length > 0 && (
             <>
