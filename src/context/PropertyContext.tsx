@@ -153,9 +153,12 @@ export function PropertyProvider({ children }: { children: React.ReactNode }) {
 
   async function addAsset(asset: Partial<PropertyAsset>) {
     if (!businessId) return;
-    const { error } = await supabase.from('property_assets').insert({ ...asset, business_id: businessId } as any);
-    if (error) { toast.error(error.message); return; }
+    const tempId = crypto.randomUUID();
+    const optimistic = { ...asset, id: tempId, business_id: businessId, created_at: new Date().toISOString(), updated_at: new Date().toISOString(), deleted_at: null } as PropertyAsset;
+    setAssets(prev => [optimistic, ...prev]);
     toast.success('Asset listed!');
+    const { error } = await supabase.from('property_assets').insert({ ...asset, business_id: businessId } as any);
+    if (error) { toast.error('Save failed: ' + error.message); setAssets(prev => prev.filter(a => a.id !== tempId)); return; }
     loadData();
   }
 
