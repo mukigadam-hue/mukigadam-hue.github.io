@@ -600,6 +600,55 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       await supabase.from('notifications').insert(notifications);
     }
 
+    // Delete child items that reference sales/purchases/orders/services first
+    const [salesIds, purchaseIds, orderIds, serviceIds] = await Promise.all([
+      supabase.from('sales').select('id').eq('business_id', businessId).then(r => (r.data || []).map(s => s.id)),
+      supabase.from('purchases').select('id').eq('business_id', businessId).then(r => (r.data || []).map(p => p.id)),
+      supabase.from('orders').select('id').eq('business_id', businessId).then(r => (r.data || []).map(o => o.id)),
+      supabase.from('services').select('id').eq('business_id', businessId).then(r => (r.data || []).map(s => s.id)),
+    ]);
+    await Promise.all([
+      salesIds.length > 0 ? supabase.from('sale_items').delete().in('sale_id', salesIds) : Promise.resolve(),
+      purchaseIds.length > 0 ? supabase.from('purchase_items').delete().in('purchase_id', purchaseIds) : Promise.resolve(),
+      orderIds.length > 0 ? supabase.from('order_items').delete().in('order_id', orderIds) : Promise.resolve(),
+      serviceIds.length > 0 ? supabase.from('service_items').delete().in('service_id', serviceIds) : Promise.resolve(),
+    ]);
+    // Delete all business-scoped tables in parallel
+    await Promise.all([
+      supabase.from('sales').delete().eq('business_id', businessId),
+      supabase.from('purchases').delete().eq('business_id', businessId),
+      supabase.from('orders').delete().eq('business_id', businessId),
+      supabase.from('services').delete().eq('business_id', businessId),
+      supabase.from('stock_items').delete().eq('business_id', businessId),
+      supabase.from('business_expenses').delete().eq('business_id', businessId),
+      supabase.from('factory_expenses').delete().eq('business_id', businessId),
+      supabase.from('factory_raw_materials').delete().eq('business_id', businessId),
+      supabase.from('factory_production').delete().eq('business_id', businessId),
+      supabase.from('factory_team_members').delete().eq('business_id', businessId),
+      supabase.from('factory_worker_payments').delete().eq('business_id', businessId),
+      supabase.from('factory_worker_advances').delete().eq('business_id', businessId),
+      supabase.from('business_team_members').delete().eq('business_id', businessId),
+      supabase.from('business_worker_payments').delete().eq('business_id', businessId),
+      supabase.from('business_worker_advances').delete().eq('business_id', businessId),
+      supabase.from('business_contacts').delete().eq('business_id', businessId),
+      supabase.from('business_blocks').delete().eq('business_id', businessId),
+      supabase.from('business_payment_methods').delete().eq('business_id', businessId),
+      supabase.from('receipts').delete().eq('business_id', businessId),
+      supabase.from('notifications').delete().eq('business_id', businessId),
+      supabase.from('subscriptions').delete().eq('business_id', businessId),
+      supabase.from('invite_codes').delete().eq('business_id', businessId),
+      supabase.from('shared_orders').delete().eq('from_business_id', businessId),
+      supabase.from('property_check_ins').delete().eq('business_id', businessId),
+      supabase.from('property_complaints').delete().eq('business_id', businessId),
+      supabase.from('property_bookings').delete().eq('business_id', businessId),
+      supabase.from('property_assets').delete().eq('business_id', businessId),
+      supabase.from('property_conversations').delete().eq('business_id', businessId),
+      supabase.from('order_disputes').delete().eq('business_id', businessId),
+      supabase.from('business_customers').delete().eq('business_id', businessId),
+      supabase.from('business_reviews').delete().eq('business_id', businessId),
+    ]);
+    await supabase.from('business_memberships').delete().eq('business_id', businessId);
+
     const { error } = await supabase.from('businesses').delete().eq('id', businessId);
     if (error) { toast.error(error.message); return false; }
     toast.success('Business deleted permanently');
@@ -703,6 +752,12 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const permanentDeleteStockItem = useCallback(async (id: string) => {
+    // Nullify foreign key references before deleting
+    await Promise.all([
+      supabase.from('sale_items').update({ stock_item_id: null } as any).eq('stock_item_id', id),
+      supabase.from('service_items').update({ stock_item_id: null } as any).eq('stock_item_id', id),
+      supabase.from('factory_production').update({ product_stock_id: null } as any).eq('product_stock_id', id),
+    ]);
     const { error } = await supabase.from('stock_items').delete().eq('id', id);
     if (error) { toast.error(error.message); return; }
     setStock(prev => prev.filter(s => s.id !== id));
@@ -762,43 +817,50 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       return optimistic;
     }
 
+    // Optimistic: update UI immediately
+    const tempId = crypto.randomUUID();
+    const optimisticSale = { ...salePayload, id: tempId, created_at: new Date().toISOString(), items: items.map(i => ({ ...i, id: crypto.randomUUID(), sale_id: tempId, created_at: new Date().toISOString() })) as any, customer_name: customerName } as Sale;
+    setSales(prev => [optimisticSale, ...prev]);
+    setStock(prev => prev.map(stockItem => {
+      const matchedItem = items.find(item => {
+        if (item.price_type === 'service') return false;
+        if (item.stock_item_id) return item.stock_item_id === stockItem.id;
+        return stockItem.name.toLowerCase() === item.item_name.toLowerCase()
+          && (stockItem.category || '').toLowerCase() === (item.category || '').toLowerCase()
+          && (stockItem.quality || '').toLowerCase() === (item.quality || '').toLowerCase();
+      });
+      if (!matchedItem) return stockItem;
+      return { ...stockItem, quantity: Math.max(0, Number(stockItem.quantity) - Number(matchedItem.quantity)) } as StockItem;
+    }));
+    toast.success('Sale recorded!');
+
     const { data: saleData, error: saleError } = await supabase.from('sales').insert(salePayload as any).select().single();
-    if (saleError || !saleData) { toast.error(saleError?.message || 'Failed'); return null; }
+    if (saleError || !saleData) { toast.error(saleError?.message || 'Failed to save sale'); setSales(prev => prev.filter(s => s.id !== tempId)); return null; }
+
+    // Replace optimistic with real
+    setSales(prev => prev.map(s => s.id === tempId ? { ...s, id: saleData.id } as Sale : s));
 
     const saleItems = items.map(item => ({
-      sale_id: saleData.id,
-      stock_item_id: item.stock_item_id || null,
-      item_name: item.item_name,
-      category: item.category,
-      quality: item.quality,
-      quantity: item.quantity,
-      price_type: item.price_type,
-      unit_price: item.unit_price,
-      subtotal: item.subtotal,
-      serial_numbers: item.serial_numbers || '',
+      sale_id: saleData.id, stock_item_id: item.stock_item_id || null,
+      item_name: item.item_name, category: item.category, quality: item.quality,
+      quantity: item.quantity, price_type: item.price_type, unit_price: item.unit_price,
+      subtotal: item.subtotal, serial_numbers: item.serial_numbers || '',
     }));
-    await supabase.from('sale_items').insert(saleItems);
 
+    // Fire all DB writes in parallel
     const currentStock = stock;
-    for (const item of items) {
-      if (item.price_type === 'service') continue;
-      if (item.stock_item_id) {
-        const stockItem = currentStock.find(s => s.id === item.stock_item_id);
-        if (stockItem) {
-          await supabase.from('stock_items').update({ quantity: Math.max(0, stockItem.quantity - item.quantity) }).eq('id', item.stock_item_id);
-        }
-      } else {
-        const stockItem = currentStock.find(s =>
-          s.name.toLowerCase() === item.item_name.toLowerCase() &&
-          s.category.toLowerCase() === (item.category || '').toLowerCase() &&
-          s.quality.toLowerCase() === (item.quality || '').toLowerCase()
-        ) || currentStock.find(s => s.name.toLowerCase() === item.item_name.toLowerCase());
-        if (stockItem) {
-          await supabase.from('stock_items').update({ quantity: Math.max(0, stockItem.quantity - item.quantity) }).eq('id', stockItem.id);
-        }
+    const stockUpdates = items.filter(item => item.price_type !== 'service').map(item => {
+      const stockItem = item.stock_item_id
+        ? currentStock.find(s => s.id === item.stock_item_id)
+        : currentStock.find(s => s.name.toLowerCase() === item.item_name.toLowerCase() && s.category.toLowerCase() === (item.category || '').toLowerCase() && s.quality.toLowerCase() === (item.quality || '').toLowerCase())
+          || currentStock.find(s => s.name.toLowerCase() === item.item_name.toLowerCase());
+      if (stockItem) {
+        return supabase.from('stock_items').update({ quantity: Math.max(0, stockItem.quantity - item.quantity) }).eq('id', stockItem.id);
       }
-    }
-    toast.success('Sale recorded!');
+      return null;
+    }).filter(Boolean);
+
+    await Promise.all([supabase.from('sale_items').insert(saleItems), ...stockUpdates]);
     return { ...saleData, items: saleItems as any, customer_name: customerName } as Sale;
   }, [currentBusinessId, stock]);
 
@@ -900,12 +962,9 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       quality: item.quality, quantity: item.quantity, unit_price: item.unit_price, subtotal: item.subtotal,
       serial_numbers: item.serial_numbers || '',
     }));
-    await supabase.from('purchase_items').insert(purchaseItems);
-
-    await addNotification('new_purchase', '🛒 New Purchase Recorded', `${items.length} item(s) from ${supplier} — Total: recorded by ${recordedBy}`);
-
+    // Fire all DB writes in parallel for speed
     const currentStock = stock;
-    for (const item of items) {
+    const stockOps = items.map(item => {
       const existingStock = currentStock.find(s =>
         s.name.toLowerCase() === item.item_name.toLowerCase() &&
         s.category.toLowerCase() === item.category.toLowerCase() &&
@@ -921,20 +980,26 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       if (item.boxes_per_container && item.boxes_per_container > 0) packagingUpdate.boxes_per_container = item.boxes_per_container;
 
       if (existingStock) {
-        await supabase.from('stock_items').update({
+        return supabase.from('stock_items').update({
           quantity: existingStock.quantity + item.quantity,
           buying_price: buyPrice, wholesale_price: ws, retail_price: ret,
           ...packagingUpdate,
         }).eq('id', existingStock.id);
       } else {
-        await supabase.from('stock_items').insert({
+        return supabase.from('stock_items').insert({
           business_id: currentBusinessId, name: item.item_name, category: item.category,
           quality: item.quality, buying_price: buyPrice, wholesale_price: ws, retail_price: ret,
           quantity: item.quantity, min_stock_level: 5,
           ...packagingUpdate,
         });
       }
-    }
+    });
+
+    await Promise.all([
+      supabase.from('purchase_items').insert(purchaseItems),
+      addNotification('new_purchase', '🛒 New Purchase Recorded', `${items.length} item(s) from ${supplier} — Total: recorded by ${recordedBy}`),
+      ...stockOps,
+    ]);
     toast.success('Purchase recorded!');
   }, [currentBusinessId, stock]);
 
