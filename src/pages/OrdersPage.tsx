@@ -316,6 +316,15 @@ export default function OrdersPage() {
       if (data && data.length > 0) {
         setRecipientLookup({ id: data[0].id, name: data[0].name });
         toast.success(`Found: ${data[0].name}`);
+        // Load supplier products for easy selection
+        const { data: products } = await supabase.rpc('get_business_public_products', { _business_id: data[0].id });
+        if (products && products.length > 0) {
+          setSupplierProducts(products as any[]);
+          setPrefilledSupplierName(data[0].name);
+        } else {
+          setSupplierProducts([]);
+          setPrefilledSupplierName('');
+        }
       } else {
         setRecipientLookup(null);
         toast.error('No business found with that code');
