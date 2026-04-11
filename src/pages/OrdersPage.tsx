@@ -1284,9 +1284,6 @@ export default function OrdersPage() {
       <BarcodeScanner open={scannerOpen} onOpenChange={setScannerOpen} onScan={handleBarcodeScan} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Orders</h1>
-        <Button size="sm" variant="outline" onClick={() => refreshData()} title="Refresh orders">
-          <RefreshCw className="h-3.5 w-3.5 mr-1" /> Refresh
-        </Button>
       </div>
 
       {/* Create new order */}
@@ -1555,28 +1552,22 @@ export default function OrdersPage() {
               )}
             </div>
 
-            <div className="flex flex-wrap gap-3 items-end">
-              <div className="flex-1 min-w-[150px]">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
                 <Label>Item Name</Label>
-                <Input className="flex-1" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onBlur={() => applyCase('name')} placeholder="Auto-filled from picker" />
+                <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onBlur={() => applyCase('name')} placeholder="Auto-filled from picker" />
               </div>
-              <div className="w-28">
+              <div>
                 <Label>Category</Label>
                 <Input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} onBlur={() => applyCase('category')} placeholder="Category..." list="cat-suggestions" />
                 <datalist id="cat-suggestions">{existingCategories.map(c => <option key={c} value={c} />)}</datalist>
               </div>
-              <div className="w-24">
+              <div>
                 <Label>Quality</Label>
                 <Input value={form.quality} onChange={e => setForm(f => ({ ...f, quality: e.target.value }))} onBlur={() => applyCase('quality')} placeholder="Quality..." list="qual-suggestions" />
                 <datalist id="qual-suggestions">{existingQualities.map(q => <option key={q} value={q} />)}</datalist>
               </div>
-              <div className="w-20">
-                <Label>Qty</Label>
-                <Input type="number" min="1" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
-                  readOnly={parseInt(form.pieces_per_carton) > 0}
-                  className={parseInt(form.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
-              </div>
-              <div className="w-28">
+              <div>
                 <Label>Price Type</Label>
                 <Select value={form.priceType} onValueChange={v => setForm(f => ({ ...f, priceType: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -1587,16 +1578,15 @@ export default function OrdersPage() {
                 </Select>
               </div>
               {orderMode !== 'request' && (
-                <div className="w-24"><Label>Price</Label><Input type="number" min="0" step="0.01" value={form.unitPrice} onChange={e => setForm(f => ({ ...f, unitPrice: e.target.value }))} placeholder="Auto" /></div>
+                <div><Label>Price</Label><Input type="number" min="0" step="0.01" value={form.unitPrice} onChange={e => setForm(f => ({ ...f, unitPrice: e.target.value }))} placeholder="Auto" /></div>
               )}
               {orderMode !== 'request' && (
-                <div className="w-24"><Label>Alt. Price <span className="text-[10px] text-muted-foreground">(bargain)</span></Label><Input type="number" min="0" step="0.01" value={form.customPrice} onChange={e => setForm(f => ({ ...f, customPrice: e.target.value }))} placeholder="Custom" /></div>
+                <div><Label>Alt. Price <span className="text-[10px] text-muted-foreground">(bargain)</span></Label><Input type="number" min="0" step="0.01" value={form.customPrice} onChange={e => setForm(f => ({ ...f, customPrice: e.target.value }))} placeholder="Custom" /></div>
               )}
-              <Button onClick={addItem} disabled={!form.name.trim()}><Plus className="h-4 w-4 mr-1" />Add</Button>
-            </div>
-            <div className="mt-2">
-              <Label className="text-xs text-muted-foreground">Serial Number (optional)</Label>
-              <Input value={form.serial_numbers} onChange={e => setForm(f => ({ ...f, serial_numbers: e.target.value }))} placeholder="e.g. IMEI, S/N..." className="max-w-xs" />
+              <div>
+                <Label>Serial Number <span className="text-[10px] text-muted-foreground">(optional)</span></Label>
+                <Input value={form.serial_numbers} onChange={e => setForm(f => ({ ...f, serial_numbers: e.target.value }))} placeholder="e.g. IMEI, S/N..." />
+              </div>
             </div>
             <BulkPackagingFields
               piecesPerCarton={form.pieces_per_carton}
@@ -1606,6 +1596,16 @@ export default function OrdersPage() {
               onQuantityCalculated={(total) => setForm(f => ({ ...f, quantity: String(total) }))}
               currentQuantity={form.quantity}
             />
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>Quantity</Label>
+                <Input type="number" min="1" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
+                  readOnly={parseInt(form.pieces_per_carton) > 0}
+                  className={parseInt(form.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
+                {parseInt(form.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
+              </div>
+            </div>
+            <Button onClick={addItem} disabled={!form.name.trim()} className="w-full"><Plus className="h-4 w-4 mr-1" />Add Item</Button>
 
             {items.length > 0 && (
               <>
