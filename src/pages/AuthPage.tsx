@@ -8,16 +8,21 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { LogIn, UserPlus, Eye, EyeOff, HelpCircle, KeyRound, ArrowLeft } from 'lucide-react';
+import { LogIn, UserPlus, Eye, EyeOff, HelpCircle, KeyRound, ArrowLeft, Phone, Mail } from 'lucide-react';
 import LegalHelpModal from '@/components/LegalHelpModal';
+
+type RecoveryMode = 'none' | 'choose' | 'email' | 'phone' | 'phone-result';
 
 export default function AuthPage() {
   const { signUp, signIn } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
-  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [recoveryMode, setRecoveryMode] = useState<RecoveryMode>('none');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [recoveryPhone, setRecoveryPhone] = useState('');
+  const [maskedEmail, setMaskedEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -27,7 +32,12 @@ export default function AuthPage() {
     setLoading(true);
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password, fullName);
+        if (!phone.trim()) {
+          toast.error('Phone number is required for account recovery');
+          setLoading(false);
+          return;
+        }
+        const { error } = await signUp(email, password, fullName, phone.trim());
         if (error) throw error;
         toast.success('Account created! Please check your email to confirm your account before signing in.', { duration: 8000 });
         setIsSignUp(false);
@@ -45,7 +55,7 @@ export default function AuthPage() {
     }
   }
 
-  async function handleForgotPassword(e: React.FormEvent) {
+  async function handleForgotPasswordByEmail(e: React.FormEvent) {
     e.preventDefault();
     if (!email) {
       toast.error('Please enter your email address');
@@ -58,12 +68,45 @@ export default function AuthPage() {
       });
       if (error) throw error;
       toast.success('Password reset link sent! Check your email inbox.', { duration: 8000 });
-      setIsForgotPassword(false);
+      setRecoveryMode('none');
     } catch (err: any) {
       toast.error(err.message || 'Failed to send reset link');
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handlePhoneLookup(e: React.FormEvent) {
+    e.preventDefault();
+    if (!recoveryPhone.trim()) {
+      toast.error('Please enter your phone number');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.rpc('lookup_email_by_phone', {
+        _phone: recoveryPhone.trim(),
+      });
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        toast.error('No account found with this phone number. Make sure you enter the exact number you used during registration.');
+        return;
+      }
+      setMaskedEmail(data[0].masked_email);
+      setRecoveryMode('phone-result');
+    } catch (err: any) {
+      toast.error(err.message || 'Lookup failed');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSendResetFromPhone() {
+    // We need the real email to send reset. Use a secure RPC.
+    // Actually, we'll let the user now use the masked email hint to remember their email,
+    // then they type it and we send the reset.
+    setRecoveryMode('email');
+    toast.info('Now enter your full email address and we\'ll send you a reset link.', { duration: 6000 });
   }
 
   async function handleGoogleSignIn() {
@@ -79,6 +122,12 @@ export default function AuthPage() {
     }
   }
 
+  const resetRecovery = () => {
+    setRecoveryMode('none');
+    setMaskedEmail('');
+    setRecoveryPhone('');
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-start p-4 sm:p-6 overflow-y-auto" style={{ background: 'linear-gradient(145deg, hsl(217 72% 12%) 0%, hsl(217 72% 18%) 35%, hsl(210 60% 25%) 65%, hsl(42 80% 45%) 100%)' }}>
       {/* Hero Section */}
@@ -93,23 +142,55 @@ export default function AuthPage() {
 
       <Card className="w-full max-w-md shadow-xl border-0 bg-card/95 backdrop-blur-sm mb-10">
         <CardContent className="p-6 space-y-6">
-          <div className="text-center space-y-2">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground text-3xl mb-2">
-              {isForgotPassword ? <KeyRound className="h-8 w-8" /> : '📦'}
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {isForgotPassword ? 'Recover Account' : 'BizTrack'}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {isForgotPassword
-                ? 'Enter the email you used to register and we\'ll send you a link to reset your password'
-                : isSignUp ? 'Create your account' : 'Sign in to your business'}
-            </p>
-          </div>
-
-          {isForgotPassword ? (
+          {/* Recovery: Choose method */}
+          {recoveryMode === 'choose' && (
             <>
-              <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="text-center space-y-2">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground mb-2">
+                  <KeyRound className="h-8 w-8" />
+                </div>
+                <h1 className="text-2xl font-bold text-foreground">Recover Account</h1>
+                <p className="text-sm text-muted-foreground">
+                  Choose how you'd like to recover your account
+                </p>
+              </div>
+              <div className="space-y-3">
+                <Button variant="outline" className="w-full h-14 flex items-center gap-3 text-left" onClick={() => setRecoveryMode('email')}>
+                  <Mail className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">I remember my email</p>
+                    <p className="text-xs text-muted-foreground">We'll send a password reset link</p>
+                  </div>
+                </Button>
+                <Button variant="outline" className="w-full h-14 flex items-center gap-3 text-left" onClick={() => setRecoveryMode('phone')}>
+                  <Phone className="h-5 w-5 text-primary shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">I forgot my email</p>
+                    <p className="text-xs text-muted-foreground">Use your phone number to find your account</p>
+                  </div>
+                </Button>
+              </div>
+              <div className="text-center">
+                <button type="button" className="text-sm text-primary hover:underline inline-flex items-center gap-1" onClick={resetRecovery}>
+                  <ArrowLeft className="h-3 w-3" /> Back to Sign In
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Recovery: By email */}
+          {recoveryMode === 'email' && (
+            <>
+              <div className="text-center space-y-2">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground mb-2">
+                  <Mail className="h-8 w-8" />
+                </div>
+                <h1 className="text-2xl font-bold text-foreground">Reset Password</h1>
+                <p className="text-sm text-muted-foreground">
+                  Enter your email and we'll send you a password reset link
+                </p>
+              </div>
+              <form onSubmit={handleForgotPasswordByEmail} className="space-y-4">
                 <div>
                   <Label>Email Address</Label>
                   <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@example.com" />
@@ -119,17 +200,85 @@ export default function AuthPage() {
                 </Button>
               </form>
               <div className="text-center">
-                <button
-                  type="button"
-                  className="text-sm text-primary hover:underline inline-flex items-center gap-1"
-                  onClick={() => setIsForgotPassword(false)}
-                >
-                  <ArrowLeft className="h-3 w-3" /> Back to Sign In
+                <button type="button" className="text-sm text-primary hover:underline inline-flex items-center gap-1" onClick={() => setRecoveryMode('choose')}>
+                  <ArrowLeft className="h-3 w-3" /> Back to recovery options
                 </button>
               </div>
             </>
-          ) : (
+          )}
+
+          {/* Recovery: By phone */}
+          {recoveryMode === 'phone' && (
             <>
+              <div className="text-center space-y-2">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground mb-2">
+                  <Phone className="h-8 w-8" />
+                </div>
+                <h1 className="text-2xl font-bold text-foreground">Find Your Account</h1>
+                <p className="text-sm text-muted-foreground">
+                  Enter the phone number you used when you registered
+                </p>
+              </div>
+              <form onSubmit={handlePhoneLookup} className="space-y-4">
+                <div>
+                  <Label>Phone Number</Label>
+                  <Input type="tel" value={recoveryPhone} onChange={e => setRecoveryPhone(e.target.value)} required placeholder="e.g. +256700123456" />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Searching...' : 'Find My Account'}
+                </Button>
+              </form>
+              <div className="text-center">
+                <button type="button" className="text-sm text-primary hover:underline inline-flex items-center gap-1" onClick={() => setRecoveryMode('choose')}>
+                  <ArrowLeft className="h-3 w-3" /> Back to recovery options
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Recovery: Phone result */}
+          {recoveryMode === 'phone-result' && (
+            <>
+              <div className="text-center space-y-2">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground mb-2">
+                  ✅
+                </div>
+                <h1 className="text-2xl font-bold text-foreground">Account Found!</h1>
+                <p className="text-sm text-muted-foreground">
+                  We found an account linked to your phone number
+                </p>
+              </div>
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-center space-y-2">
+                <p className="text-xs text-muted-foreground">Your email address is:</p>
+                <p className="text-lg font-bold font-mono text-foreground tracking-wide">{maskedEmail}</p>
+                <p className="text-xs text-muted-foreground">
+                  Does this look familiar? Use this to reset your password.
+                </p>
+              </div>
+              <Button className="w-full" onClick={handleSendResetFromPhone}>
+                <Mail className="h-4 w-4 mr-2" /> Reset Password with this Email
+              </Button>
+              <div className="text-center space-y-1">
+                <button type="button" className="text-sm text-primary hover:underline inline-flex items-center gap-1" onClick={() => setRecoveryMode('phone')}>
+                  <ArrowLeft className="h-3 w-3" /> Try a different phone number
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Normal sign in / sign up */}
+          {recoveryMode === 'none' && (
+            <>
+              <div className="text-center space-y-2">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground text-3xl mb-2">
+                  📦
+                </div>
+                <h1 className="text-2xl font-bold text-foreground">BizTrack</h1>
+                <p className="text-sm text-muted-foreground">
+                  {isSignUp ? 'Create your account' : 'Sign in to your business'}
+                </p>
+              </div>
+
               {/* Google Sign-In */}
               <Button
                 variant="outline"
@@ -154,10 +303,16 @@ export default function AuthPage() {
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 {isSignUp && (
-                  <div>
-                    <Label>Full Name</Label>
-                    <Input value={fullName} onChange={e => setFullName(e.target.value)} required placeholder="Your name" />
-                  </div>
+                  <>
+                    <div>
+                      <Label>Full Name</Label>
+                      <Input value={fullName} onChange={e => setFullName(e.target.value)} required placeholder="Your name" />
+                    </div>
+                    <div>
+                      <Label>Phone Number <span className="text-xs text-muted-foreground">(for account recovery)</span></Label>
+                      <Input type="tel" value={phone} onChange={e => setPhone(e.target.value)} required placeholder="e.g. +256700123456" />
+                    </div>
+                  </>
                 )}
                 <div>
                   <Label>Email</Label>
@@ -177,9 +332,9 @@ export default function AuthPage() {
                     <button
                       type="button"
                       className="text-xs text-primary hover:underline"
-                      onClick={() => setIsForgotPassword(true)}
+                      onClick={() => setRecoveryMode('choose')}
                     >
-                      Forgot password?
+                      Forgot email or password?
                     </button>
                   </div>
                 )}
