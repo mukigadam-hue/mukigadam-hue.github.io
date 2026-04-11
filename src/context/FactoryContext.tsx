@@ -223,22 +223,29 @@ export function FactoryProvider({ children }: { children: React.ReactNode }) {
       toast.success('Expense saved offline — will sync when online');
       return;
     }
-    const { error } = await supabase.from('factory_expenses').insert({ ...expense, business_id: businessId } as any);
-    if (error) { toast.error(error.message); return; }
+    const tempId = crypto.randomUUID();
+    const optimistic = { ...expense, id: tempId, business_id: businessId, created_at: new Date().toISOString() } as FactoryExpense;
+    setExpenses(prev => [optimistic, ...prev]);
     toast.success('Expense recorded!');
+    const { error } = await supabase.from('factory_expenses').insert({ ...expense, business_id: businessId } as any);
+    if (error) { toast.error('Save failed: ' + error.message); setExpenses(prev => prev.filter(e => e.id !== tempId)); }
   }, [businessId]);
 
   const deleteExpense = useCallback(async (id: string) => {
-    const { error } = await supabase.from('factory_expenses').delete().eq('id', id);
-    if (error) { toast.error(error.message); return; }
+    setExpenses(prev => prev.filter(e => e.id !== id));
     toast.success('Expense deleted');
+    const { error } = await supabase.from('factory_expenses').delete().eq('id', id);
+    if (error) { toast.error(error.message); }
   }, []);
 
   const addTeamMember = useCallback(async (member: Omit<FactoryTeamMember, 'id' | 'business_id' | 'created_at'>) => {
     if (!businessId) return;
-    const { error } = await supabase.from('factory_team_members').insert({ ...member, business_id: businessId } as any);
-    if (error) { toast.error(error.message); return; }
+    const tempId = crypto.randomUUID();
+    const optimistic = { ...member, id: tempId, business_id: businessId, created_at: new Date().toISOString() } as FactoryTeamMember;
+    setTeamMembers(prev => [...prev, optimistic].sort((a, b) => a.full_name.localeCompare(b.full_name)));
     toast.success('Team member added!');
+    const { error } = await supabase.from('factory_team_members').insert({ ...member, business_id: businessId } as any);
+    if (error) { toast.error('Save failed: ' + error.message); setTeamMembers(prev => prev.filter(t => t.id !== tempId)); }
   }, [businessId]);
 
   const updateTeamMember = useCallback(async (id: string, updates: Partial<FactoryTeamMember>) => {
