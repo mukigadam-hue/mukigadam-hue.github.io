@@ -402,5 +402,14 @@ export default function BusinessDetailDialog({ business, open, onOpenChange, onO
         </Tabs>
       </DialogContent>
     </Dialog>
+    {business.logo_url && (
+      <ImageLightbox
+        images={[business.logo_url]}
+        open={logoLightboxOpen}
+        onOpenChange={setLogoLightboxOpen}
+        title={business.name}
+      />
+    )}
+    </>
   );
 }
