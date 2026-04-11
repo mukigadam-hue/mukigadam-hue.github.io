@@ -45,6 +45,27 @@ export default function AuthPage() {
     }
   }
 
+  async function handleForgotPassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email) {
+      toast.error('Please enter your email address');
+      return;
+    }
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast.success('Password reset link sent! Check your email inbox.', { duration: 8000 });
+      setIsForgotPassword(false);
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send reset link');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleGoogleSignIn() {
     setGoogleLoading(true);
     try {
