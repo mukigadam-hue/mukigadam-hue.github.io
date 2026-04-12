@@ -182,7 +182,6 @@ export default function FactoryProduction() {
                 </Select>
               </div>
             </div>
-            </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div><Label>Wholesale Price</Label><Input type="number" min="0" step="0.01" value={form.wholesale_price} onChange={e => setForm(f => ({ ...f, wholesale_price: e.target.value }))} placeholder="0.00" /></div>
