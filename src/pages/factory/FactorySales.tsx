@@ -56,9 +56,16 @@ export default function FactorySales() {
   const [bulkPkg, setBulkPkg] = useState({ pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
   const [bulkQuantity, setBulkQuantity] = useState('');
 
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'debt'>('all');
   const [activeTab, setActiveTab] = useState<'today' | 'previous'>('today');
   const todaySales = sales.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const prevSales = sales.filter(s => new Date(s.created_at).toDateString() !== new Date().toDateString());
+  const currentSalesList = activeTab === 'today' ? todaySales : prevSales;
+  const filteredSales = currentSalesList.filter(s => {
+    if (paymentFilter === 'all') return true;
+    if (paymentFilter === 'paid') return s.payment_status === 'paid';
+    return s.payment_status === 'partial' || s.payment_status === 'unpaid';
+  });
 
   // Filter stock items by search text
   const filteredStock = activeProducts.filter(s => {
@@ -324,13 +331,23 @@ export default function FactorySales() {
         </button>
       </div>
 
+      {/* Payment filter */}
+      <div className="flex gap-1.5 flex-wrap">
+        {(['all', 'paid', 'debt'] as const).map(f => (
+          <button key={f} onClick={() => setPaymentFilter(f)}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${paymentFilter === f ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+            {f === 'all' ? '📋 All' : f === 'paid' ? '✅ Paid' : '❌ Debts'}
+          </button>
+        ))}
+      </div>
+
       <Card className="shadow-card">
         <CardContent className="p-4">
-          {(activeTab === 'today' ? todaySales : prevSales).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No sales yet.</p>
+          {filteredSales.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No sales matching filter.</p>
           ) : (
             <div className="space-y-3 max-h-[500px] overflow-y-auto">
-              {(activeTab === 'today' ? todaySales : prevSales).map(s => (
+              {filteredSales.map(s => (
                 <div key={s.id} className={`border rounded-lg p-3 ${s.payment_status === 'unpaid' ? 'border-destructive/40 bg-destructive/5' : s.payment_status === 'partial' ? 'border-warning/40 bg-warning/5' : ''}`}>
                   <div className="flex justify-between items-center mb-1">
                     <div className="flex items-center gap-2 flex-wrap">

@@ -66,9 +66,16 @@ export default function SalesPage() {
   const { locked: submitLocked, withLock } = useSubmitLock();
   const [scannerOpen, setScannerOpen] = useState(false);
   const [partScannerOpen, setPartScannerOpen] = useState(false);
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'debt'>('all');
   const activeStock = stock.filter(s => !s.deleted_at);
   const todaySales = sales.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const previousSales = sales.filter(s => new Date(s.created_at).toDateString() !== new Date().toDateString());
+  const currentSalesList = activeTab === 'today' ? todaySales : previousSales;
+  const filteredSales = currentSalesList.filter(s => {
+    if (paymentFilter === 'all') return true;
+    if (paymentFilter === 'paid') return s.payment_status === 'paid';
+    return s.payment_status === 'partial' || s.payment_status === 'unpaid';
+  });
 
   // Filter stock items by search text
   const filteredStock = activeStock.filter(s => {
@@ -630,16 +637,26 @@ export default function SalesPage() {
         </button>
       </div>
 
+      {/* Payment filter */}
+      <div className="flex gap-1.5 flex-wrap">
+        {(['all', 'paid', 'debt'] as const).map(f => (
+          <button key={f} onClick={() => setPaymentFilter(f)}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${paymentFilter === f ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+            {f === 'all' ? '📋 All' : f === 'paid' ? '✅ Paid' : '❌ Debts'}
+          </button>
+        ))}
+      </div>
+
       <Card className="shadow-card">
         <CardContent className="p-4">
           <h2 className="text-base font-semibold mb-3">
             {activeTab === 'today' ? "Today's Sales" : "Previous Sales"}
           </h2>
-          {(activeTab === 'today' ? todaySales : previousSales).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No sales {activeTab === 'today' ? 'today' : 'from previous days'} yet.</p>
+          {filteredSales.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No sales {activeTab === 'today' ? 'today' : 'from previous days'} matching filter.</p>
           ) : (
             <div className="space-y-3 max-h-[500px] overflow-y-auto pr-1">
-              {(activeTab === 'today' ? todaySales : previousSales).map(sale => (
+              {filteredSales.map(sale => (
                 <SaleCard key={sale.id} sale={sale} />
               ))}
             </div>
