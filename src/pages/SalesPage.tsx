@@ -66,9 +66,16 @@ export default function SalesPage() {
   const { locked: submitLocked, withLock } = useSubmitLock();
   const [scannerOpen, setScannerOpen] = useState(false);
   const [partScannerOpen, setPartScannerOpen] = useState(false);
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'debt'>('all');
   const activeStock = stock.filter(s => !s.deleted_at);
   const todaySales = sales.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const previousSales = sales.filter(s => new Date(s.created_at).toDateString() !== new Date().toDateString());
+  const currentSalesList = activeTab === 'today' ? todaySales : previousSales;
+  const filteredSales = currentSalesList.filter(s => {
+    if (paymentFilter === 'all') return true;
+    if (paymentFilter === 'paid') return s.payment_status === 'paid';
+    return s.payment_status === 'partial' || s.payment_status === 'unpaid';
+  });
 
   // Filter stock items by search text
   const filteredStock = activeStock.filter(s => {

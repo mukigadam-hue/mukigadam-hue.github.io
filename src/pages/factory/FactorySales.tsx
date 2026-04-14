@@ -56,9 +56,16 @@ export default function FactorySales() {
   const [bulkPkg, setBulkPkg] = useState({ pieces_per_carton: '0', cartons_per_box: '0', boxes_per_container: '0' });
   const [bulkQuantity, setBulkQuantity] = useState('');
 
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'debt'>('all');
   const [activeTab, setActiveTab] = useState<'today' | 'previous'>('today');
   const todaySales = sales.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const prevSales = sales.filter(s => new Date(s.created_at).toDateString() !== new Date().toDateString());
+  const currentSalesList = activeTab === 'today' ? todaySales : prevSales;
+  const filteredSales = currentSalesList.filter(s => {
+    if (paymentFilter === 'all') return true;
+    if (paymentFilter === 'paid') return s.payment_status === 'paid';
+    return s.payment_status === 'partial' || s.payment_status === 'unpaid';
+  });
 
   // Filter stock items by search text
   const filteredStock = activeProducts.filter(s => {
