@@ -21,6 +21,7 @@ import AdSpace from '@/components/AdSpace';
 import { BulkPackagingFields } from '@/components/BulkPackagingInfo';
 import OrderDisputeDialog, { DisputeResponseDialog } from '@/components/OrderDisputeDialog';
 import { calculateMobileMoneyCharge } from '@/lib/mobileMoneyCharges';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -1136,6 +1137,11 @@ export default function OrdersPage() {
             <Button size="sm" variant="outline" onClick={() => { setUpdatePaymentOrder(order); setUpdatePaymentAmount(''); }}>
               💰 Update Payment
             </Button>
+          )}
+
+          {/* Cancel / Delete order — moves to Recycle Bin (owner finalizes) */}
+          {order.type !== 'inbox' && (
+            <RecycleDeleteButton table="orders" recordId={order.id} label="Cancel" />
           )}
         </div>
       </div>
