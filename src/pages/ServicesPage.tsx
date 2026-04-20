@@ -11,6 +11,7 @@ import { Wrench, Receipt as ReceiptIcon, Plus, Trash2, Package } from 'lucide-re
 import Receipt from '@/components/Receipt';
 import type { ServiceRecord } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
@@ -131,6 +132,7 @@ export default function ServicesPage() {
           <Button size="sm" variant="ghost" onClick={() => setReceiptService(s)}>
             <ReceiptIcon className="h-3.5 w-3.5" />
           </Button>
+          <RecycleDeleteButton table="services" recordId={s.id} />
         </div>
       </div>
     );

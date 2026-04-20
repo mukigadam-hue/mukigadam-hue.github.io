@@ -13,6 +13,7 @@ import BarcodeScanner from '@/components/BarcodeScanner';
 import { toast } from 'sonner';
 import type { ServiceRecord } from '@/context/BusinessContext';
 import AdSpace from '@/components/AdSpace';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 

@@ -13,6 +13,7 @@ import BarcodeScanHandler from '@/components/BarcodeScanHandler';
 import { toast } from 'sonner';
 import AdSpace from '@/components/AdSpace';
 import { BulkPackagingFields } from '@/components/BulkPackagingInfo';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -161,11 +162,14 @@ export default function PurchasesPage() {
             </div>
           ))}
         </div>
-        {!isPaid && (
-          <Button size="sm" variant="outline" className="mt-2" onClick={() => { setEditPaymentPurchase(p); setEditAmountPaid(String(p.amount_paid || 0)); }}>
-            💰 Update Payment
-          </Button>
-        )}
+        <div className="flex gap-1 mt-2">
+          {!isPaid && (
+            <Button size="sm" variant="outline" onClick={() => { setEditPaymentPurchase(p); setEditAmountPaid(String(p.amount_paid || 0)); }}>
+              💰 Update Payment
+            </Button>
+          )}
+          <RecycleDeleteButton table="purchases" recordId={p.id} label="Cancel" />
+        </div>
       </div>
     );
   }
