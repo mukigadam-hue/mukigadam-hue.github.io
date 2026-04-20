@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Trash2, Factory, AlertTriangle } from 'lucide-react';
 import AdSpace from '@/components/AdSpace';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
@@ -286,6 +287,7 @@ export default function FactoryProduction() {
                       {Number(p.waste_quantity) > 0 && (
                         <p className="text-xs text-warning mt-1">Waste: {p.waste_quantity} {p.waste_unit}</p>
                       )}
+                      <div className="mt-1"><RecycleDeleteButton table="factory_production" recordId={p.id} /></div>
                     </div>
                   </div>
                 </div>

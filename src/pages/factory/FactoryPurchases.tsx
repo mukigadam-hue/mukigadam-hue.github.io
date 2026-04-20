@@ -12,6 +12,7 @@ import { useBusiness } from '@/context/BusinessContext';
 import BarcodeScanner from '@/components/BarcodeScanner';
 import { toast } from 'sonner';
 import AdSpace from '@/components/AdSpace';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import { useSubmitLock } from '@/hooks/useSubmitLock';
@@ -318,6 +319,9 @@ export default function FactoryPurchases() {
                         <span className="tabular-nums shrink-0">{fmt(Number(item.subtotal))}</span>
                       </div>
                     ))}
+                  </div>
+                  <div className="mt-2">
+                    <RecycleDeleteButton table="purchases" recordId={p.id} label="Cancel" />
                   </div>
                 </div>
               ))}
