@@ -16,7 +16,8 @@ declare global {
   }
 }
 
-const GOOGLE_TEST_AD_ID = 'ca-app-pub-3940256099942544/6300978111';
+// Production AdMob Ad Unit ID
+const ADMOB_AD_UNIT_ID = 'ca-app-pub-9605564713228252/4713172172';
 
 interface BannerAdProps {
   position?: 'top' | 'bottom';
@@ -45,7 +46,7 @@ export default function BannerAd({ position = 'bottom', className, slotId }: Ban
         await window.despia?.AdMob?.hideBanner().catch(() => {});
         if (cancelled) return;
         await window.despia?.AdMob?.showBanner({
-          adId: GOOGLE_TEST_AD_ID,
+          adId: ADMOB_AD_UNIT_ID,
           position,
           autoShow: true,
         });
