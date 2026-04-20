@@ -11,6 +11,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Trash2, Plus, AlertTriangle, RotateCcw, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import AdSpace from '@/components/AdSpace';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
 const WASTE_TYPES = ['Expired', 'Faulty', 'Returned', 'Damaged', 'Spoiled', 'Other'];

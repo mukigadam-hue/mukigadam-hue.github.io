@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Plus, Receipt, Flame } from 'lucide-react';
 import AdSpace from '@/components/AdSpace';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
