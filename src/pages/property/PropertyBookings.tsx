@@ -21,6 +21,7 @@ import Receipt from '@/components/Receipt';
 import { toast } from 'sonner';
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import AdSpace from '@/components/AdSpace';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 import { addToOfflineQueue } from '@/lib/offlineStore';
 
 const PAYMENT_FREQUENCIES = [
@@ -1004,6 +1005,7 @@ export default function PropertyBookings() {
                 <FileText className="h-3 w-3 mr-1" />Receipt
               </Button>
             )}
+            <RecycleDeleteButton table="property_bookings" recordId={booking.id} label="Cancel" />
           </div>
         </CardContent>
       </Card>
