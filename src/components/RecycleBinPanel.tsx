@@ -107,8 +107,8 @@ export default function RecycleBinPanel() {
                   <p className="text-xs text-muted-foreground">{r.subtitle}</p>
                   <p className="text-[10px] text-muted-foreground mt-0.5">
                     {r.amount !== undefined && <span className="font-semibold">{fmt(r.amount)} · </span>}
-                    deleted {deletedAt.toLocaleDateString()} {deletedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    {r.deleted_by_name && ` by ${r.deleted_by_name}`}
+                    {t('recycleBin.deletedBy')} {deletedAt.toLocaleDateString()} {deletedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {r.deleted_by_name && ` ${t('recycleBin.by')} ${r.deleted_by_name}`}
                   </p>
                   <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{r.table.replace(/_/g, ' ')}</p>
                 </div>
@@ -119,7 +119,7 @@ export default function RecycleBinPanel() {
                     disabled={busyId === r.id}
                     onClick={() => onRestore(r)}
                   >
-                    <RotateCcw className="h-3 w-3 mr-1" />Restore
+                    <RotateCcw className="h-3 w-3 mr-1" />{t('recycleBin.restore')}
                   </Button>
                   {canPermanentDelete && (
                     <Button
@@ -128,7 +128,7 @@ export default function RecycleBinPanel() {
                       disabled={busyId === r.id}
                       onClick={() => onPermanentDelete(r)}
                     >
-                      <Trash2 className="h-3 w-3 mr-1" />Delete
+                      <Trash2 className="h-3 w-3 mr-1" />{t('recycleBin.delete')}
                     </Button>
                   )}
                 </div>
