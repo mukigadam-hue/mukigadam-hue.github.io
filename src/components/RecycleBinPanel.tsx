@@ -15,6 +15,7 @@ import {
 } from '@/lib/recycleBin';
 
 export default function RecycleBinPanel() {
+  const { t } = useTranslation();
   const { currentBusiness, userRole, refreshData } = useBusiness();
   const { fmt } = useCurrency();
   const [records, setRecords] = useState<RecycledRecord[]>([]);
@@ -38,11 +39,10 @@ export default function RecycleBinPanel() {
   async function onRestore(r: RecycledRecord) {
     setBusyId(r.id);
     try {
-      // Undo any stock side-effects applied on soft-delete
       await undoStockReversal(r.table, r.id);
       const ok = await restoreRecord(r.table, r.id);
       if (ok) {
-        toast.success('Restored from Recycle Bin');
+        toast.success(t('recycleBin.restored'));
         setRecords(prev => prev.filter(x => x.id !== r.id));
         await refreshData();
       }
@@ -53,15 +53,15 @@ export default function RecycleBinPanel() {
 
   async function onPermanentDelete(r: RecycledRecord) {
     if (!canPermanentDelete) {
-      toast.error('Only the owner or admin can permanently delete records');
+      toast.error(t('recycleBin.ownerOnly'));
       return;
     }
-    if (!window.confirm(`Permanently delete this record? This cannot be undone.\n\n${r.title}`)) return;
+    if (!window.confirm(`${t('recycleBin.confirmPermanent')}\n\n${r.title}`)) return;
     setBusyId(r.id);
     try {
       const ok = await permanentDeleteRecord(r.table, r.id);
       if (ok) {
-        toast.success('Permanently deleted');
+        toast.success(t('recycleBin.permanentlyDeleted'));
         setRecords(prev => prev.filter(x => x.id !== r.id));
       }
     } finally {
