@@ -714,45 +714,45 @@ export default function SettingsPage() {
       {/* ===== COMPREHENSIVE FINANCIAL SUMMARY ===== */}
       <Card className="shadow-card border-primary/20">
         <CardContent className="p-4 space-y-4">
-          <h2 className="text-lg font-bold flex items-center gap-2">📊 Financial Summary</h2>
+          <h2 className="text-lg font-bold flex items-center gap-2">📊 {t('settings.financial.title')}</h2>
 
           {/* 1. Total Capital */}
           <div className="p-3 rounded-lg bg-info/5 border border-info/20">
-            <div className="flex items-center gap-2 mb-1"><Wallet className="h-4 w-4 text-info" /><p className="text-sm font-semibold">1. Total Capital (Shopping Price)</p></div>
-            <p className="text-xs text-muted-foreground mb-1">Sum of (Buying Price × Quantity) for all active stock items</p>
+            <div className="flex items-center gap-2 mb-1"><Wallet className="h-4 w-4 text-info" /><p className="text-sm font-semibold">1. {t('settings.financial.totalCapital')}</p></div>
+            <p className="text-xs text-muted-foreground mb-1">{t('settings.financial.totalCapitalDesc')}</p>
             <p className="text-2xl font-bold text-info tabular-nums">{fmt(buyingCapital)}</p>
-            <p className="text-xs text-muted-foreground">{activeStock.length} items in stock</p>
+            <p className="text-xs text-muted-foreground">{activeStock.length} {t('settings.financial.itemsInStock')}</p>
           </div>
 
           {/* 2. Purchases */}
           <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-            <div className="flex items-center gap-2 mb-1"><ShoppingCart className="h-4 w-4 text-primary" /><p className="text-sm font-semibold">2. Purchases</p></div>
+            <div className="flex items-center gap-2 mb-1"><ShoppingCart className="h-4 w-4 text-primary" /><p className="text-sm font-semibold">2. {t('settings.financial.purchases')}</p></div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-xs text-muted-foreground">Today's Purchases</p>
+                <p className="text-xs text-muted-foreground">{t('settings.financial.todaysPurchases')}</p>
                 <p className="text-lg font-bold tabular-nums">{fmt(todayPurchaseTotal)}</p>
-                <p className="text-[10px] text-muted-foreground">{todayPurchases.length} purchase(s)</p>
+                <p className="text-[10px] text-muted-foreground">{todayPurchases.length} {t('settings.financial.purchaseCount')}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">All-Time Purchases</p>
+                <p className="text-xs text-muted-foreground">{t('settings.financial.allTimePurchases')}</p>
                 <p className="text-lg font-bold tabular-nums">{fmt(totalPurchases)}</p>
-                <p className="text-[10px] text-muted-foreground">{purchases.length} total</p>
+                <p className="text-[10px] text-muted-foreground">{purchases.length} {t('settings.financial.totalCount')}</p>
               </div>
             </div>
           </div>
 
           {/* 3. Stock Value (Wholesale) */}
           <div className="p-3 rounded-lg bg-accent/5 border border-accent/20">
-            <div className="flex items-center gap-2 mb-1"><TrendingUp className="h-4 w-4 text-accent" /><p className="text-sm font-semibold">3. Expected Stock Value (Wholesale)</p></div>
-            <p className="text-xs text-muted-foreground mb-1">Sum of (Wholesale Price × Quantity) for all active stock</p>
+            <div className="flex items-center gap-2 mb-1"><TrendingUp className="h-4 w-4 text-accent" /><p className="text-sm font-semibold">3. {t('settings.financial.expectedStockWholesale')}</p></div>
+            <p className="text-xs text-muted-foreground mb-1">{t('settings.financial.wholesaleDesc')}</p>
             <p className="text-2xl font-bold tabular-nums">{fmt(wholesaleCapital)}</p>
             {wholesaleCapital > retailCapital && (
               <div className="mt-1.5 p-2 rounded bg-destructive/10 border border-destructive/20">
-                <p className="text-xs text-destructive font-medium">⚠️ Wholesale value is higher than Retail — some items may have incorrect prices.</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">Check your stock items and ensure Retail Price ≥ Wholesale Price for each item.</p>
+                <p className="text-xs text-destructive font-medium">⚠️ {t('settings.financial.wholesaleWarning')}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{t('settings.financial.wholesaleWarningHint')}</p>
                 <div className="mt-1 space-y-0.5">
                   {activeStock.filter(s => Number(s.wholesale_price) > Number(s.retail_price) && s.quantity > 0).slice(0, 5).map(s => (
-                    <p key={s.id} className="text-[10px] text-destructive">• {s.name}: Wholesale {fmt(Number(s.wholesale_price))} &gt; Retail {fmt(Number(s.retail_price))}</p>
+                    <p key={s.id} className="text-[10px] text-destructive">• {s.name}: {fmt(Number(s.wholesale_price))} &gt; {fmt(Number(s.retail_price))}</p>
                   ))}
                 </div>
               </div>
@@ -761,44 +761,44 @@ export default function SettingsPage() {
 
           {/* 4. Stock Value (Retail) */}
           <div className="p-3 rounded-lg bg-success/5 border border-success/20">
-            <div className="flex items-center gap-2 mb-1"><TrendingUp className="h-4 w-4 text-success" /><p className="text-sm font-semibold">4. Expected Stock Value (Retail)</p></div>
-            <p className="text-xs text-muted-foreground mb-1">Sum of (Retail Price × Quantity) for all active stock</p>
+            <div className="flex items-center gap-2 mb-1"><TrendingUp className="h-4 w-4 text-success" /><p className="text-sm font-semibold">4. {t('settings.financial.expectedStockRetail')}</p></div>
+            <p className="text-xs text-muted-foreground mb-1">{t('settings.financial.retailDesc')}</p>
             <p className="text-2xl font-bold text-success tabular-nums">{fmt(retailCapital)}</p>
-            <p className="text-xs text-muted-foreground">Expected Profit (Retail − Buying): <span className="font-bold text-success">{fmt(retailCapital - buyingCapital)}</span></p>
+            <p className="text-xs text-muted-foreground">{t('settings.financial.expectedProfit')}: <span className="font-bold text-success">{fmt(retailCapital - buyingCapital)}</span></p>
           </div>
 
           {/* 5. Today's Revenue */}
           <div className="p-3 rounded-lg bg-success/5 border border-success/20">
-            <div className="flex items-center gap-2 mb-1"><DollarSign className="h-4 w-4 text-success" /><p className="text-sm font-semibold">5. Today's Revenue</p></div>
+            <div className="flex items-center gap-2 mb-1"><DollarSign className="h-4 w-4 text-success" /><p className="text-sm font-semibold">5. {t('settings.financial.todaysRevenue')}</p></div>
             <p className="text-2xl font-bold text-success tabular-nums">{fmt(todayTotalRevenue)}</p>
-            <p className="text-xs text-muted-foreground mb-2">Cash collected today: <span className="font-bold text-success">{fmt(todayTotalCashCollected)}</span></p>
+            <p className="text-xs text-muted-foreground mb-2">{t('settings.financial.cashCollectedToday')}: <span className="font-bold text-success">{fmt(todayTotalCashCollected)}</span></p>
 
             <div className="space-y-1.5 text-sm">
               <div className="flex justify-between items-center p-2 rounded bg-background/80">
-                <span className="text-xs">📦 Stock Sales ({todaySales.length})</span>
+                <span className="text-xs">📦 {t('settings.financial.stockSales')} ({todaySales.length})</span>
                 <span className="font-bold tabular-nums">{fmt(todayStockSalesRevenue)}</span>
               </div>
               {todaySalesFull.length > 0 && (
                 <div className="flex justify-between items-center p-1.5 rounded bg-success/5 ml-4">
-                  <span className="text-xs text-success">✅ Paid Full ({todaySalesFull.length})</span>
+                  <span className="text-xs text-success">✅ {t('settings.financial.paidFull')} ({todaySalesFull.length})</span>
                   <span className="font-semibold tabular-nums text-success">{fmt(todaySalesFullTotal)}</span>
                 </div>
               )}
               {todaySalesPartial.length > 0 && (
                 <div className="flex justify-between items-center p-1.5 rounded bg-warning/5 ml-4">
-                  <span className="text-xs text-warning">⚠️ Partial ({todaySalesPartial.length}) — Paid: {fmt(todaySalesPartialPaid)}</span>
+                  <span className="text-xs text-warning">⚠️ {t('settings.financial.partial')} ({todaySalesPartial.length}) — {t('settings.financial.paid')}: {fmt(todaySalesPartialPaid)}</span>
                   <span className="font-semibold tabular-nums">{fmt(todaySalesPartialTotal)}</span>
                 </div>
               )}
               {todaySalesCredit.length > 0 && (
                 <div className="flex justify-between items-center p-1.5 rounded bg-destructive/5 ml-4">
-                  <span className="text-xs text-destructive">🔴 Credit ({todaySalesCredit.length})</span>
+                  <span className="text-xs text-destructive">🔴 {t('settings.financial.credit')} ({todaySalesCredit.length})</span>
                   <span className="font-semibold tabular-nums text-destructive">{fmt(todaySalesCreditTotal)}</span>
                 </div>
               )}
               {todayOrders.length > 0 && (
                 <div className="flex justify-between items-center p-2 rounded bg-background/80">
-                  <span className="text-xs">📋 Orders ({todayOrders.length})</span>
+                  <span className="text-xs">📋 {t('settings.financial.orders')} ({todayOrders.length})</span>
                   <span className="font-bold tabular-nums">{fmt(todayOrdersTotal)}</span>
                 </div>
               )}
@@ -807,69 +807,69 @@ export default function SettingsPage() {
 
           {/* 6. Service Fee Revenue */}
           <div className="p-3 rounded-lg bg-accent/5 border border-accent/20">
-            <div className="flex items-center gap-2 mb-1"><Wrench className="h-4 w-4 text-accent" /><p className="text-sm font-semibold">6. Service Fee Revenue</p></div>
-            <p className="text-xs text-muted-foreground mb-1">Service labor fees only (parts used from stock are NOT included here)</p>
+            <div className="flex items-center gap-2 mb-1"><Wrench className="h-4 w-4 text-accent" /><p className="text-sm font-semibold">6. {t('settings.financial.serviceFeeRevenue')}</p></div>
+            <p className="text-xs text-muted-foreground mb-1">{t('settings.financial.serviceFeeDesc')}</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-xs text-muted-foreground">Today's Service Fees</p>
+                <p className="text-xs text-muted-foreground">{t('settings.financial.todaysServiceFees')}</p>
                 <p className="text-lg font-bold tabular-nums">{fmt(todayTotalServiceFees)}</p>
-                <p className="text-[10px] text-muted-foreground">{todayServices.length} service(s) · Cash: {fmt(todayServiceCashCollected)}</p>
+                <p className="text-[10px] text-muted-foreground">{todayServices.length} {t('settings.financial.serviceCount')} · {t('settings.financial.cash')}: {fmt(todayServiceCashCollected)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">All-Time Service Fees</p>
+                <p className="text-xs text-muted-foreground">{t('settings.financial.allTimeServiceFees')}</p>
                 <p className="text-lg font-bold tabular-nums">{fmt(totalServiceRevenue)}</p>
-                <p className="text-[10px] text-muted-foreground">{services.length} total services</p>
+                <p className="text-[10px] text-muted-foreground">{services.length} {t('settings.financial.totalServices')}</p>
               </div>
             </div>
           </div>
 
           {/* 7. Expenses */}
           <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/20">
-            <div className="flex items-center gap-2 mb-1"><Flame className="h-4 w-4 text-destructive" /><p className="text-sm font-semibold">7. Non-Production Expenses</p></div>
+            <div className="flex items-center gap-2 mb-1"><Flame className="h-4 w-4 text-destructive" /><p className="text-sm font-semibold">7. {t('settings.financial.nonProductionExpenses')}</p></div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-xs text-muted-foreground">Today's Expenses</p>
+                <p className="text-xs text-muted-foreground">{t('settings.financial.todaysExpenses')}</p>
                 <p className="text-lg font-bold text-destructive tabular-nums">{fmt(todayExpenseTotal)}</p>
-                <p className="text-[10px] text-muted-foreground">{todayExpenses.length} expense(s)</p>
+                <p className="text-[10px] text-muted-foreground">{todayExpenses.length} {t('settings.financial.expenseCount')}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">All-Time Expenses</p>
+                <p className="text-xs text-muted-foreground">{t('settings.financial.allTimeExpenses')}</p>
                 <p className="text-lg font-bold text-destructive tabular-nums">{fmt(totalExpenses)}</p>
-                <p className="text-[10px] text-muted-foreground">{expenses.length} total</p>
+                <p className="text-[10px] text-muted-foreground">{expenses.length} {t('settings.financial.totalCount')}</p>
               </div>
             </div>
           </div>
 
           {/* Net Position Today */}
           <div className={`p-3 rounded-lg border ${todayNetPosition >= 0 ? 'bg-success/5 border-success/20' : 'bg-destructive/5 border-destructive/20'}`}>
-            <p className="text-sm font-semibold mb-1">📈 Today's Net Position</p>
-            <p className="text-xs text-muted-foreground">Cash Collected − Expenses − Purchases</p>
+            <p className="text-sm font-semibold mb-1">📈 {t('settings.financial.todaysNetPosition')}</p>
+            <p className="text-xs text-muted-foreground">{t('settings.financial.netPositionDesc')}</p>
             <p className={`text-2xl font-bold tabular-nums ${todayNetPosition >= 0 ? 'text-success' : 'text-destructive'}`}>{fmt(todayNetPosition)}</p>
             <div className="mt-2 text-xs text-muted-foreground space-y-0.5">
-              <p>+ Cash Collected: {fmt(todayTotalCashCollected)}</p>
-              <p>− Expenses: {fmt(todayExpenseTotal)}</p>
-              <p>− Purchases: {fmt(todayPurchaseTotal)}</p>
+              <p>+ {t('settings.financial.cashCollected')}: {fmt(todayTotalCashCollected)}</p>
+              <p>− {t('settings.financial.expenses')}: {fmt(todayExpenseTotal)}</p>
+              <p>− {t('settings.financial.purchases')}: {fmt(todayPurchaseTotal)}</p>
             </div>
           </div>
 
           {/* All-time Revenue Overview */}
           <div className="p-3 rounded-lg bg-muted/30 border">
-            <p className="text-sm font-semibold mb-2">📊 All-Time Revenue Overview</p>
+            <p className="text-sm font-semibold mb-2">📊 {t('settings.financial.allTimeRevenueOverview')}</p>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <p className="text-xs text-muted-foreground">Total Revenue</p>
+                <p className="text-xs text-muted-foreground">{t('settings.financial.totalRevenue')}</p>
                 <p className="text-lg font-bold text-success tabular-nums">{fmt(totalRevenue)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Stock Sales</p>
+                <p className="text-xs text-muted-foreground">{t('settings.financial.stockSales')}</p>
                 <p className="text-lg font-bold tabular-nums">{fmt(totalStockSalesRevenue)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Service Fees</p>
+                <p className="text-xs text-muted-foreground">{t('settings.financial.serviceFees')}</p>
                 <p className="text-lg font-bold tabular-nums">{fmt(totalServiceRevenue)}</p>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Total Expenses</p>
+                <p className="text-xs text-muted-foreground">{t('settings.financial.totalExpenses')}</p>
                 <p className="text-lg font-bold text-destructive tabular-nums">{fmt(totalExpenses)}</p>
               </div>
             </div>
