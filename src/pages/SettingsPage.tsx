@@ -1070,16 +1070,16 @@ export default function SettingsPage() {
       {/* Currency Setting */}
       <Card className="shadow-card">
         <CardContent className="p-4 space-y-3">
-          <h2 className="text-base font-semibold">Currency Symbol</h2>
-          <p className="text-xs text-muted-foreground">Set the currency symbol used throughout the app (e.g. KSh, $, £, €, UGX)</p>
+          <h2 className="text-base font-semibold">{t('settings.currencySymbol')}</h2>
+          <p className="text-xs text-muted-foreground">{t('settings.currencySymbolDesc')}</p>
           <div className="flex gap-3 items-end">
             <div className="flex-1">
-              <Label>Currency Symbol</Label>
+              <Label>{t('settings.currencySymbol')}</Label>
               <Input value={currencyInput} onChange={e => setCurrencyInput(e.target.value)} placeholder="KSh" maxLength={6} />
             </div>
-            <Button onClick={handleSaveCurrency}><Save className="h-4 w-4 mr-2" />Save</Button>
+            <Button onClick={handleSaveCurrency}><Save className="h-4 w-4 mr-2" />{t('common.save')}</Button>
           </div>
-          <p className="text-xs text-muted-foreground">Preview: <span className="font-semibold text-success">{currencyInput || 'KSh'} 1,000.00</span></p>
+          <p className="text-xs text-muted-foreground">{t('settings.preview')}: <span className="font-semibold text-success">{currencyInput || 'KSh'} 1,000.00</span></p>
         </CardContent>
       </Card>
 
