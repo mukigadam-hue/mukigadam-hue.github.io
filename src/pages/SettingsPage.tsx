@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useBusiness } from '@/context/BusinessContext';
 import { useCurrency } from '@/hooks/useCurrency';
 import { countries, getCountryByCode } from '@/lib/countries';
@@ -257,6 +258,7 @@ function DiscoverVisibilityCard({ businessId }: { businessId: string }) {
 }
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { currentBusiness, updateBusiness, stock, sales, purchases, services, expenses, orders, businesses, memberships, setCurrentBusinessId, userRole, getReceipts, restoreStockItem, permanentDeleteStockItem, deleteBusiness, refreshData } = useBusiness();
