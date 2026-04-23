@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import AdSpace from '@/components/AdSpace';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 const CATEGORIES = [
   { value: 'house', label: '🏠 House / Apartment', subs: ['apartment', 'single-room', 'bedsitter', 'studio', 'duplex', 'mansion', 'hostel', 'commercial'] },
@@ -337,9 +338,7 @@ export default function PropertyAssets() {
                         </Button>
                       )}
                       {(userRole === 'owner' || userRole === 'admin') && (
-                        <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive" onClick={() => { if (confirm('Delete this asset?')) deleteAsset(asset.id); }}>
-                          <Trash2 className="h-3 w-3 mr-1" />Delete
-                        </Button>
+                        <RecycleDeleteButton table="property_assets" recordId={asset.id} label="Delete" />
                       )}
                     </div>
                   </CardContent>

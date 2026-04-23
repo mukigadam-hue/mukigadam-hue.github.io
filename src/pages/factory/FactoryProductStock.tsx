@@ -14,6 +14,7 @@ import BarcodeScanner from '@/components/BarcodeScanner';
 import { toast } from 'sonner';
 import AdSpace from '@/components/AdSpace';
 import BulkPackagingInfo, { BulkPackagingFields } from '@/components/BulkPackagingInfo';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 import { toSentenceCase } from '@/lib/utils';
 
@@ -157,7 +158,7 @@ export default function FactoryProductStock() {
                         <TableCell>
                           <div className="flex gap-1">
                             <Button variant="ghost" size="icon" onClick={() => openEdit(item)}><Edit2 className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => deleteStockItem(item.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                            <RecycleDeleteButton table="stock_items" recordId={item.id} />
                           </div>
                         </TableCell>
                       </TableRow>

@@ -145,7 +145,7 @@ export default function FactoryExpenses() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-destructive tabular-nums">{fmt(Number(e.amount))}</span>
-                    <Button variant="ghost" size="icon" onClick={() => deleteExpense(e.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                    <RecycleDeleteButton table="factory_expenses" recordId={e.id} />
                   </div>
                 </div>
               ))}
