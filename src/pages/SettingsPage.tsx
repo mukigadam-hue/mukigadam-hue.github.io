@@ -431,8 +431,25 @@ export default function SettingsPage() {
 
   // Today's total cash collected
   const todayTotalCashCollected = todaySalesCashCollected + todayServiceCashCollected;
-  // Today's total revenue (grand totals regardless of payment)
-  const todayTotalRevenue = todaySalesGrandTotal + todayServiceFeeTotal + todaySaleServiceFees;
+  // Today's total revenue (grand totals regardless of payment) — incl. customer orders received
+  const todayCustomerOrders = todayOrders.filter(o => o.type !== 'request');
+  const todayCustomerOrdersTotal = todayCustomerOrders.reduce((sum, o) => sum + Number(o.grand_total), 0);
+  const todayTotalRevenue = todaySalesGrandTotal + todayServiceFeeTotal + todaySaleServiceFees + todayCustomerOrdersTotal;
+
+  // ====== THIS MONTH'S REVENUE (Sales + Services + Customer Orders received) ======
+  const monthSales = sales.filter(s => isThisMonth(s.created_at));
+  const monthSalesGrandTotal = monthSales.reduce((sum, s) => sum + Number(s.grand_total), 0);
+  const monthSalesCashCollected = monthSales.reduce((sum, s) => sum + Number(s.amount_paid), 0);
+  const monthServices = services.filter(s => isThisMonth(s.created_at));
+  const monthServiceFeeTotal = monthServices.reduce((sum, s) => sum + Number(s.cost), 0);
+  const monthServiceCashCollected = monthServices.reduce((sum, s) => sum + Number(s.amount_paid), 0);
+  const monthSaleServiceFees = monthSales.reduce((sum, s) => {
+    return sum + s.items.filter(i => i.price_type === 'service').reduce((t, i) => t + Number(i.subtotal), 0);
+  }, 0);
+  const monthCustomerOrders = orders.filter(o => o.type !== 'request' && isThisMonth(o.created_at));
+  const monthCustomerOrdersTotal = monthCustomerOrders.reduce((sum, o) => sum + Number(o.grand_total), 0);
+  const monthTotalRevenue = monthSalesGrandTotal + monthServiceFeeTotal + monthSaleServiceFees + monthCustomerOrdersTotal;
+  const monthTotalCashCollected = monthSalesCashCollected + monthServiceCashCollected;
 
   // Net position today
   const todayNetPosition = todayTotalCashCollected - todayExpenseTotal - todayPurchaseTotal;
