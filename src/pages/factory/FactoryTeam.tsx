@@ -174,25 +174,25 @@ export default function FactoryTeam() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="h-6 w-6" /> {t('team.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {activeMembers.length} active members{isOwnerOrAdmin && ` · Monthly salary: ${fmt(totalSalary)}`}
+            {activeMembers.length} {t('factoryUI.activeMembers')}{isOwnerOrAdmin && ` · ${t('factoryUI.monthlySalary')}: ${fmt(totalSalary)}`}
           </p>
         </div>
         {isOwnerOrAdmin && <Button onClick={() => {
           const activeCount = teamMembers.filter(w => w.is_active).length;
           if (activeCount >= maxWorkers) {
-            toast.info(`Free plan allows up to ${maxWorkers} workers. Upgrade to Premium ($52/year) for unlimited.`);
+            toast.info(t('factoryUI.freePlanLimit', { count: maxWorkers }));
             return;
           }
           resetForm(); setShowAdd(true);
-        }}><Plus className="h-4 w-4 mr-1" />Add Worker</Button>}
+        }}><Plus className="h-4 w-4 mr-1" />{t('factoryUI.addWorker')}</Button>}
       </div>
 
       <AdSpace variant="banner" />
 
       <Tabs defaultValue="team" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="team" className="flex items-center gap-2"><Users className="h-4 w-4" /> Team</TabsTrigger>
-          <TabsTrigger value="payments" className="flex items-center gap-2"><Wallet className="h-4 w-4" /> Payments</TabsTrigger>
+          <TabsTrigger value="team" className="flex items-center gap-2"><Users className="h-4 w-4" /> {t('factoryUI.team')}</TabsTrigger>
+          <TabsTrigger value="payments" className="flex items-center gap-2"><Wallet className="h-4 w-4" /> {t('factoryUI.payments')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="team" className="space-y-6 mt-4">
@@ -236,18 +236,18 @@ export default function FactoryTeam() {
           {isOwnerOrAdmin && (
             <Card className="shadow-card border-dashed">
               <CardContent className="p-4 space-y-3">
-                <h2 className="text-sm font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> 👔 Invite My Worker to App</h2>
-                <p className="text-xs text-muted-foreground">As the <strong>owner/boss</strong>, generate a code and send it to your worker. They will enter it on their phone to join your factory team.</p>
+                <h2 className="text-sm font-semibold flex items-center gap-2"><UserPlus className="h-4 w-4" /> 👔 {t('factoryUI.inviteWorkerToApp')}</h2>
+                <p className="text-xs text-muted-foreground">{t('factoryUI.ownerInviteHelp')}</p>
                 {workerCode ? (
                   <div className="space-y-2">
                     <div className="rounded-lg p-3 text-center bg-primary/5">
                       <span className="text-2xl font-mono font-bold tracking-widest">{workerCode}</span>
-                      <p className="text-xs text-muted-foreground mt-1">🔐 Send this code to your worker — Expires in 7 days</p>
+                      <p className="text-xs text-muted-foreground mt-1">🔐 {t('factoryUI.sendCodeToWorker')}</p>
                     </div>
                     <FactoryShareButtons code={workerCode} />
                   </div>
                 ) : (
-                  <Button onClick={handleGenCode} disabled={loading} size="sm">Generate Code for My Worker</Button>
+                  <Button onClick={handleGenCode} disabled={loading} size="sm">{t('factoryUI.generateCode')}</Button>
                 )}
               </CardContent>
             </Card>
@@ -256,11 +256,11 @@ export default function FactoryTeam() {
           {/* Received an invite code - available to everyone */}
           <Card className="shadow-card border-dashed border-primary/30">
             <CardContent className="p-4 space-y-3">
-              <h2 className="text-sm font-semibold flex items-center gap-2"><Send className="h-4 w-4" /> 📩 I Received an Invite Code</h2>
-              <p className="text-xs text-muted-foreground">If your <strong>boss or factory owner</strong> sent you a code, enter it here to join their team as a worker.</p>
+              <h2 className="text-sm font-semibold flex items-center gap-2"><Send className="h-4 w-4" /> 📩 {t('factoryUI.iReceivedInviteCode')}</h2>
+              <p className="text-xs text-muted-foreground">{t('factoryUI.workerInviteHelp')}</p>
               <div className="flex gap-2">
-                <Input placeholder="Enter invite code (e.g. UG-ABC123)" value={redeemCode} onChange={e => setRedeemCode(e.target.value.toUpperCase())} className="font-mono" />
-                <Button onClick={handleRedeem} disabled={loading || !redeemCode.trim()} size="sm">{loading ? 'Joining...' : 'Join'}</Button>
+                <Input placeholder={t('factoryUI.enterInviteCode')} value={redeemCode} onChange={e => setRedeemCode(e.target.value.toUpperCase())} className="font-mono" />
+                <Button onClick={handleRedeem} disabled={loading || !redeemCode.trim()} size="sm">{loading ? t('factoryUI.joining') : t('factoryUI.join')}</Button>
               </div>
             </CardContent>
           </Card>
