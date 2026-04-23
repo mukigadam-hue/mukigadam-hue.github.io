@@ -85,8 +85,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string, phone?: string) => {
+    const normalizedEmail = email.trim().toLowerCase();
     const { error } = await supabase.auth.signUp({
-      email,
+      email: normalizedEmail,
       password,
       options: {
         emailRedirectTo: window.location.origin,
@@ -97,12 +98,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const normalizedEmail = email.trim().toLowerCase();
+    // Defensive: ensure no stale session blocks a fresh sign-in with a different account
+    try {
+      const { data: { session: existing } } = await supabase.auth.getSession();
+      if (existing && existing.user?.email?.toLowerCase() !== normalizedEmail) {
+        await supabase.auth.signOut();
+      }
+    } catch {}
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: normalizedEmail,
+      password,
+    });
     return { error };
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch {}
+    // Clear ALL Supabase auth keys from localStorage to prevent stale-session issues
+    // when signing in with a different account afterwards.
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < window.localStorage.length; i++) {
+        const key = window.localStorage.key(i);
+        if (key && (key.startsWith('sb-') || key.startsWith('supabase.auth.'))) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach((k) => window.localStorage.removeItem(k));
+    } catch {}
     setSession(null);
     setUser(null);
   };
