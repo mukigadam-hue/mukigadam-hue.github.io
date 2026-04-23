@@ -207,15 +207,15 @@ export default function PurchasesPage() {
 
       <Card className="shadow-card">
         <CardContent className="p-4 space-y-4">
-          <h2 className="text-base font-semibold">Record New Purchase</h2>
+          <h2 className="text-base font-semibold">{t('purchases.recordNewPurchase')}</h2>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Supplier</Label>
-              <Input value={supplier} onChange={e => setSupplier(e.target.value)} placeholder="Supplier name" />
+              <Label>{t('purchases.supplier')}</Label>
+              <Input value={supplier} onChange={e => setSupplier(e.target.value)} placeholder={t('purchases.supplierPh')} />
             </div>
             <div>
-              <Label>Recorded By {roleLabel}</Label>
-              <Input value={recordedBy} onChange={e => setRecordedBy(e.target.value)} onBlur={() => setRecordedBy(toTitleCase(recordedBy))} placeholder="Your name (auto-filled)" />
+              <Label>{t('purchases.recordedBy')} {roleLabel}</Label>
+              <Input value={recordedBy} onChange={e => setRecordedBy(e.target.value)} onBlur={() => setRecordedBy(toTitleCase(recordedBy))} placeholder={t('sales.sellerNamePh')} />
               {currentBusiness && <p className="text-[10px] text-muted-foreground mt-0.5">📍 {currentBusiness.name}</p>}
             </div>
           </div>
@@ -271,8 +271,8 @@ export default function PurchasesPage() {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <Label>Item Name</Label>
-              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onBlur={() => applyCase('name')} placeholder="Item name (auto-filled from picker)" />
+              <Label>{t('purchases.itemName')}</Label>
+              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onBlur={() => applyCase('name')} placeholder={t('purchases.itemNamePh')} />
             </div>
             <div>
               <Label>Category</Label>
@@ -308,14 +308,14 @@ export default function PurchasesPage() {
           />
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Quantity</Label>
+              <Label>{t('sales.quantity')}</Label>
               <Input type="number" min="0.01" step="0.01" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
                 readOnly={parseInt(form.pieces_per_carton) > 0}
                 className={parseInt(form.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
               {parseInt(form.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
             </div>
           </div>
-          <Button onClick={addItem} disabled={!form.name.trim()} className="w-full"><Plus className="h-4 w-4 mr-1" />Add Item</Button>
+          <Button onClick={addItem} disabled={!form.name.trim()} className="w-full"><Plus className="h-4 w-4 mr-1" />{t('purchases.addItem')}</Button>
 
            {items.length > 0 && (
             <>
