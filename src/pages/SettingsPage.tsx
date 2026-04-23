@@ -813,11 +813,23 @@ export default function SettingsPage() {
             <p className="text-xs text-muted-foreground">{t('settings.financial.expectedProfit')}: <span className="font-bold text-success">{fmt(retailCapital - buyingCapital)}</span></p>
           </div>
 
-          {/* 5. Today's Revenue */}
+          {/* 5. Revenue (Today + This Month) */}
           <div className="p-3 rounded-lg bg-success/5 border border-success/20">
             <div className="flex items-center gap-2 mb-1"><DollarSign className="h-4 w-4 text-success" /><p className="text-sm font-semibold">5. {t('settings.financial.todaysRevenue')}</p></div>
-            <p className="text-2xl font-bold text-success tabular-nums">{fmt(todayTotalRevenue)}</p>
-            <p className="text-xs text-muted-foreground mb-2">{t('settings.financial.cashCollectedToday')}: <span className="font-bold text-success">{fmt(todayTotalCashCollected)}</span></p>
+            <p className="text-[10px] text-muted-foreground mb-2">{t('settings.financial.revenueIncludesOrders')}</p>
+
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="p-2 rounded-lg bg-background/80 border border-success/10">
+                <p className="text-[11px] text-muted-foreground">{t('settings.financial.todaysRevenue')}</p>
+                <p className="text-xl font-bold text-success tabular-nums">{fmt(todayTotalRevenue)}</p>
+                <p className="text-[10px] text-muted-foreground">{t('settings.financial.cashCollectedToday')}: <span className="font-semibold text-success">{fmt(todayTotalCashCollected)}</span></p>
+              </div>
+              <div className="p-2 rounded-lg bg-background/80 border border-success/20">
+                <p className="text-[11px] text-muted-foreground">{t('settings.financial.thisMonthRevenue')}</p>
+                <p className="text-xl font-bold text-success tabular-nums">{fmt(monthTotalRevenue)}</p>
+                <p className="text-[10px] text-muted-foreground">{t('settings.financial.cashCollectedThisMonth')}: <span className="font-semibold text-success">{fmt(monthTotalCashCollected)}</span></p>
+              </div>
+            </div>
 
             <div className="space-y-1.5 text-sm">
               <div className="flex justify-between items-center p-2 rounded bg-background/80">
@@ -842,10 +854,10 @@ export default function SettingsPage() {
                   <span className="font-semibold tabular-nums text-destructive">{fmt(todaySalesCreditTotal)}</span>
                 </div>
               )}
-              {todayOrders.length > 0 && (
+              {todayCustomerOrders.length > 0 && (
                 <div className="flex justify-between items-center p-2 rounded bg-background/80">
-                  <span className="text-xs">📋 {t('settings.financial.orders')} ({todayOrders.length})</span>
-                  <span className="font-bold tabular-nums">{fmt(todayOrdersTotal)}</span>
+                  <span className="text-xs">📋 {t('settings.financial.orders')} ({todayCustomerOrders.length})</span>
+                  <span className="font-bold tabular-nums">{fmt(todayCustomerOrdersTotal)}</span>
                 </div>
               )}
             </div>
