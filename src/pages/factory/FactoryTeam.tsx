@@ -53,6 +53,7 @@ function FactoryShareButtons({ code }: { code: string }) {
 }
 
 export default function FactoryTeam() {
+  const { t } = useTranslation();
   const { teamMembers, addTeamMember, updateTeamMember, deleteTeamMember } = useFactory();
   const { currentBusiness, userRole, memberships, generateInviteCode, redeemInviteCode, getMembers, removeMember, updateMemberRole } = useBusiness();
   const { user } = useAuth();
@@ -171,7 +172,7 @@ export default function FactoryTeam() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="h-6 w-6" /> Factory Team</h1>
+          <h1 className="text-2xl font-bold flex items-center gap-2"><Users className="h-6 w-6" /> {t('team.title')}</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {activeMembers.length} active members{isOwnerOrAdmin && ` · Monthly salary: ${fmt(totalSalary)}`}
           </p>
