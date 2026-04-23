@@ -160,6 +160,11 @@ export default function OrdersPage() {
   const inboxOrders = orders.filter(o => o.type === 'inbox');
   const myRequests = orders.filter(o => o.type === 'request');
   const requestsNeedingAction = myRequests.filter(o => o.status === 'priced' || o.status === 'confirmed').length;
+  // Yellow badge on "Customers" tab: only count UNREAD notifications related to incoming orders.
+  // Once the user reads/opens those notifications, the badge disappears.
+  const unreadCustomerInboxCount = notifications.filter(
+    n => !n.is_read && (n.type === 'new_order' || n.type === 'order_confirmed')
+  ).length;
 
   // Load orders for payment verification tab (all types with payment activity)
   async function loadCheckoutOrders() {
@@ -1680,7 +1685,7 @@ export default function OrdersPage() {
           {!fromDiscover && (
             <TabsTrigger value="inbox" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
               📥 Customers
-              {inboxOrders.length > 0 && <span className="ml-0.5 bg-warning text-warning-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold">{inboxOrders.length}</span>}
+              {unreadCustomerInboxCount > 0 && <span className="ml-0.5 bg-warning text-warning-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold">{unreadCustomerInboxCount}</span>}
             </TabsTrigger>
           )}
           <TabsTrigger value="my_requests" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1 relative">
