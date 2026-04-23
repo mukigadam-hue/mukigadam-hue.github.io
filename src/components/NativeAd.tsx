@@ -1,25 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAdRefresh } from '@/hooks/useAdRefresh';
-
-declare global {
-  interface Window {
-    despia?: {
-      AdMob?: {
-        showBanner: (options: {
-          adId: string;
-          position?: 'top' | 'bottom';
-          autoShow?: boolean;
-        }) => Promise<void>;
-        hideBanner: () => Promise<void>;
-        showNative?: (options: {
-          adId: string;
-          containerId?: string;
-        }) => Promise<void>;
-        hideNative?: (containerId?: string) => Promise<void>;
-      };
-    };
-  }
-}
+import '@/types/despia.d.ts';
 
 // Production AdMob Native Ad Unit IDs
 export const NATIVE_AD_UNIT_HOME = 'ca-app-pub-9605564713228252/3146574176';
