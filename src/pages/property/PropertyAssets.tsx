@@ -60,8 +60,8 @@ function AssetForm({ asset, onSave, onClose }: { asset?: PropertyAsset; onSave: 
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name.trim()) { toast.error('Name is required'); return; }
-    if (!form.location.trim()) { toast.error('Location is required'); return; }
+    if (!form.name.trim()) { toast.error(t('propertyUI.nameRequired')); return; }
+    if (!form.location.trim()) { toast.error(t('propertyUI.locationRequired')); return; }
     onSave({
       ...form,
       name: toSentenceCase(form.name.trim()),
@@ -78,12 +78,12 @@ function AssetForm({ asset, onSave, onClose }: { asset?: PropertyAsset; onSave: 
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-1">
       <div className="grid grid-cols-2 gap-3">
         <div className="col-span-2">
-          <Label>Asset Name *</Label>
-          <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Room 1 - front, Room 2 - back, Toyota Hiace" required />
-          <p className="text-[10px] text-muted-foreground mt-0.5">💡 For different prices, add each room/unit as a separate asset (e.g. "Room 1 - Front", "Room 2 - Back")</p>
+          <Label>{t('propertyUI.assetName')} *</Label>
+          <Input value={form.name} onChange={e => setForm(p => ({ ...p, name: e.target.value }))} placeholder={t('propertyUI.assetNamePh')} required />
+          <p className="text-[10px] text-muted-foreground mt-0.5">💡 {t('propertyUI.assetNameTip')}</p>
         </div>
         <div>
-          <Label>Category</Label>
+          <Label>{t('propertyUI.category')}</Label>
           <Select value={form.category} onValueChange={v => setForm(p => ({ ...p, category: v, sub_category: '' }))}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -92,29 +92,29 @@ function AssetForm({ asset, onSave, onClose }: { asset?: PropertyAsset; onSave: 
           </Select>
         </div>
         <div>
-          <Label>Sub-Category</Label>
+          <Label>{t('propertyUI.subCategory')}</Label>
           <Select value={form.sub_category} onValueChange={v => setForm(p => ({ ...p, sub_category: v }))}>
-            <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
+            <SelectTrigger><SelectValue placeholder={t('propertyUI.selectPh')} /></SelectTrigger>
             <SelectContent>
               {catInfo?.subs.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
         <div className="col-span-2">
-          <Label><MapPin className="h-3 w-3 inline mr-1" />Location *</Label>
-          <Input value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} placeholder="City, Area" required />
+          <Label><MapPin className="h-3 w-3 inline mr-1" />{t('propertyUI.location')} *</Label>
+          <Input value={form.location} onChange={e => setForm(p => ({ ...p, location: e.target.value }))} placeholder={t('propertyUI.locationPh')} required />
         </div>
 
         {/* House-specific: rooms */}
         {form.category === 'house' && (
           <>
             <div>
-              <Label><DoorOpen className="h-3 w-3 inline mr-1" />Total Rooms</Label>
-              <Input type="number" min="0" value={form.total_rooms || ''} onChange={e => setForm(p => ({ ...p, total_rooms: +e.target.value }))} placeholder="e.g. 10" />
+              <Label><DoorOpen className="h-3 w-3 inline mr-1" />{t('propertyUI.totalRooms')}</Label>
+              <Input type="number" min="0" value={form.total_rooms || ''} onChange={e => setForm(p => ({ ...p, total_rooms: +e.target.value }))} placeholder={t('propertyUI.totalRoomsPh')} />
             </div>
             <div>
-              <Label>Room Size</Label>
-              <Input value={form.room_size} onChange={e => setForm(p => ({ ...p, room_size: e.target.value }))} placeholder="e.g. 4m x 3m" />
+              <Label>{t('propertyUI.roomSize')}</Label>
+              <Input value={form.room_size} onChange={e => setForm(p => ({ ...p, room_size: e.target.value }))} placeholder={t('propertyUI.roomSizePh')} />
             </div>
           </>
         )}
@@ -123,11 +123,11 @@ function AssetForm({ asset, onSave, onClose }: { asset?: PropertyAsset; onSave: 
         {(form.category === 'land' || form.category === 'house') && (
           <>
             <div>
-              <Label>Area Size</Label>
+              <Label>{t('propertyUI.areaSize')}</Label>
               <Input type="number" value={form.area_size || ''} onChange={e => setForm(p => ({ ...p, area_size: +e.target.value }))} />
             </div>
             <div>
-              <Label>Unit</Label>
+              <Label>{t('propertyUI.unit')}</Label>
               <Select value={form.area_unit} onValueChange={v => setForm(p => ({ ...p, area_unit: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -142,52 +142,52 @@ function AssetForm({ asset, onSave, onClose }: { asset?: PropertyAsset; onSave: 
         )}
 
         <div className="col-span-2">
-          <Label>Description</Label>
-          <Textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder="Describe your asset..." rows={3} />
+          <Label>{t('propertyUI.description')}</Label>
+          <Textarea value={form.description} onChange={e => setForm(p => ({ ...p, description: e.target.value }))} placeholder={t('propertyUI.descriptionPh')} rows={3} />
         </div>
       </div>
 
       <div className="border-t pt-3">
-        <p className="text-xs font-semibold mb-2">Pricing ({currency})</p>
+        <p className="text-xs font-semibold mb-2">{t('propertyUI.pricing')} ({currency})</p>
         <div className="grid grid-cols-3 gap-2">
-          <div><Label className="text-xs">Hourly</Label><Input type="number" value={form.hourly_price || ''} onChange={e => setForm(p => ({ ...p, hourly_price: +e.target.value }))} /></div>
-          <div><Label className="text-xs">Daily</Label><Input type="number" value={form.daily_price || ''} onChange={e => setForm(p => ({ ...p, daily_price: +e.target.value }))} /></div>
-          <div><Label className="text-xs">Monthly</Label><Input type="number" value={form.monthly_price || ''} onChange={e => setForm(p => ({ ...p, monthly_price: +e.target.value }))} /></div>
+          <div><Label className="text-xs">{t('propertyUI.hourly')}</Label><Input type="number" value={form.hourly_price || ''} onChange={e => setForm(p => ({ ...p, hourly_price: +e.target.value }))} /></div>
+          <div><Label className="text-xs">{t('propertyUI.daily')}</Label><Input type="number" value={form.daily_price || ''} onChange={e => setForm(p => ({ ...p, daily_price: +e.target.value }))} /></div>
+          <div><Label className="text-xs">{t('propertyUI.monthly')}</Label><Input type="number" value={form.monthly_price || ''} onChange={e => setForm(p => ({ ...p, monthly_price: +e.target.value }))} /></div>
         </div>
       </div>
 
       <div className="border-t pt-3">
-        <p className="text-xs font-semibold mb-2">Owner Information</p>
+        <p className="text-xs font-semibold mb-2">{t('propertyUI.ownerInformation')}</p>
         <div className="grid grid-cols-2 gap-2">
-          <div><Label className="text-xs">Name</Label><Input value={form.owner_name} onChange={e => setForm(p => ({ ...p, owner_name: e.target.value }))} /></div>
-          <div><Label className="text-xs">Phone</Label><Input value={form.owner_contact} onChange={e => setForm(p => ({ ...p, owner_contact: e.target.value }))} /></div>
+          <div><Label className="text-xs">{t('propertyUI.name')}</Label><Input value={form.owner_name} onChange={e => setForm(p => ({ ...p, owner_name: e.target.value }))} /></div>
+          <div><Label className="text-xs">{t('propertyUI.phone')}</Label><Input value={form.owner_contact} onChange={e => setForm(p => ({ ...p, owner_contact: e.target.value }))} /></div>
         </div>
       </div>
 
       <div className="border-t pt-3">
-        <Label className="text-xs">Features (comma-separated)</Label>
-        <Input value={form.features} onChange={e => setForm(p => ({ ...p, features: e.target.value }))} placeholder="WiFi, Parking, AC..." />
-        <Label className="text-xs mt-2">Rental Rules</Label>
-        <Textarea value={form.rules} onChange={e => setForm(p => ({ ...p, rules: e.target.value }))} placeholder="No smoking, pets allowed..." rows={2} />
+        <Label className="text-xs">{t('propertyUI.featuresHelp')}</Label>
+        <Input value={form.features} onChange={e => setForm(p => ({ ...p, features: e.target.value }))} placeholder={t('propertyUI.featuresPh')} />
+        <Label className="text-xs mt-2">{t('propertyUI.rentalRules')}</Label>
+        <Textarea value={form.rules} onChange={e => setForm(p => ({ ...p, rules: e.target.value }))} placeholder={t('propertyUI.rulesPh')} rows={2} />
       </div>
 
       <div className="border-t pt-3">
-        <p className="text-xs font-semibold mb-2">Photos</p>
+        <p className="text-xs font-semibold mb-2">{t('propertyUI.photos')}</p>
         <div className="flex gap-3 flex-wrap">
-          <ImageUpload bucket="item-images" path="property" currentUrl={form.image_url_1} onUploaded={url => setForm(p => ({ ...p, image_url_1: url }))} onRemoved={() => setForm(p => ({ ...p, image_url_1: '' }))} size="sm" label="Photo 1" />
-          <ImageUpload bucket="item-images" path="property" currentUrl={form.image_url_2} onUploaded={url => setForm(p => ({ ...p, image_url_2: url }))} onRemoved={() => setForm(p => ({ ...p, image_url_2: '' }))} size="sm" label="Photo 2" />
-          <ImageUpload bucket="item-images" path="property" currentUrl={form.image_url_3} onUploaded={url => setForm(p => ({ ...p, image_url_3: url }))} onRemoved={() => setForm(p => ({ ...p, image_url_3: '' }))} size="sm" label="Photo 3" />
+          <ImageUpload bucket="item-images" path="property" currentUrl={form.image_url_1} onUploaded={url => setForm(p => ({ ...p, image_url_1: url }))} onRemoved={() => setForm(p => ({ ...p, image_url_1: '' }))} size="sm" label={`${t('propertyUI.photoN')} 1`} />
+          <ImageUpload bucket="item-images" path="property" currentUrl={form.image_url_2} onUploaded={url => setForm(p => ({ ...p, image_url_2: url }))} onRemoved={() => setForm(p => ({ ...p, image_url_2: '' }))} size="sm" label={`${t('propertyUI.photoN')} 2`} />
+          <ImageUpload bucket="item-images" path="property" currentUrl={form.image_url_3} onUploaded={url => setForm(p => ({ ...p, image_url_3: url }))} onRemoved={() => setForm(p => ({ ...p, image_url_3: '' }))} size="sm" label={`${t('propertyUI.photoN')} 3`} />
         </div>
       </div>
 
       <div className="flex items-center gap-2 border-t pt-3">
         <Switch checked={form.is_available} onCheckedChange={v => setForm(p => ({ ...p, is_available: v }))} />
-        <Label className="text-sm">Available for Rent</Label>
+        <Label className="text-sm">{t('propertyUI.availableForRent')}</Label>
       </div>
 
       <div className="flex gap-2">
-        <Button type="submit" className="flex-1">{asset ? 'Save' : 'List Asset'}</Button>
-        <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
+        <Button type="submit" className="flex-1">{asset ? t('propertyUI.save') : t('propertyUI.listAssetBtn')}</Button>
+        <Button type="button" variant="outline" onClick={onClose}>{t('propertyUI.cancel')}</Button>
       </div>
     </form>
   );
@@ -222,20 +222,20 @@ export default function PropertyAssets() {
 
   async function reAdvertise(assetId: string) {
     await supabase.from('property_assets').update({ is_available: true } as any).eq('id', assetId);
-    toast.success('Asset re-advertised as available!');
+    toast.success(t('propertyUI.reAdvertised'));
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">🏠 My Assets</h1>
+        <h1 className="text-xl font-bold">🏠 {t('propertyUI.myAssets')}</h1>
         <Dialog open={dialogOpen} onOpenChange={v => { setDialogOpen(v); if (!v) setEditAsset(undefined); }}>
           <DialogTrigger asChild>
-            <Button size="sm"><Plus className="h-4 w-4 mr-1" />Add</Button>
+            <Button size="sm"><Plus className="h-4 w-4 mr-1" />{t('propertyUI.add')}</Button>
           </DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>{editAsset ? 'Edit Asset' : 'List New Asset'}</DialogTitle>
+              <DialogTitle>{editAsset ? t('propertyUI.editAssetTitle') : t('propertyUI.listNewAssetTitle')}</DialogTitle>
             </DialogHeader>
             <AssetForm asset={editAsset} onSave={data => { editAsset ? updateAsset(editAsset.id, data) : addAsset(data); }} onClose={() => { setDialogOpen(false); setEditAsset(undefined); }} />
           </DialogContent>
@@ -245,12 +245,12 @@ export default function PropertyAssets() {
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search assets..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9 h-9" />
+          <Input placeholder={t('propertyUI.searchAssetsPh')} value={search} onChange={e => setSearch(e.target.value)} className="pl-9 h-9" />
         </div>
         <Select value={filterCat} onValueChange={setFilterCat}>
           <SelectTrigger className="w-36 h-9"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="all">{t('propertyUI.all')}</SelectItem>
             {CATEGORIES.map(c => <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -288,9 +288,9 @@ export default function PropertyAssets() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Badge variant={status === 'occupied' ? 'destructive' : 'default'} className="text-[10px]">
-                          {status === 'occupied' ? '🔴 Rented' : '🟢 Available'}
+                          {status === 'occupied' ? `🔴 ${t('propertyUI.rented')}` : `🟢 ${t('propertyUI.available')}`}
                         </Badge>
-                        {!asset.is_available && <Badge variant="secondary" className="text-[10px]">Hidden</Badge>}
+                        {!asset.is_available && <Badge variant="secondary" className="text-[10px]">{t('propertyUI.hidden')}</Badge>}
                       </div>
                     </div>
                     <div className="flex gap-2 text-xs flex-wrap">
@@ -302,23 +302,23 @@ export default function PropertyAssets() {
                     {/* Room breakdown for houses */}
                     {asset.category === 'house' && totalRooms > 0 && (
                       <div className="flex gap-2 text-xs">
-                        <Badge variant="outline" className="text-[9px]">🚪 {totalRooms} rooms</Badge>
-                        <Badge variant="default" className="text-[9px] bg-success/10 text-success">{vacantRooms} vacant</Badge>
-                        {occupiedRooms > 0 && <Badge variant="secondary" className="text-[9px]">{occupiedRooms} occupied</Badge>}
+                        <Badge variant="outline" className="text-[9px]">🚪 {totalRooms} {t('propertyUI.rooms')}</Badge>
+                        <Badge variant="default" className="text-[9px] bg-success/10 text-success">{vacantRooms} {t('propertyUI.vacant')}</Badge>
+                        {occupiedRooms > 0 && <Badge variant="secondary" className="text-[9px]">{occupiedRooms} {t('propertyUI.occupied')}</Badge>}
                       </div>
                     )}
 
                     {/* Active bookings indicator for non-house assets */}
                     {asset.category !== 'house' && activeBookingsCount > 0 && (
                       <div className="text-[10px] text-muted-foreground">
-                        📋 {activeBookingsCount} active booking{activeBookingsCount > 1 ? 's' : ''}
+                        📋 {activeBookingsCount} {activeBookingsCount > 1 ? t('propertyUI.activeBookings') : t('propertyUI.activeBooking')}
                       </div>
                     )}
 
                     <div className="flex gap-3 text-xs">
-                      {asset.hourly_price > 0 && <span>{fmt(asset.hourly_price)}/hr</span>}
-                      {asset.daily_price > 0 && <span>{fmt(asset.daily_price)}/day</span>}
-                      {asset.monthly_price > 0 && <span>{fmt(asset.monthly_price)}/mo</span>}
+                      {asset.hourly_price > 0 && <span>{fmt(asset.hourly_price)}{t('propertyUI.perHr')}</span>}
+                      {asset.daily_price > 0 && <span>{fmt(asset.daily_price)}{t('propertyUI.perDay')}</span>}
+                      {asset.monthly_price > 0 && <span>{fmt(asset.monthly_price)}{t('propertyUI.perMo')}</span>}
                     </div>
                     {asset.features && (
                       <div className="flex flex-wrap gap-1">
@@ -329,16 +329,16 @@ export default function PropertyAssets() {
                     )}
                     <div className="flex gap-1 pt-1">
                       <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => { setEditAsset(asset); setDialogOpen(true); }}>
-                        <Edit2 className="h-3 w-3 mr-1" />Edit
+                        <Edit2 className="h-3 w-3 mr-1" />{t('propertyUI.edit')}
                       </Button>
                       {/* Re-advertise button for unavailable assets */}
                       {!asset.is_available && status !== 'occupied' && (
                         <Button size="sm" variant="ghost" className="h-7 text-xs text-primary" onClick={() => reAdvertise(asset.id)}>
-                          <RefreshCw className="h-3 w-3 mr-1" />Re-advertise
+                          <RefreshCw className="h-3 w-3 mr-1" />{t('propertyUI.reAdvertise')}
                         </Button>
                       )}
                       {(userRole === 'owner' || userRole === 'admin') && (
-                        <RecycleDeleteButton table="property_assets" recordId={asset.id} label="Delete" />
+                        <RecycleDeleteButton table="property_assets" recordId={asset.id} label={t('common.delete', 'Delete')} />
                       )}
                     </div>
                   </CardContent>

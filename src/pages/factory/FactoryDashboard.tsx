@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useBusiness } from '@/context/BusinessContext';
 import { useFactory } from '@/context/FactoryContext';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -14,6 +15,7 @@ import AnnouncementsBanner from '@/components/AnnouncementsBanner';
 import WorkerActivityTracker from '@/components/WorkerActivityTracker';
 
 export default function FactoryDashboard() {
+  const { t } = useTranslation();
   const { currentBusiness, updateBusiness, stock, sales, services } = useBusiness();
   const { rawMaterials, expenses, teamMembers, production } = useFactory();
   const { fmt } = useCurrency();
@@ -67,22 +69,22 @@ export default function FactoryDashboard() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <Factory className="h-5 w-5 sm:h-6 sm:w-6" />
-              <h1 className="text-lg sm:text-2xl font-bold truncate">{currentBusiness?.name || 'My Factory'}</h1>
+              <h1 className="text-lg sm:text-2xl font-bold truncate">{currentBusiness?.name || t('factoryUI.myFactory')}</h1>
             </div>
-            <p className="text-xs sm:text-sm opacity-80 mt-1">Factory Manager</p>
+            <p className="text-xs sm:text-sm opacity-80 mt-1">{t('factoryUI.factoryManager')}</p>
             {currentBusiness?.business_code && (
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-xs sm:text-sm font-mono bg-primary-foreground/20 px-2 py-0.5 rounded">
-                  🔗 Code: {(currentBusiness as any).business_code}
+                  🔗 {t('factoryUI.code')}: {(currentBusiness as any).business_code}
                 </span>
                 <button
                   onClick={() => {
                     navigator.clipboard.writeText((currentBusiness as any).business_code || '');
-                    import('sonner').then(m => m.toast.success('Business code copied!'));
+                    import('sonner').then(m => m.toast.success(t('factoryUI.businessCodeCopied')));
                   }}
                   className="text-xs bg-primary-foreground/20 hover:bg-primary-foreground/30 px-2 py-0.5 rounded transition-colors"
                 >
-                  📋 Copy
+                  📋 {t('factoryUI.copy')}
                 </button>
               </div>
             )}
@@ -97,13 +99,13 @@ export default function FactoryDashboard() {
             <ImageUpload bucket="business-logos" path={currentBusiness?.id || 'logo'}
               currentUrl={currentBusiness?.logo_url}
               onUploaded={(url) => { updateBusiness({ logo_url: url } as any); setShowLogoUpload(false); }}
-              onRemoved={() => updateBusiness({ logo_url: '' } as any)} size="md" label="Factory Logo" />
+              onRemoved={() => updateBusiness({ logo_url: '' } as any)} size="md" label={t('factoryUI.factoryLogo')} />
           </div>
         )}
       </div>
 
       <Button onClick={() => setShowQuickAdd(true)} className="w-full" variant="outline" size="lg">
-        <Camera className="h-5 w-5 mr-2" /> Add Product with Photos
+        <Camera className="h-5 w-5 mr-2" /> {t('factoryUI.addProductWithPhotos')}
       </Button>
       <QuickAddItem open={showQuickAdd} onOpenChange={setShowQuickAdd} />
 
@@ -113,7 +115,7 @@ export default function FactoryDashboard() {
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10"><Package className="h-4 w-4 sm:h-5 sm:w-5 text-primary" /></div>
-              <div><p className="text-[10px] sm:text-xs text-muted-foreground">Raw Materials</p><p className="text-lg sm:text-xl font-bold">{activeRawMaterials.length}</p></div>
+              <div><p className="text-[10px] sm:text-xs text-muted-foreground">{t('factoryUI.rawMaterials')}</p><p className="text-lg sm:text-xl font-bold">{activeRawMaterials.length}</p></div>
             </div>
           </CardContent>
         </Card>
@@ -121,7 +123,7 @@ export default function FactoryDashboard() {
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-1.5 sm:p-2 rounded-lg bg-accent/10"><Package className="h-4 w-4 sm:h-5 sm:w-5 text-accent" /></div>
-              <div><p className="text-[10px] sm:text-xs text-muted-foreground">Products</p><p className="text-lg sm:text-xl font-bold">{activeProducts.length}</p></div>
+              <div><p className="text-[10px] sm:text-xs text-muted-foreground">{t('factoryUI.products')}</p><p className="text-lg sm:text-xl font-bold">{activeProducts.length}</p></div>
             </div>
           </CardContent>
         </Card>
@@ -129,7 +131,7 @@ export default function FactoryDashboard() {
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-1.5 sm:p-2 rounded-lg bg-success/10"><TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-success" /></div>
-              <div><p className="text-[10px] sm:text-xs text-muted-foreground">Total Sales</p><p className="text-lg sm:text-xl font-bold">{sales.length}</p></div>
+              <div><p className="text-[10px] sm:text-xs text-muted-foreground">{t('factoryUI.totalSales')}</p><p className="text-lg sm:text-xl font-bold">{sales.length}</p></div>
             </div>
           </CardContent>
         </Card>
@@ -137,7 +139,7 @@ export default function FactoryDashboard() {
           <CardContent className="p-3 sm:p-4">
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="p-1.5 sm:p-2 rounded-lg bg-destructive/10"><Flame className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" /></div>
-              <div className="min-w-0"><p className="text-[10px] sm:text-xs text-muted-foreground">Today's Expenses</p><p className="text-base sm:text-xl font-bold text-destructive truncate">{fmt(todayExpenseTotal)}</p></div>
+              <div className="min-w-0"><p className="text-[10px] sm:text-xs text-muted-foreground">{t('factoryUI.todayExpenses')}</p><p className="text-base sm:text-xl font-bold text-destructive truncate">{fmt(todayExpenseTotal)}</p></div>
             </div>
           </CardContent>
         </Card>
@@ -148,7 +150,7 @@ export default function FactoryDashboard() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-warning/10"><Users className="h-5 w-5 text-warning" /></div>
-              <div><p className="text-xs text-muted-foreground">Active Workers</p><p className="text-xl font-bold">{teamMembers.filter(t => t.is_active).length}</p></div>
+              <div><p className="text-xs text-muted-foreground">{t('factoryUI.activeWorkers')}</p><p className="text-xl font-bold">{teamMembers.filter(tm => tm.is_active).length}</p></div>
             </div>
           </CardContent>
         </Card>
@@ -156,7 +158,7 @@ export default function FactoryDashboard() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-info/10"><DollarSign className="h-5 w-5 text-info" /></div>
-              <div><p className="text-xs text-muted-foreground">Monthly Salary Bill</p><p className="text-lg font-bold text-info">{fmt(totalSalaryBill)}</p></div>
+              <div><p className="text-xs text-muted-foreground">{t('factoryUI.monthlySalaryBill')}</p><p className="text-lg font-bold text-info">{fmt(totalSalaryBill)}</p></div>
             </div>
           </CardContent>
         </Card>
@@ -164,7 +166,7 @@ export default function FactoryDashboard() {
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-destructive/10"><AlertTriangle className="h-5 w-5 text-destructive" /></div>
-              <div><p className="text-xs text-muted-foreground">Today's Waste</p><p className="text-xl font-bold">{todayWaste}</p></div>
+              <div><p className="text-xs text-muted-foreground">{t('factoryUI.todayWaste')}</p><p className="text-xl font-bold">{todayWaste}</p></div>
             </div>
           </CardContent>
         </Card>
@@ -173,10 +175,10 @@ export default function FactoryDashboard() {
       {/* Alerts */}
       <div className="grid md:grid-cols-2 gap-6">
         <Card className="shadow-card">
-          <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-warning" />Material Alerts</CardTitle></CardHeader>
+          <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-warning" />{t('factoryUI.materialAlerts')}</CardTitle></CardHeader>
           <CardContent>
             {lowMaterials.length === 0 && outMaterials.length === 0 ? (
-              <p className="text-sm text-muted-foreground">All material levels are healthy.</p>
+              <p className="text-sm text-muted-foreground">{t('factoryUI.allMaterialsHealthy')}</p>
             ) : (
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {outMaterials.map(r => (
@@ -185,7 +187,7 @@ export default function FactoryDashboard() {
                       <p className="text-sm font-medium">{r.name}</p>
                       <p className="text-xs text-muted-foreground">{r.category} · {r.unit_type}</p>
                     </div>
-                    <span className="text-xs font-semibold text-destructive px-2 py-0.5 rounded-full bg-destructive/10">OUT</span>
+                    <span className="text-xs font-semibold text-destructive px-2 py-0.5 rounded-full bg-destructive/10">{t('factoryUI.out')}</span>
                   </div>
                 ))}
                 {lowMaterials.map(r => (
@@ -194,7 +196,7 @@ export default function FactoryDashboard() {
                       <p className="text-sm font-medium">{r.name}</p>
                       <p className="text-xs text-muted-foreground">{r.category} · {r.unit_type}</p>
                     </div>
-                    <span className="text-xs font-semibold text-warning px-2 py-0.5 rounded-full bg-warning/10">{r.quantity} left</span>
+                    <span className="text-xs font-semibold text-warning px-2 py-0.5 rounded-full bg-warning/10">{r.quantity} {t('factoryUI.left')}</span>
                   </div>
                 ))}
               </div>
@@ -203,22 +205,22 @@ export default function FactoryDashboard() {
         </Card>
 
         <Card className="shadow-card">
-          <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-warning" />Product Alerts</CardTitle></CardHeader>
+          <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><AlertTriangle className="h-4 w-4 text-warning" />{t('factoryUI.productAlerts')}</CardTitle></CardHeader>
           <CardContent>
             {lowProducts.length === 0 && outProducts.length === 0 ? (
-              <p className="text-sm text-muted-foreground">All product levels are healthy.</p>
+              <p className="text-sm text-muted-foreground">{t('factoryUI.allProductsHealthy')}</p>
             ) : (
               <div className="space-y-2 max-h-60 overflow-y-auto">
                 {outProducts.map(i => (
                   <div key={i.id} className="flex items-center justify-between p-2 rounded-lg bg-destructive/5">
                     <div><p className="text-sm font-medium">{i.name}</p><p className="text-xs text-muted-foreground">{[i.category, i.quality].filter(Boolean).join(' · ')}</p></div>
-                    <span className="text-xs font-semibold text-destructive px-2 py-0.5 rounded-full bg-destructive/10">OUT</span>
+                    <span className="text-xs font-semibold text-destructive px-2 py-0.5 rounded-full bg-destructive/10">{t('factoryUI.out')}</span>
                   </div>
                 ))}
                 {lowProducts.map(i => (
                   <div key={i.id} className="flex items-center justify-between p-2 rounded-lg bg-warning/5">
                     <div><p className="text-sm font-medium">{i.name}</p><p className="text-xs text-muted-foreground">{[i.category, i.quality].filter(Boolean).join(' · ')}</p></div>
-                    <span className="text-xs font-semibold text-warning px-2 py-0.5 rounded-full bg-warning/10">{i.quantity} left</span>
+                    <span className="text-xs font-semibold text-warning px-2 py-0.5 rounded-full bg-warning/10">{i.quantity} {t('factoryUI.left')}</span>
                   </div>
                 ))}
               </div>
@@ -229,10 +231,10 @@ export default function FactoryDashboard() {
 
       {/* Recent Production */}
       <Card className="shadow-card">
-        <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" />Recent Production</CardTitle></CardHeader>
+        <CardHeader className="pb-3"><CardTitle className="text-base flex items-center gap-2"><TrendingUp className="h-4 w-4 text-primary" />{t('factoryUI.recentProduction')}</CardTitle></CardHeader>
         <CardContent>
           {production.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No production records yet.</p>
+            <p className="text-sm text-muted-foreground">{t('factoryUI.noProductionRecords')}</p>
           ) : (
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {production.slice(0, 10).map(p => (
@@ -240,14 +242,14 @@ export default function FactoryDashboard() {
                   <div>
                     <p className="text-sm font-medium">{p.product_name}</p>
                     <p className="text-xs text-muted-foreground">
-                      Produced: {p.quantity_produced} · Waste: {p.waste_quantity} {p.waste_unit}
+                      {t('factoryUI.produced')}: {p.quantity_produced} · {t('factoryUI.waste')}: {p.waste_quantity} {p.waste_unit}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       📅 {new Date(p.production_date).toLocaleDateString()}
-                      {p.expiry_date && ` · Expires: ${new Date(p.expiry_date).toLocaleDateString()}`}
+                      {p.expiry_date && ` · ${t('factoryUI.expires')}: ${new Date(p.expiry_date).toLocaleDateString()}`}
                     </p>
                   </div>
-                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-md font-medium">{p.quantity_produced} units</span>
+                  <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-md font-medium">{p.quantity_produced} {t('factoryUI.units')}</span>
                 </div>
               ))}
             </div>
