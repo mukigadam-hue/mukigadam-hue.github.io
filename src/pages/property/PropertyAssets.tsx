@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 import AdSpace from '@/components/AdSpace';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 const CATEGORIES = [
   { value: 'house', label: '🏠 House / Apartment', subs: ['apartment', 'single-room', 'bedsitter', 'studio', 'duplex', 'mansion', 'hostel', 'commercial'] },
