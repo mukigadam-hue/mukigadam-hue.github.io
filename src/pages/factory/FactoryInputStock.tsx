@@ -13,6 +13,7 @@ import { Plus, Edit2, Trash2, Package } from 'lucide-react';
 import { toast } from 'sonner';
 import AdSpace from '@/components/AdSpace';
 import BulkPackagingInfo, { BulkPackagingFields } from '@/components/BulkPackagingInfo';
+import RecycleDeleteButton from '@/components/RecycleDeleteButton';
 
 import { toSentenceCase, toTitleCase } from '@/lib/utils';
 
@@ -141,7 +142,7 @@ export default function FactoryInputStock() {
                         <TableCell>
                           <div className="flex gap-1">
                             <Button variant="ghost" size="icon" onClick={() => openEdit(r)}><Edit2 className="h-3.5 w-3.5" /></Button>
-                            <Button variant="ghost" size="icon" onClick={() => deleteRawMaterial(r.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                            <RecycleDeleteButton table="factory_raw_materials" recordId={r.id} />
                           </div>
                         </TableCell>
                       </TableRow>
