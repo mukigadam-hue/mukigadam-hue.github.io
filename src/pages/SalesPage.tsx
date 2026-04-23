@@ -343,29 +343,29 @@ export default function SalesPage() {
 
       <Card className="shadow-card">
         <CardContent className="p-4 space-y-4">
-          <h2 className="text-base font-semibold">Record New Sale</h2>
+          <h2 className="text-base font-semibold">{t('sales.recordNewSale')}</h2>
 
           {/* Buyer & Seller names — required */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-muted/40 rounded-lg border">
             <div>
-              <Label className="text-xs font-semibold text-destructive">Buyer Name *</Label>
-              <Input value={buyerName} onChange={e => setBuyerName(e.target.value)} onBlur={() => setBuyerName(toTitleCase(buyerName))} placeholder="Customer name (required)" />
+              <Label className="text-xs font-semibold text-destructive">{t('sales.buyerName')} *</Label>
+              <Input value={buyerName} onChange={e => setBuyerName(e.target.value)} onBlur={() => setBuyerName(toTitleCase(buyerName))} placeholder={t('sales.buyerNamePh')} />
             </div>
             <div>
-              <Label className="text-xs font-semibold text-destructive">Seller Name * {roleLabel}</Label>
-              <Input value={sellerName} onChange={e => setSellerName(e.target.value)} onBlur={() => setSellerName(toTitleCase(sellerName))} placeholder="Your name (auto-filled)" />
+              <Label className="text-xs font-semibold text-destructive">{t('sales.sellerName')} * {roleLabel}</Label>
+              <Input value={sellerName} onChange={e => setSellerName(e.target.value)} onBlur={() => setSellerName(toTitleCase(sellerName))} placeholder={t('sales.sellerNamePh')} />
               {currentBusiness && <p className="text-[10px] text-muted-foreground mt-0.5">📍 {currentBusiness.name}</p>}
             </div>
           </div>
 
           {/* Stock Items */}
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">📦 Stock Items</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">📦 {t('sales.stockItemsHeader')}</p>
             <div className="space-y-3">
               <div className="w-full">
-                <Label>Search & Select Item</Label>
+                <Label>{t('sales.searchSelectItem')}</Label>
                 <Input
-                  placeholder="Type to search items by name, category, quality..."
+                  placeholder={t('sales.searchPh')}
                   value={stockSearch}
                   onChange={e => setStockSearch(e.target.value)}
                   className="mb-1.5"
@@ -373,7 +373,7 @@ export default function SalesPage() {
                 <div className="flex gap-1.5">
                   <Select value={selectedStock} onValueChange={handleSelectStock}>
                     <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Select item..." />
+                      <SelectValue placeholder={t('sales.selectItemPh')} />
                     </SelectTrigger>
                     <SelectContent>
                       {filteredStock.map(s => (
@@ -382,7 +382,7 @@ export default function SalesPage() {
                         </SelectItem>
                       ))}
                       {filteredStock.length === 0 && (
-                        <div className="px-3 py-2 text-xs text-muted-foreground">No items found</div>
+                        <div className="px-3 py-2 text-xs text-muted-foreground">{t('sales.noItemsFound')}</div>
                       )}
                     </SelectContent>
                   </Select>
@@ -392,24 +392,24 @@ export default function SalesPage() {
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div><Label>Qty</Label><Input type="number" min="0.01" step="0.01" value={quantity} onChange={e => setQuantity(e.target.value)}
+                <div><Label>{t('sales.qty')}</Label><Input type="number" min="0.01" step="0.01" value={quantity} onChange={e => setQuantity(e.target.value)}
                   readOnly={parseInt(bulkPkg.pieces_per_carton) > 0}
                   className={parseInt(bulkPkg.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
-                  {parseInt(bulkPkg.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
+                  {parseInt(bulkPkg.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">{t('sales.autoCalcBulk')}</p>}
                 </div>
                 <div>
-                  <Label>Price Type</Label>
+                  <Label>{t('sales.priceType')}</Label>
                   <Select value={priceType} onValueChange={v => setPriceType(v as 'wholesale' | 'retail')}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="retail">Retail</SelectItem>
-                      <SelectItem value="wholesale">Wholesale</SelectItem>
+                      <SelectItem value="retail">{t('sales.retail')}</SelectItem>
+                      <SelectItem value="wholesale">{t('sales.wholesale')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label>Alt. Price <span className="text-[10px] text-muted-foreground">(optional)</span></Label>
-                  <Input type="number" min="0" step="0.01" value={customPrice} onChange={e => setCustomPrice(e.target.value)} placeholder="Custom..." />
+                  <Label>{t('sales.altPrice')} <span className="text-[10px] text-muted-foreground">{t('sales.optional')}</span></Label>
+                  <Input type="number" min="0" step="0.01" value={customPrice} onChange={e => setCustomPrice(e.target.value)} placeholder={t('sales.customPh')} />
                 </div>
               </div>
 
@@ -435,19 +435,19 @@ export default function SalesPage() {
                   </div>
                 );
               })()}
-              <Button onClick={addItem} disabled={!selectedStock} className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-1" />Add Item</Button>
+              <Button onClick={addItem} disabled={!selectedStock} className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-1" />{t('sales.addItem')}</Button>
             </div>
             {selectedStock && (
               <div className="mt-2">
-                <Label className="text-xs text-muted-foreground">Serial Number (optional)</Label>
-                <Input value={serialInput} onChange={e => setSerialInput(e.target.value)} placeholder="e.g. IMEI, S/N..." className="max-w-xs" />
+                <Label className="text-xs text-muted-foreground">{t('sales.serialNumber')}</Label>
+                <Input value={serialInput} onChange={e => setSerialInput(e.target.value)} placeholder={t('sales.serialPh')} className="max-w-xs" />
               </div>
             )}
           </div>
 
           {/* Service Items */}
           <div className="border rounded-lg p-3 space-y-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">🔧 Services (Optional)</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">🔧 {t('sales.servicesOptional')}</p>
             
             {/* Service Details */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -613,10 +613,10 @@ export default function SalesPage() {
                 )}
               </div>
               {!buyerName.trim() || !sellerName.trim() ? (
-                <p className="text-xs text-destructive text-center">⚠️ Buyer name and Seller name are required before saving.</p>
+                <p className="text-xs text-destructive text-center">⚠️ {t('sales.buyerSellerRequired')}</p>
               ) : null}
               <Button onClick={() => withLock(handleSave)} className="w-full" disabled={!canSave || submitLocked}>
-                <ShoppingCart className="h-4 w-4 mr-2" />{submitLocked ? 'Saving...' : `Record Sale — ${fmt(grandTotal)}`}
+                <ShoppingCart className="h-4 w-4 mr-2" />{submitLocked ? t('sales.saving') : `${t('sales.recordSaleBtn')} — ${fmt(grandTotal)}`}
               </Button>
             </>
           )}
@@ -631,13 +631,13 @@ export default function SalesPage() {
           onClick={() => setActiveTab('today')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'today' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
         >
-          Today's Sales ({todaySales.length})
+          {t('sales.todaySales')} ({todaySales.length})
         </button>
         <button
           onClick={() => setActiveTab('previous')}
           className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'previous' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}
         >
-          Previous Sales ({previousSales.length})
+          {t('sales.previousSales')} ({previousSales.length})
         </button>
       </div>
 
@@ -646,7 +646,7 @@ export default function SalesPage() {
         {(['all', 'paid', 'debt'] as const).map(f => (
           <button key={f} onClick={() => setPaymentFilter(f)}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${paymentFilter === f ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-            {f === 'all' ? '📋 All' : f === 'paid' ? '✅ Paid' : '❌ Debts'}
+            {f === 'all' ? `📋 ${t('sales.all')}` : f === 'paid' ? `✅ ${t('sales.paid')}` : `❌ ${t('sales.debts')}`}
           </button>
         ))}
       </div>
@@ -654,7 +654,7 @@ export default function SalesPage() {
       <Card className="shadow-card">
         <CardContent className="p-4">
           <h2 className="text-base font-semibold mb-3">
-            {activeTab === 'today' ? "Today's Sales" : "Previous Sales"}
+            {activeTab === 'today' ? t('sales.todaySales') : t('sales.previousSales')}
           </h2>
           {filteredSales.length === 0 ? (
             <p className="text-sm text-muted-foreground">No sales {activeTab === 'today' ? 'today' : 'from previous days'} matching filter.</p>
@@ -670,7 +670,7 @@ export default function SalesPage() {
 
       <Dialog open={!!receiptSale} onOpenChange={o => { if (!o) setReceiptSale(null); }}>
         <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Sale Receipt</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('sales.saleReceipt')}</DialogTitle></DialogHeader>
           {receiptSale && (
             <Receipt
               items={receiptSale.items.map(i => ({
@@ -693,7 +693,7 @@ export default function SalesPage() {
       {/* Update Payment Dialog */}
       <Dialog open={!!editPaymentSale} onOpenChange={o => { if (!o) setEditPaymentSale(null); }}>
         <DialogContent className="max-w-sm">
-          <DialogHeader><DialogTitle>Update Payment — {editPaymentSale?.customer_name}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('sales.updatePayment')} — {editPaymentSale?.customer_name}</DialogTitle></DialogHeader>
           {editPaymentSale && (() => {
             const total = Number(editPaymentSale.grand_total);
             const previouslyPaid = Number(editPaymentSale.amount_paid);
@@ -705,21 +705,21 @@ export default function SalesPage() {
             return (
               <div className="space-y-3">
                 <div className="p-3 bg-muted/40 rounded-lg border space-y-1">
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Total Charged</span><span className="font-bold">{fmt(total)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Previously Paid</span><span className="font-bold">{fmt(previouslyPaid)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Remaining Balance</span><span className="font-bold text-destructive">{fmt(remaining)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('sales.totalCharged')}</span><span className="font-bold">{fmt(total)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('sales.previouslyPaid')}</span><span className="font-bold">{fmt(previouslyPaid)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('sales.remainingBalance')}</span><span className="font-bold text-destructive">{fmt(remaining)}</span></div>
                 </div>
                 <div>
-                  <Label>💰 Amount Paying Now</Label>
+                  <Label>💰 {t('sales.amountPayingNow')}</Label>
                   <Input type="number" min="0" max={remaining} step="0.01" value={editAmountPaid} onChange={e => setEditAmountPaid(e.target.value)} placeholder={String(remaining)} />
                 </div>
-                {fullyPaid && <p className="text-sm font-semibold text-success text-center">✅ Fully Paid — debt cleared!</p>}
-                {!fullyPaid && payingNow > 0 && <p className="text-sm text-center">New balance: <span className="font-bold text-destructive">{fmt(newBalance)}</span></p>}
+                {fullyPaid && <p className="text-sm font-semibold text-success text-center">✅ {t('sales.fullyPaidMsg')}</p>}
+                {!fullyPaid && payingNow > 0 && <p className="text-sm text-center">{t('sales.newBalance')}: <span className="font-bold text-destructive">{fmt(newBalance)}</span></p>}
                 <Button className="w-full" onClick={async () => {
                   await updateSalePayment(editPaymentSale.id, newTotal, fullyPaid ? 'paid' : newTotal > 0 ? 'partial' : 'unpaid');
                   setEditPaymentSale(null);
                 }}>
-                  💰 {fullyPaid ? 'Clear Debt' : 'Save Payment'}
+                  💰 {fullyPaid ? t('sales.clearDebt') : t('sales.savePayment')}
                 </Button>
               </div>
             );
