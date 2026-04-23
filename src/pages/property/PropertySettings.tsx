@@ -19,6 +19,7 @@ import AdSpace from '@/components/AdSpace';
 import LanguageSelector from '@/components/LanguageSelector';
 import Receipt from '@/components/Receipt';
 import PaymentMethodsManager from '@/components/PaymentMethodsManager';
+import PersonalPreferencesSettings from '@/components/PersonalPreferencesSettings';
 
 function ReceiptArchive({ businessId }: { businessId: string }) {
   const { t } = useTranslation();
@@ -403,13 +404,8 @@ export default function PropertySettings() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">🏠 {t('propertyUI.settingsTitle')}</h1>
-        <Card className="shadow-card">
-          <CardContent className="p-6 text-center space-y-4">
-            <Lock className="h-12 w-12 mx-auto text-muted-foreground" />
-            <h2 className="text-lg font-semibold">{t('propertyUI.settingsTitle')}</h2>
-            <p className="text-sm text-muted-foreground">—</p>
-          </CardContent>
-        </Card>
+
+        <PersonalPreferencesSettings />
       </div>
     );
   }
@@ -691,14 +687,14 @@ export default function PropertySettings() {
                 const icon = bType === 'factory' ? '🏭' : bType === 'property' ? '🏠' : '🏪';
                 return (
                   <button key={b.id} onClick={() => { navigate('/'); setCurrentBusinessId(b.id); }}
-                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${isActive ? 'bg-orange-500/10 border-2 border-orange-500' : 'bg-muted/30 border-2 border-transparent hover:border-orange-500/20'}`}>
+                    className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-all ${isActive ? 'bg-accent/40 border-2 border-primary' : 'bg-muted/30 border-2 border-transparent hover:border-primary/20'}`}>
                     <span className="text-xl">{icon}</span>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{b.name}</p>
                       <p className="text-xs text-muted-foreground capitalize">{role}</p>
                     </div>
                     {isActive ? (
-                      <span className="text-[10px] bg-orange-500 text-white px-2 py-0.5 rounded-full shrink-0">Active</span>
+                      <span className="text-[10px] bg-primary text-primary-foreground px-2 py-0.5 rounded-full shrink-0">Active</span>
                     ) : (
                       <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                     )}
