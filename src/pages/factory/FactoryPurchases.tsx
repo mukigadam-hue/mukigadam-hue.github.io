@@ -146,16 +146,16 @@ export default function FactoryPurchases() {
 
       <Card className="shadow-card">
         <CardContent className="p-4 space-y-4">
-          <h2 className="text-base font-semibold">Record Raw Material Purchase</h2>
+          <h2 className="text-base font-semibold">{t('factoryUI.recordRawMaterialPurchase')}</h2>
           <div className="grid grid-cols-2 gap-3">
-            <div><Label>Supplier</Label><Input value={supplier} onChange={e => setSupplier(e.target.value)} placeholder="Supplier name" /></div>
-            <div><Label>Recorded By</Label><Input value={recordedBy} onChange={e => setRecordedBy(e.target.value)} placeholder="Your name" /></div>
+            <div><Label>{t('factoryUI.supplier')}</Label><Input value={supplier} onChange={e => setSupplier(e.target.value)} placeholder={t('factoryUI.supplierPh')} /></div>
+            <div><Label>{t('factoryUI.recordedBy')}</Label><Input value={recordedBy} onChange={e => setRecordedBy(e.target.value)} placeholder={t('factoryUI.namePh')} /></div>
           </div>
 
           {/* Smart Search Picker */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold flex items-center gap-1.5">
-              <Search className="h-3.5 w-3.5" /> Search Materials or Stock Items
+              <Search className="h-3.5 w-3.5" /> {t('factoryUI.searchMaterialsStock')}
             </Label>
             <div className="flex gap-1.5">
               <Input
@@ -163,16 +163,16 @@ export default function FactoryPurchases() {
                 value={stockSearch}
                 onChange={e => { setStockSearch(e.target.value); setShowStockPicker(true); }}
                 onFocus={() => setShowStockPicker(true)}
-                placeholder="🔍 Search by name, category..."
+                placeholder={`🔍 ${t('factoryUI.searchByNameCategory')}`}
               />
-              <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setScannerOpen(true)} title="Scan barcode">
+              <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setScannerOpen(true)} title={t('factoryUI.scanBarcode')}>
                 <ScanLine className="h-4 w-4" />
               </Button>
             </div>
             {showStockPicker && (
               <div className="max-h-48 overflow-y-auto rounded-lg border border-border bg-card shadow-md">
                 {filteredItems.length === 0 ? (
-                  <p className="text-xs text-muted-foreground text-center py-3">No matching items</p>
+                  <p className="text-xs text-muted-foreground text-center py-3">{t('factoryUI.noMatchingItems')}</p>
                 ) : (
                   filteredItems.slice(0, 50).map((item, idx) => (
                     <button
@@ -186,7 +186,7 @@ export default function FactoryPurchases() {
                         {item.category && <span className="text-xs ml-1.5 text-muted-foreground">· {item.category}</span>}
                         {item.quality && <span className="text-xs ml-1.5 px-1.5 py-0.5 rounded bg-primary/10 text-primary">{item.quality}</span>}
                       </div>
-                      <span className="text-[10px] text-muted-foreground ml-2">{item.type === 'raw' ? '🏭 Raw' : '📦 Stock'}</span>
+                      <span className="text-[10px] text-muted-foreground ml-2">{item.type === 'raw' ? `🏭 ${t('factoryUI.raw')}` : `📦 ${t('factoryUI.stock')}`}</span>
                     </button>
                   ))
                 )}
@@ -195,7 +195,7 @@ export default function FactoryPurchases() {
                   onClick={() => { setShowStockPicker(false); setForm(f => ({ ...f, name: stockSearch })); setStockSearch(''); }}
                   className="w-full px-3 py-2 text-left text-sm text-primary font-medium hover:bg-primary/5 border-t border-border"
                 >
-                  ➕ Add as new item: "{stockSearch || '...'}"
+                  ➕ {t('factoryUI.addAsNewItem')}: "{stockSearch || '...'}"
                 </button>
               </div>
             )}
@@ -203,24 +203,24 @@ export default function FactoryPurchases() {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <Label>Material Name</Label>
-              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Auto-filled from picker" />
+              <Label>{t('factoryUI.materialName')}</Label>
+              <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder={t('factoryUI.autoFilledFromPicker')} />
             </div>
             <div>
-              <Label>Category</Label>
-              <Input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} placeholder="Category..." />
+              <Label>{t('factoryUI.category')}</Label>
+              <Input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} placeholder={t('factoryUI.categoryPh')} />
             </div>
             <div>
-              <Label>Unit Type</Label>
+              <Label>{t('factoryUI.unitType')}</Label>
               <Select value={form.unit_type} onValueChange={v => setForm(f => ({ ...f, unit_type: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{UNIT_TYPES.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
               </Select>
             </div>
-            <div><Label>Unit Cost</Label><Input type="number" min="0" step="0.01" value={form.unit_price} onChange={e => setForm(f => ({ ...f, unit_price: e.target.value }))} /></div>
+            <div><Label>{t('factoryUI.unitCost')}</Label><Input type="number" min="0" step="0.01" value={form.unit_price} onChange={e => setForm(f => ({ ...f, unit_price: e.target.value }))} /></div>
             <div>
-              <Label className="text-xs text-muted-foreground">Serial Number (optional)</Label>
-              <Input value={form.serial_numbers} onChange={e => setForm(f => ({ ...f, serial_numbers: e.target.value }))} placeholder="e.g. IMEI, S/N..." />
+              <Label className="text-xs text-muted-foreground">{t('factoryUI.serialNumberOptional')}</Label>
+              <Input value={form.serial_numbers} onChange={e => setForm(f => ({ ...f, serial_numbers: e.target.value }))} placeholder={t('factoryUI.serialPh')} />
             </div>
           </div>
           <BulkPackagingFields
@@ -233,14 +233,14 @@ export default function FactoryPurchases() {
           />
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label>Quantity</Label>
+              <Label>{t('factoryUI.quantity')}</Label>
               <Input type="number" min="0.01" step="0.01" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
                 readOnly={parseInt(form.pieces_per_carton) > 0}
                 className={parseInt(form.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
-              {parseInt(form.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
+              {parseInt(form.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">{t('factoryUI.autoCalcFromBulk')}</p>}
             </div>
           </div>
-          <Button onClick={addItem} disabled={!form.name.trim()} className="w-full"><Plus className="h-4 w-4 mr-1" />Add Item</Button>
+          <Button onClick={addItem} disabled={!form.name.trim()} className="w-full"><Plus className="h-4 w-4 mr-1" />{t('factoryUI.addItem')}</Button>
 
           {items.length > 0 && (
             <>
@@ -262,12 +262,12 @@ export default function FactoryPurchases() {
                   </div>
                 ))}
                 <div className="flex justify-between items-center pt-2 border-t">
-                  <span className="font-bold text-sm">Grand Total</span>
+                  <span className="font-bold text-sm">{t('factoryUI.grandTotal')}</span>
                   <span className="font-bold text-lg text-success tabular-nums">{fmt(grandTotal)}</span>
                 </div>
               </div>
               <Button onClick={() => withLock(handleSave)} className="w-full" disabled={submitLocked}>
-                <ShoppingCart className="h-4 w-4 mr-2" />{submitLocked ? 'Saving...' : `Record Purchase — ${fmt(grandTotal)}`}
+                <ShoppingCart className="h-4 w-4 mr-2" />{submitLocked ? t('factoryUI.saving') : `${t('factoryUI.recordPurchase')} — ${fmt(grandTotal)}`}
               </Button>
             </>
           )}
@@ -279,10 +279,10 @@ export default function FactoryPurchases() {
       {/* History */}
       <div className="flex gap-2">
         <button onClick={() => setActiveTab('today')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'today' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-          Today ({todayPurchases.length})
+          {t('factoryUI.today')} ({todayPurchases.length})
         </button>
         <button onClick={() => setActiveTab('previous')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'previous' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-          Previous ({previousPurchases.length})
+          {t('factoryUI.previous')} ({previousPurchases.length})
         </button>
       </div>
 
@@ -291,7 +291,7 @@ export default function FactoryPurchases() {
         {(['all', 'paid', 'debt'] as const).map(f => (
           <button key={f} onClick={() => setPaymentFilter(f)}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${paymentFilter === f ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-            {f === 'all' ? '📋 All' : f === 'paid' ? '✅ Paid' : '❌ Debts'}
+            {f === 'all' ? `📋 ${t('factoryUI.all')}` : f === 'paid' ? `✅ ${t('factoryUI.paid')}` : `❌ ${t('factoryUI.debts')}`}
           </button>
         ))}
       </div>
@@ -299,7 +299,7 @@ export default function FactoryPurchases() {
       <Card className="shadow-card">
         <CardContent className="p-4">
           {filteredPurchases.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No purchases matching filter.</p>
+            <p className="text-sm text-muted-foreground">{t('factoryUI.noPurchasesFilter')}</p>
           ) : (
             <div className="space-y-3 max-h-[500px] overflow-y-auto">
               {filteredPurchases.map(p => (

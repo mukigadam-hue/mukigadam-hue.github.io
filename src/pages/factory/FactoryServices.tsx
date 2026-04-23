@@ -97,35 +97,35 @@ export default function FactoryServices() {
 
       <Card className="shadow-card">
         <CardContent className="p-4">
-          <h2 className="text-base font-semibold mb-3">Record Service</h2>
+          <h2 className="text-base font-semibold mb-3">{t('factoryUI.recordService')}</h2>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-2 gap-3 p-3 bg-muted/40 rounded-lg border">
-              <div><Label className="text-xs font-semibold text-destructive">Customer *</Label><Input value={form.customer_name} onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))} required /></div>
-              <div><Label className="text-xs font-semibold text-destructive">Seller *</Label><Input value={form.seller_name} onChange={e => setForm(f => ({ ...f, seller_name: e.target.value }))} required /></div>
+              <div><Label className="text-xs font-semibold text-destructive">{t('factoryUI.customer')} *</Label><Input value={form.customer_name} onChange={e => setForm(f => ({ ...f, customer_name: e.target.value }))} required /></div>
+              <div><Label className="text-xs font-semibold text-destructive">{t('factoryUI.seller')} *</Label><Input value={form.seller_name} onChange={e => setForm(f => ({ ...f, seller_name: e.target.value }))} required /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Service Type</Label>
+                <Label>{t('factoryUI.serviceType')}</Label>
                 <Select value={form.service_name} onValueChange={v => setForm(f => ({ ...f, service_name: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Select service..." /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('factoryUI.selectService')} /></SelectTrigger>
                   <SelectContent>{SERVICE_TYPES.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div><Label>Service Fee</Label><Input type="number" min="0" step="0.01" value={form.cost} onChange={e => setForm(f => ({ ...f, cost: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.serviceFee')}</Label><Input type="number" min="0" step="0.01" value={form.cost} onChange={e => setForm(f => ({ ...f, cost: e.target.value }))} /></div>
             </div>
-            <div><Label>Description</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
+            <div><Label>{t('factoryUI.description')}</Label><Input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} /></div>
 
             {/* Parts used */}
             <div className="border rounded-lg p-3 space-y-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Package className="h-3.5 w-3.5" /> Parts/Materials Used</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-1"><Package className="h-3.5 w-3.5" /> {t('factoryUI.partsMaterialsUsed')}</p>
               <div className="flex flex-wrap gap-2 items-end">
                 <div className="flex-1 min-w-[180px]">
                   <div className="flex gap-1.5">
                     <Select value={selectedStock} onValueChange={setSelectedStock}>
-                      <SelectTrigger className="flex-1"><SelectValue placeholder="Choose part..." /></SelectTrigger>
-                      <SelectContent>{activeStock.map(s => <SelectItem key={s.id} value={s.id}>{s.name}{s.category ? ` · ${s.category}` : ''} (qty: {s.quantity})</SelectItem>)}</SelectContent>
+                      <SelectTrigger className="flex-1"><SelectValue placeholder={t('factoryUI.choosePart')} /></SelectTrigger>
+                      <SelectContent>{activeStock.map(s => <SelectItem key={s.id} value={s.id}>{s.name}{s.category ? ` · ${s.category}` : ''} ({t('factoryUI.qty').toLowerCase()}: {s.quantity})</SelectItem>)}</SelectContent>
                     </Select>
-                    <Button type="button" variant="outline" size="icon" className="shrink-0 h-9 w-9" onClick={() => setScannerOpen(true)} title="Scan barcode">
+                    <Button type="button" variant="outline" size="icon" className="shrink-0 h-9 w-9" onClick={() => setScannerOpen(true)} title={t('factoryUI.scanBarcode')}>
                       <ScanLine className="h-3.5 w-3.5" />
                     </Button>
                   </div>
@@ -148,13 +148,13 @@ export default function FactoryServices() {
 
             {totalCost > 0 && (
               <div className="flex justify-between items-center p-2 bg-success/5 rounded-lg border border-success/20">
-                <span className="text-sm font-medium">Total</span>
+                <span className="text-sm font-medium">{t('factoryUI.total')}</span>
                 <span className="font-bold text-success tabular-nums">{fmt(totalCost)}</span>
               </div>
             )}
 
             <Button type="submit" className="w-full" disabled={!canSubmit}>
-              <Wrench className="h-4 w-4 mr-2" />Record Service
+              <Wrench className="h-4 w-4 mr-2" />{t('factoryUI.recordService')}
             </Button>
           </form>
         </CardContent>
@@ -164,14 +164,14 @@ export default function FactoryServices() {
 
       {/* History */}
       <div className="flex gap-2">
-        <button onClick={() => setActiveTab('today')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'today' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>Today ({todayServices.length})</button>
-        <button onClick={() => setActiveTab('previous')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'previous' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>Previous ({prevServices.length})</button>
+        <button onClick={() => setActiveTab('today')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'today' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>{t('factoryUI.today')} ({todayServices.length})</button>
+        <button onClick={() => setActiveTab('previous')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'previous' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>{t('factoryUI.previous')} ({prevServices.length})</button>
       </div>
 
       <Card className="shadow-card">
         <CardContent className="p-4">
           {(activeTab === 'today' ? todayServices : prevServices).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No services yet.</p>
+            <p className="text-sm text-muted-foreground">{t('factoryUI.noServicesYet')}</p>
           ) : (
             <div className="space-y-2 max-h-[500px] overflow-y-auto">
               {(activeTab === 'today' ? todayServices : prevServices).map(s => (
@@ -190,7 +190,7 @@ export default function FactoryServices() {
 
       <Dialog open={!!receiptService} onOpenChange={o => { if (!o) setReceiptService(null); }}>
         <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Service Receipt</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('factoryUI.serviceReceipt')}</DialogTitle></DialogHeader>
           {receiptService && (
             <Receipt
               items={[{ itemName: receiptService.service_name, category: 'Service', quality: receiptService.description || '-', quantity: 1, priceType: 'service', unitPrice: Number(receiptService.cost), subtotal: Number(receiptService.cost) }]}

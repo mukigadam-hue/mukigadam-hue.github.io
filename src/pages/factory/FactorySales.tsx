@@ -30,7 +30,7 @@ export default function FactorySales() {
   const { locked: submitLocked, withLock } = useSubmitLock();
 
   const userFullName = user?.user_metadata?.full_name || '';
-  const roleLabel = userRole === 'owner' ? '(Owner)' : userRole === 'admin' ? '(Admin)' : '(Worker)';
+  const roleLabel = userRole === 'owner' ? `(${t('factoryUI.owner')})` : userRole === 'admin' ? `(${t('factoryUI.admin')})` : `(${t('factoryUI.worker')})`;
 
   const activeProducts = stock.filter(s => !s.deleted_at);
 
@@ -155,27 +155,27 @@ export default function FactorySales() {
 
       <Card className="shadow-card">
         <CardContent className="p-4 space-y-4">
-          <h2 className="text-base font-semibold">Sell Finished Products</h2>
+          <h2 className="text-base font-semibold">{t('factoryUI.sellFinishedProducts')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-muted/40 rounded-lg border">
             <div>
-              <Label className="text-xs font-semibold text-destructive">Customer (Buyer) *</Label>
-              <Input value={customerName} onChange={e => setCustomerName(e.target.value)} onBlur={() => setCustomerName(toTitleCase(customerName))} placeholder="Customer name" required />
+              <Label className="text-xs font-semibold text-destructive">{t('factoryUI.customerBuyer')} *</Label>
+              <Input value={customerName} onChange={e => setCustomerName(e.target.value)} onBlur={() => setCustomerName(toTitleCase(customerName))} placeholder={t('factoryUI.customerNamePh')} required />
             </div>
             <div>
-              <Label className="text-xs font-semibold text-destructive">Seller * {roleLabel}</Label>
-              <Input value={sellerName} onChange={e => setSellerName(e.target.value)} onBlur={() => setSellerName(toTitleCase(sellerName))} placeholder="Your name (auto-filled)" required />
+              <Label className="text-xs font-semibold text-destructive">{t('factoryUI.seller')} * {roleLabel}</Label>
+              <Input value={sellerName} onChange={e => setSellerName(e.target.value)} onBlur={() => setSellerName(toTitleCase(sellerName))} placeholder={t('factoryUI.yourNameAuto')} required />
               {currentBusiness && <p className="text-[10px] text-muted-foreground mt-0.5">📍 {currentBusiness.name}</p>}
             </div>
           </div>
 
           {/* Stock Items with Search */}
           <div>
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">📦 Products</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">📦 {t('factoryUI.products')}</p>
             <div className="space-y-3">
               <div className="w-full">
-                <Label className="flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> Search & Select Item</Label>
+                <Label className="flex items-center gap-1.5"><Search className="h-3.5 w-3.5" /> {t('factoryUI.searchSelectItem')}</Label>
                 <Input
-                  placeholder="Type to search items by name, category, quality..."
+                  placeholder={t('factoryUI.searchItemsPh')}
                   value={stockSearch}
                   onChange={e => setStockSearch(e.target.value)}
                   className="mb-1.5"
@@ -183,43 +183,43 @@ export default function FactorySales() {
                 <div className="flex gap-1.5">
                   <Select value={selectedProduct} onValueChange={handleSelectProduct}>
                     <SelectTrigger className="flex-1">
-                      <SelectValue placeholder="Select item..." />
+                      <SelectValue placeholder={t('factoryUI.selectItem')} />
                     </SelectTrigger>
                     <SelectContent>
                       {filteredStock.map(p => (
                         <SelectItem key={p.id} value={p.id}>
-                          {p.name}{p.category ? ` · ${p.category}` : ''}{p.quality ? ` · ${p.quality}` : ''} (qty: {p.quantity})
+                          {p.name}{p.category ? ` · ${p.category}` : ''}{p.quality ? ` · ${p.quality}` : ''} ({t('factoryUI.qty').toLowerCase()}: {p.quantity})
                         </SelectItem>
                       ))}
                       {filteredStock.length === 0 && (
-                        <div className="px-3 py-2 text-xs text-muted-foreground">No items found</div>
+                        <div className="px-3 py-2 text-xs text-muted-foreground">{t('factoryUI.noItemsFound')}</div>
                       )}
                     </SelectContent>
                   </Select>
-                  <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setScannerOpen(true)} title="Scan barcode">
+                  <Button type="button" variant="outline" size="icon" className="shrink-0" onClick={() => setScannerOpen(true)} title={t('factoryUI.scanBarcode')}>
                     <ScanLine className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
               <div className="grid grid-cols-3 gap-2">
-                <div><Label>Qty</Label><Input type="number" min="0.01" step="0.01" value={qty} onChange={e => setQty(e.target.value)}
+                <div><Label>{t('factoryUI.qty')}</Label><Input type="number" min="0.01" step="0.01" value={qty} onChange={e => setQty(e.target.value)}
                   readOnly={parseInt(bulkPkg.pieces_per_carton) > 0}
                   className={parseInt(bulkPkg.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
-                  {parseInt(bulkPkg.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
+                  {parseInt(bulkPkg.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">{t('factoryUI.autoCalcFromBulk')}</p>}
                 </div>
                 <div>
-                  <Label>Price Type</Label>
+                  <Label>{t('factoryUI.priceType')}</Label>
                   <Select value={priceType} onValueChange={v => setPriceType(v as 'wholesale' | 'retail')}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="retail">Retail</SelectItem>
-                      <SelectItem value="wholesale">Wholesale</SelectItem>
+                      <SelectItem value="retail">{t('factoryUI.retail')}</SelectItem>
+                      <SelectItem value="wholesale">{t('factoryUI.wholesale')}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label>Alt. Price <span className="text-[10px] text-muted-foreground">(bargain)</span></Label>
-                  <Input type="number" min="0" step="0.01" value={customPrice} onChange={e => setCustomPrice(e.target.value)} placeholder="Custom..." />
+                  <Label>{t('factoryUI.altPrice')} <span className="text-[10px] text-muted-foreground">({t('factoryUI.bargain')})</span></Label>
+                  <Input type="number" min="0" step="0.01" value={customPrice} onChange={e => setCustomPrice(e.target.value)} placeholder={t('factoryUI.customPh')} />
                 </div>
               </div>
 
@@ -241,17 +241,17 @@ export default function FactorySales() {
                 const totalQty = parseFloat(qty) || 0;
                 return (
                   <div className="text-xs text-muted-foreground bg-muted/40 rounded p-2">
-                    {customPrice.trim() && <span className="text-warning font-medium mr-2">⚡ Custom price: {fmt(effectivePrice)}</span>}
-                    Subtotal: <span className="font-bold text-foreground">{fmt(totalQty * effectivePrice)}</span>
+                    {customPrice.trim() && <span className="text-warning font-medium mr-2">⚡ {t('factoryUI.customPrice')}: {fmt(effectivePrice)}</span>}
+                    {t('factoryUI.subtotal')}: <span className="font-bold text-foreground">{fmt(totalQty * effectivePrice)}</span>
                   </div>
                 );
               })()}
-              <Button onClick={addItem} disabled={!selectedProduct} className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-1" />Add Item</Button>
+              <Button onClick={addItem} disabled={!selectedProduct} className="w-full sm:w-auto"><Plus className="h-4 w-4 mr-1" />{t('factoryUI.addItem')}</Button>
             </div>
             {selectedProduct && (
               <div className="mt-2">
-                <Label className="text-xs text-muted-foreground">Serial Number (optional)</Label>
-                <Input value={serialInput} onChange={e => setSerialInput(e.target.value)} placeholder="e.g. IMEI, S/N..." className="max-w-xs" />
+                <Label className="text-xs text-muted-foreground">{t('factoryUI.serialNumberOptional')}</Label>
+                <Input value={serialInput} onChange={e => setSerialInput(e.target.value)} placeholder={t('factoryUI.serialPh')} className="max-w-xs" />
               </div>
             )}
           </div>
@@ -263,9 +263,9 @@ export default function FactorySales() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Item</TableHead><TableHead>Category</TableHead><TableHead>Quality</TableHead>
-                      <TableHead>Type</TableHead><TableHead className="text-right">Qty</TableHead>
-                      <TableHead className="text-right">Price</TableHead><TableHead className="text-right">Subtotal</TableHead>
+                      <TableHead>{t('factoryUI.item')}</TableHead><TableHead>{t('factoryUI.category')}</TableHead><TableHead>{t('factoryUI.quality')}</TableHead>
+                      <TableHead>{t('factoryUI.type')}</TableHead><TableHead className="text-right">{t('factoryUI.qty')}</TableHead>
+                      <TableHead className="text-right">{t('factoryUI.price')}</TableHead><TableHead className="text-right">{t('factoryUI.subtotal')}</TableHead>
                       <TableHead></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -283,7 +283,7 @@ export default function FactorySales() {
                       </TableRow>
                     ))}
                     <TableRow>
-                      <TableCell colSpan={6} className="text-right font-bold">Grand Total</TableCell>
+                      <TableCell colSpan={6} className="text-right font-bold">{t('factoryUI.grandTotal')}</TableCell>
                       <TableCell className="text-right font-bold text-lg text-success tabular-nums">{fmt(grandTotal)}</TableCell>
                       <TableCell></TableCell>
                     </TableRow>
@@ -292,30 +292,30 @@ export default function FactorySales() {
               </div>
               {/* Payment Status */}
               <div className="p-3 bg-muted/40 rounded-lg border space-y-2">
-                <Label className="text-xs font-semibold">💰 Payment Status</Label>
+                <Label className="text-xs font-semibold">💰 {t('factoryUI.paymentStatus')}</Label>
                 <div className="flex gap-2 flex-wrap">
                   {(['paid', 'partial', 'unpaid'] as const).map(s => (
                     <button key={s} onClick={() => setPaymentStatus(s)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${paymentStatus === s
                         ? s === 'paid' ? 'bg-success text-success-foreground' : s === 'partial' ? 'bg-warning text-warning-foreground' : 'bg-destructive text-destructive-foreground'
                         : 'bg-muted text-muted-foreground'}`}>
-                      {s === 'paid' ? '✅ Paid Full' : s === 'partial' ? '⚠️ Paid Partial' : '❌ Not Paid (Credit)'}
+                      {s === 'paid' ? `✅ ${t('factoryUI.paidFull')}` : s === 'partial' ? `⚠️ ${t('factoryUI.paidPartial')}` : `❌ ${t('factoryUI.notPaidCredit')}`}
                     </button>
                   ))}
                 </div>
                 {paymentStatus !== 'paid' && (
                   <div className="flex items-center gap-2">
-                    <Label className="text-xs whitespace-nowrap">Amount Paid:</Label>
+                    <Label className="text-xs whitespace-nowrap">{t('factoryUI.amountPaid')}:</Label>
                     <Input type="number" min="0" step="0.01" value={amountPaid} onChange={e => setAmountPaid(e.target.value)}
                       placeholder="0.00" className="w-32" />
                     <span className="text-xs text-muted-foreground">
-                      Balance: <span className="font-bold text-destructive">{fmt(grandTotal - (parseFloat(amountPaid) || 0))}</span>
+                      {t('factoryUI.balance')}: <span className="font-bold text-destructive">{fmt(grandTotal - (parseFloat(amountPaid) || 0))}</span>
                     </span>
                   </div>
                 )}
               </div>
               <Button onClick={() => withLock(handleSave)} className="w-full" disabled={!canSave || submitLocked}>
-                <TrendingUp className="h-4 w-4 mr-2" />{submitLocked ? 'Saving...' : `Complete Sale — ${fmt(grandTotal)}`}
+                <TrendingUp className="h-4 w-4 mr-2" />{submitLocked ? t('factoryUI.saving') : `${t('factoryUI.completeSale')} — ${fmt(grandTotal)}`}
               </Button>
             </>
           )}

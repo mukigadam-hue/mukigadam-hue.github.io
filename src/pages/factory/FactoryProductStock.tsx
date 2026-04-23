@@ -101,8 +101,8 @@ export default function FactoryProductStock() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2"><Package className="h-6 w-6" /> {t('factory.productStock')}</h1>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => setScannerOpen(true)} title="Scan barcode"><ScanLine className="h-4 w-4" /></Button>
-          <Button onClick={() => { resetForm(); setShowAdd(true); }}><Plus className="h-4 w-4 mr-1" />Add Product</Button>
+          <Button variant="outline" size="icon" onClick={() => setScannerOpen(true)} title={t('factoryUI.scanBarcode')}><ScanLine className="h-4 w-4" /></Button>
+          <Button onClick={() => { resetForm(); setShowAdd(true); }}><Plus className="h-4 w-4 mr-1" />{t('factoryUI.addProduct')}</Button>
         </div>
       </div>
 
@@ -110,21 +110,21 @@ export default function FactoryProductStock() {
 
       <Card className="shadow-card">
         <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground mb-3">Finished goods — {active.length} products</p>
+          <p className="text-sm text-muted-foreground mb-3">{t('factoryUI.finishedGoods')} — {active.length} {t('factoryUI.products')}</p>
           {active.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No products yet.</p>
+            <p className="text-sm text-muted-foreground text-center py-8">{t('factoryUI.noProductsYet')}</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead></TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead>Quality</TableHead>
-                    <TableHead className="text-right">Qty</TableHead>
-                    <TableHead className="text-right">Wholesale</TableHead>
-                    <TableHead className="text-right">Retail</TableHead>
+                    <TableHead>{t('factoryUI.product')}</TableHead>
+                    <TableHead>{t('factoryUI.category')}</TableHead>
+                    <TableHead>{t('factoryUI.quality')}</TableHead>
+                    <TableHead className="text-right">{t('factoryUI.qty')}</TableHead>
+                    <TableHead className="text-right">{t('factoryUI.wholesale')}</TableHead>
+                    <TableHead className="text-right">{t('factoryUI.retail')}</TableHead>
                     <TableHead></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -175,13 +175,13 @@ export default function FactoryProductStock() {
         <Card className="shadow-card border-destructive/20">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-semibold text-destructive">🗑️ Recycle Bin ({deleted.length})</h2>
-              <Button size="sm" variant="ghost" onClick={() => setShowDeleted(v => !v)}>{showDeleted ? 'Hide' : 'Show'}</Button>
+              <h2 className="text-sm font-semibold text-destructive">🗑️ {t('factoryUI.recycleBin')} ({deleted.length})</h2>
+              <Button size="sm" variant="ghost" onClick={() => setShowDeleted(v => !v)}>{showDeleted ? t('factoryUI.hide') : t('factoryUI.show')}</Button>
             </div>
             {showDeleted && deleted.map(item => (
               <div key={item.id} className="flex items-center justify-between p-2 rounded border mb-1">
                 <span className="text-sm line-through text-muted-foreground">{item.name}</span>
-                <Button size="sm" variant="outline" onClick={() => restoreStockItem(item.id)}><RotateCcw className="h-3 w-3 mr-1" />Restore</Button>
+                <Button size="sm" variant="outline" onClick={() => restoreStockItem(item.id)}><RotateCcw className="h-3 w-3 mr-1" />{t('factoryUI.restore')}</Button>
               </div>
             ))}
           </CardContent>
@@ -191,19 +191,19 @@ export default function FactoryProductStock() {
       {/* Add/Edit Dialog */}
       <Dialog open={showAdd || !!editItem} onOpenChange={o => { if (!o) { setShowAdd(false); setEditItem(null); resetForm(); } }}>
         <DialogContent className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>{editItem ? 'Edit Product' : 'Add Finished Product'}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editItem ? t('factoryUI.editProduct') : t('factoryUI.addFinishedProduct')}</DialogTitle></DialogHeader>
           <form onSubmit={editItem ? handleEdit : handleAdd} className="space-y-3">
-            <div><Label>Product Name *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
+            <div><Label>{t('factoryUI.productName')} *</Label><Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Category</Label><Input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} /></div>
-              <div><Label>Quality</Label><Input value={form.quality} onChange={e => setForm(f => ({ ...f, quality: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.category')}</Label><Input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.quality')}</Label><Input value={form.quality} onChange={e => setForm(f => ({ ...f, quality: e.target.value }))} /></div>
             </div>
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>Buying Price</Label><Input type="number" min="0" step="0.01" value={form.buying_price} onChange={e => setForm(f => ({ ...f, buying_price: e.target.value }))} /></div>
-              <div><Label>Wholesale</Label><Input type="number" min="0" step="0.01" value={form.wholesale_price} onChange={e => setForm(f => ({ ...f, wholesale_price: e.target.value }))} /></div>
-              <div><Label>Retail</Label><Input type="number" min="0" step="0.01" value={form.retail_price} onChange={e => setForm(f => ({ ...f, retail_price: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.buyingPrice')}</Label><Input type="number" min="0" step="0.01" value={form.buying_price} onChange={e => setForm(f => ({ ...f, buying_price: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.wholesale')}</Label><Input type="number" min="0" step="0.01" value={form.wholesale_price} onChange={e => setForm(f => ({ ...f, wholesale_price: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.retail')}</Label><Input type="number" min="0" step="0.01" value={form.retail_price} onChange={e => setForm(f => ({ ...f, retail_price: e.target.value }))} /></div>
             </div>
-            <div><Label>Barcode (Optional)</Label><Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} placeholder="Scan or type barcode..." /></div>
+            <div><Label>{t('factoryUI.barcodeOptional')}</Label><Input value={form.barcode} onChange={e => setForm(f => ({ ...f, barcode: e.target.value }))} placeholder={t('factoryUI.barcodePh')} /></div>
             <BulkPackagingFields
               piecesPerCarton={form.pieces_per_carton}
               cartonsPerBox={form.cartons_per_box}
@@ -214,27 +214,27 @@ export default function FactoryProductStock() {
             />
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Quantity (Total Pieces)</Label>
+                <Label>{t('factoryUI.quantityTotalPieces')}</Label>
                 <Input type="number" min="0" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
                   readOnly={parseInt(form.pieces_per_carton) > 0}
                   className={parseInt(form.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
-                {parseInt(form.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
+                {parseInt(form.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">{t('factoryUI.autoCalcFromBulk')}</p>}
               </div>
-              <div><Label>Min Level</Label><Input type="number" min="0" value={form.min_stock_level} onChange={e => setForm(f => ({ ...f, min_stock_level: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.minLevel')}</Label><Input type="number" min="0" value={form.min_stock_level} onChange={e => setForm(f => ({ ...f, min_stock_level: e.target.value }))} /></div>
             </div>
             <div className="space-y-2">
-              <Label>Product Images (up to 3)</Label>
+              <Label>{t('factoryUI.productImages')}</Label>
               <div className="grid grid-cols-3 gap-2">
                 {[1, 2, 3].map(n => (
                   <ImageUpload key={n} bucket="item-images" path={`product-${editItem || 'new'}-${n}`}
                     currentUrl={form[`image_url_${n}` as keyof typeof form] as string}
                     onUploaded={url => setForm(f => ({ ...f, [`image_url_${n}`]: url }))}
                     onRemoved={() => setForm(f => ({ ...f, [`image_url_${n}`]: '' }))}
-                    size="sm" label={`Photo ${n}`} premiumOnly />
+                    size="sm" label={`${t('factoryUI.photoN')} ${n}`} premiumOnly />
                 ))}
               </div>
             </div>
-            <Button type="submit" className="w-full">{editItem ? 'Save Changes' : 'Add Product'}</Button>
+            <Button type="submit" className="w-full">{editItem ? t('factoryUI.saveChanges') : t('factoryUI.addProduct')}</Button>
           </form>
         </DialogContent>
       </Dialog>
