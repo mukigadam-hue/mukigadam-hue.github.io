@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useBusiness } from '@/context/BusinessContext';
+import { supabase } from '@/integrations/supabase/client';
 import { softDeleteRecord, applyStockReversal, type RecyclableTable } from '@/lib/recycleBin';
 
 interface Props {
@@ -21,6 +22,9 @@ interface Props {
  * Soft-delete a record into the Recycle Bin (Settings → Recycle Bin).
  * Any team member can use this; only owners/admins can permanently delete.
  * Stock side-effects are reversed automatically.
+ *
+ * The deleter's full name is captured (profiles → user_metadata → email)
+ * so the Recycle Bin shows "deleted by <person>" for audit/tracking.
  */
 export default function RecycleDeleteButton({
   table, recordId, label, onDeleted, size = 'sm', variant = 'ghost', confirmText,
@@ -29,6 +33,23 @@ export default function RecycleDeleteButton({
   const { user } = useAuth();
   const { refreshData } = useBusiness();
   const [busy, setBusy] = useState(false);
+  const [profileName, setProfileName] = useState<string>('');
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!user?.id) return;
+    (async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('full_name, email')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (!cancelled && data) {
+        setProfileName((data as any).full_name || (data as any).email || '');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user?.id]);
 
   async function onClick() {
     const msg = confirmText ?? t('recycleBin.moveConfirm');
@@ -36,9 +57,15 @@ export default function RecycleDeleteButton({
     setBusy(true);
     try {
       await applyStockReversal(table, recordId);
+      const resolvedName =
+        profileName ||
+        (user?.user_metadata as any)?.full_name ||
+        (user?.user_metadata as any)?.name ||
+        user?.email ||
+        'Member';
       const ok = await softDeleteRecord(table, recordId, {
         userId: user?.id,
-        userName: user?.user_metadata?.full_name || user?.email || 'Member',
+        userName: resolvedName,
       });
       if (ok) {
         toast.success(t('recycleBin.moved'));
