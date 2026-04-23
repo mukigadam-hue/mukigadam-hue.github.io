@@ -31,6 +31,8 @@ export default function ServicesPage() {
   const [itemsUsed, setItemsUsed] = useState<{ stock_item_id: string; item_name: string; category: string; quality: string; quantity: number; unit_price: number; subtotal: number }[]>([]);
   const [selectedStock, setSelectedStock] = useState('');
   const [itemQty, setItemQty] = useState('1');
+  const [stockSearch, setStockSearch] = useState('');
+  const [showStockPicker, setShowStockPicker] = useState(false);
 
   const activeStock = stock.filter(s => !s.deleted_at && s.quantity > 0);
 
