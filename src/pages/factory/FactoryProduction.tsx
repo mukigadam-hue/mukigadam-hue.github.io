@@ -143,13 +143,13 @@ export default function FactoryProduction() {
         <Card className="shadow-card border-warning/30">
           <CardContent className="p-4">
             <h2 className="text-sm font-semibold text-warning flex items-center gap-2 mb-2">
-              <AlertTriangle className="h-4 w-4" /> Expired or Expiring Products ({expiringSoon.length})
+              <AlertTriangle className="h-4 w-4" /> {t('factoryUI.expiredOrExpiring')} ({expiringSoon.length})
             </h2>
             <div className="space-y-1 max-h-40 overflow-y-auto">
               {expiringSoon.map(p => (
                 <div key={p.id} className="flex justify-between text-sm p-1.5 rounded bg-warning/5">
-                  <span>{p.product_name} — {p.quantity_produced} units</span>
-                  <span className="text-xs text-warning font-semibold">Exp: {new Date(p.expiry_date!).toLocaleDateString()}</span>
+                  <span>{p.product_name} — {p.quantity_produced} {t('factoryUI.units')}</span>
+                  <span className="text-xs text-warning font-semibold">{t('factoryUI.exp')}: {new Date(p.expiry_date!).toLocaleDateString()}</span>
                 </div>
               ))}
             </div>
@@ -159,17 +159,17 @@ export default function FactoryProduction() {
 
       <Card className="shadow-card">
         <CardContent className="p-4">
-          <h2 className="text-base font-semibold mb-3">Record Production</h2>
+          <h2 className="text-base font-semibold mb-3">{t('factoryUI.recordProduction')}</h2>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Product Name *</Label>
+                <Label>{t('factoryUI.productName')} *</Label>
                 <Input value={form.product_name} onChange={e => setForm(f => ({ ...f, product_name: e.target.value }))}
-                  placeholder="Product name" list="product-suggestions" required />
+                  placeholder={t('factoryUI.productNamePh')} list="product-suggestions" required />
                 <datalist id="product-suggestions">{activeProducts.map(p => <option key={p.id} value={p.name} />)}</datalist>
               </div>
               <div>
-                <Label>Link to Existing Product</Label>
+                <Label>{t('factoryUI.linkExistingProduct')}</Label>
                 <Select value={form.product_stock_id || '__new__'} onValueChange={v => {
                   setForm(f => ({ ...f, product_stock_id: v === '__new__' ? '' : v }));
                   if (v !== '__new__') {
@@ -177,9 +177,9 @@ export default function FactoryProduction() {
                     if (p) setForm(f => ({ ...f, product_name: p.name }));
                   }
                 }}>
-                  <SelectTrigger><SelectValue placeholder="Optional..." /></SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder={t('factoryUI.optional')} /></SelectTrigger>
                   <SelectContent position="popper" className="max-h-48 overflow-y-auto">
-                    <SelectItem value="__new__">New Product</SelectItem>
+                    <SelectItem value="__new__">{t('factoryUI.newProduct')}</SelectItem>
                     {activeProducts.map(p => <SelectItem key={p.id} value={p.id}>{p.name} (W:{fmt(Number(p.wholesale_price))} R:{fmt(Number(p.retail_price))})</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -187,37 +187,37 @@ export default function FactoryProduction() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Wholesale Price</Label><Input type="number" min="0" step="0.01" value={form.wholesale_price} onChange={e => setForm(f => ({ ...f, wholesale_price: e.target.value }))} placeholder="0.00" /></div>
-              <div><Label>Retail Price</Label><Input type="number" min="0" step="0.01" value={form.retail_price} onChange={e => setForm(f => ({ ...f, retail_price: e.target.value }))} placeholder="0.00" /></div>
+              <div><Label>{t('factoryUI.wholesalePrice')}</Label><Input type="number" min="0" step="0.01" value={form.wholesale_price} onChange={e => setForm(f => ({ ...f, wholesale_price: e.target.value }))} placeholder="0.00" /></div>
+              <div><Label>{t('factoryUI.retailPrice')}</Label><Input type="number" min="0" step="0.01" value={form.retail_price} onChange={e => setForm(f => ({ ...f, retail_price: e.target.value }))} placeholder="0.00" /></div>
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <div><Label>Qty Produced *</Label><Input type="number" min="1" value={form.quantity_produced} onChange={e => setForm(f => ({ ...f, quantity_produced: e.target.value }))} required /></div>
-              <div><Label>Waste Qty</Label><Input type="number" min="0" step="0.01" value={form.waste_quantity} onChange={e => setForm(f => ({ ...f, waste_quantity: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.qtyProduced')} *</Label><Input type="number" min="1" value={form.quantity_produced} onChange={e => setForm(f => ({ ...f, quantity_produced: e.target.value }))} required /></div>
+              <div><Label>{t('factoryUI.wasteQty')}</Label><Input type="number" min="0" step="0.01" value={form.waste_quantity} onChange={e => setForm(f => ({ ...f, waste_quantity: e.target.value }))} /></div>
               <div>
-                <Label>Waste Unit</Label>
+                <Label>{t('factoryUI.wasteUnit')}</Label>
                 <Select value={form.waste_unit} onValueChange={v => setForm(f => ({ ...f, waste_unit: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent position="popper" className="max-h-48 overflow-y-auto">{WASTE_UNITS.map(u => <SelectItem key={u} value={u}>{u}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div><Label>Recorded By</Label><Input value={form.recorded_by} onChange={e => setForm(f => ({ ...f, recorded_by: e.target.value }))} placeholder="Name" /></div>
+              <div><Label>{t('factoryUI.recordedBy')}</Label><Input value={form.recorded_by} onChange={e => setForm(f => ({ ...f, recorded_by: e.target.value }))} placeholder={t('factoryUI.namePh')} /></div>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
-              <div><Label>Batch Number *</Label><Input value={form.batch_number} onChange={e => setForm(f => ({ ...f, batch_number: e.target.value }))} placeholder="B240308-XK2A" required /></div>
-              <div><Label>Production Date *</Label><Input type="date" value={form.production_date} onChange={e => setForm(f => ({ ...f, production_date: e.target.value }))} required /></div>
-              <div><Label>Expiry Date</Label><Input type="date" value={form.expiry_date} onChange={e => setForm(f => ({ ...f, expiry_date: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.batchNumber')} *</Label><Input value={form.batch_number} onChange={e => setForm(f => ({ ...f, batch_number: e.target.value }))} placeholder="B240308-XK2A" required /></div>
+              <div><Label>{t('factoryUI.productionDate')} *</Label><Input type="date" value={form.production_date} onChange={e => setForm(f => ({ ...f, production_date: e.target.value }))} required /></div>
+              <div><Label>{t('factoryUI.expiryDate')}</Label><Input type="date" value={form.expiry_date} onChange={e => setForm(f => ({ ...f, expiry_date: e.target.value }))} /></div>
             </div>
 
             {/* Materials Used */}
             <div className="border rounded-lg p-3 space-y-2">
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Materials Used</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{t('factoryUI.materialsUsed')}</p>
               <div className="flex flex-wrap gap-2 items-end">
                 <div className="flex-1 min-w-[180px]">
-                  <Label className="text-xs">Material</Label>
+                  <Label className="text-xs">{t('factoryUI.material')}</Label>
                   <Select value={selectedMaterial} onValueChange={setSelectedMaterial}>
-                    <SelectTrigger><SelectValue placeholder="Choose material..." /></SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder={t('factoryUI.chooseMaterial')} /></SelectTrigger>
                     <SelectContent position="popper" className="max-h-48 overflow-y-auto">
                       {activeRM.filter(r => Number(r.quantity) > 0).map(r => (
                         <SelectItem key={r.id} value={r.id}>{r.name} ({r.quantity} {r.unit_type})</SelectItem>
@@ -225,8 +225,8 @@ export default function FactoryProduction() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="w-20"><Label className="text-xs">Qty</Label><Input type="number" min="0.01" step="0.01" value={materialQty} onChange={e => setMaterialQty(e.target.value)} /></div>
-                <Button type="button" size="sm" variant="outline" onClick={addMaterial} disabled={!selectedMaterial}><Plus className="h-3.5 w-3.5 mr-1" />Add</Button>
+                <div className="w-20"><Label className="text-xs">{t('factoryUI.qty')}</Label><Input type="number" min="0.01" step="0.01" value={materialQty} onChange={e => setMaterialQty(e.target.value)} /></div>
+                <Button type="button" size="sm" variant="outline" onClick={addMaterial} disabled={!selectedMaterial}><Plus className="h-3.5 w-3.5 mr-1" />{t('factoryUI.addMaterial').replace(/^Add\s/i, 'Add ').replace('Add Material','Add')}</Button>
               </div>
               {materialsUsed.length > 0 && (
                 <div className="space-y-1 mt-2">
@@ -242,10 +242,10 @@ export default function FactoryProduction() {
               )}
             </div>
 
-            <div><Label>Notes</Label><Input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder="Any notes..." /></div>
+            <div><Label>{t('factoryUI.notes')}</Label><Input value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} placeholder={t('factoryUI.notesPh')} /></div>
 
             <Button type="submit" className="w-full" disabled={!form.product_name.trim() || !form.quantity_produced}>
-              <Factory className="h-4 w-4 mr-2" />Record Production
+              <Factory className="h-4 w-4 mr-2" />{t('factoryUI.recordProduction')}
             </Button>
           </form>
         </CardContent>
@@ -256,9 +256,9 @@ export default function FactoryProduction() {
       {/* Production History */}
       <Card className="shadow-card">
         <CardContent className="p-4">
-          <h2 className="text-base font-semibold mb-3">Production History</h2>
+          <h2 className="text-base font-semibold mb-3">{t('factoryUI.productionHistory')}</h2>
           {production.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No production records yet.</p>
+            <p className="text-sm text-muted-foreground">{t('factoryUI.noProductionRecords')}</p>
           ) : (
             <div className="space-y-3 max-h-[500px] overflow-y-auto">
               {production.map(p => (
@@ -274,20 +274,20 @@ export default function FactoryProduction() {
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        📅 Produced: {new Date(p.production_date).toLocaleDateString()}
-                        {p.expiry_date && ` · Expires: ${new Date(p.expiry_date).toLocaleDateString()}`}
+                        📅 {t('factoryUI.produced')}: {new Date(p.production_date).toLocaleDateString()}
+                        {p.expiry_date && ` · ${t('factoryUI.expires')}: ${new Date(p.expiry_date).toLocaleDateString()}`}
                       </p>
                       {p.notes && <p className="text-xs text-muted-foreground mt-0.5">{p.notes}</p>}
                       {Array.isArray(p.materials_used) && p.materials_used.length > 0 && (
                         <p className="text-xs text-muted-foreground mt-0.5">
-                          Materials: {p.materials_used.map((m: any) => `${m.name} ×${m.quantity}`).join(', ')}
+                          {t('factoryUI.materials')}: {p.materials_used.map((m: any) => `${m.name} ×${m.quantity}`).join(', ')}
                         </p>
                       )}
                     </div>
                     <div className="text-right">
-                      <span className="text-sm font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-md">{p.quantity_produced} produced</span>
+                      <span className="text-sm font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-md">{p.quantity_produced} {t('factoryUI.produced').toLowerCase()}</span>
                       {Number(p.waste_quantity) > 0 && (
-                        <p className="text-xs text-warning mt-1">Waste: {p.waste_quantity} {p.waste_unit}</p>
+                        <p className="text-xs text-warning mt-1">{t('factoryUI.waste')}: {p.waste_quantity} {p.waste_unit}</p>
                       )}
                       <div className="mt-1"><RecycleDeleteButton table="factory_production" recordId={p.id} /></div>
                     </div>
