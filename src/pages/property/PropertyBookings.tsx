@@ -246,7 +246,7 @@ function DirectBookingDialog({ open, onClose, assets }: { open: boolean; onClose
             <Select value={selectedAssetId} onValueChange={setSelectedAssetId}>
               <SelectTrigger><SelectValue placeholder="Choose asset or specific room/unit..." /></SelectTrigger>
               <SelectContent>
-                {assets.filter(a => a.is_available).map(a => (
+                {assets.filter(a => isAssetBookable(a as any)).map(a => (
                   <SelectItem key={a.id} value={a.id}>
                     {a.category === 'house' ? '🏠' : a.category === 'land' ? '🏞️' : a.category === 'vehicle' ? '🚗' : '🚢'} {a.name} - {a.location}
                     {(a as any).total_rooms > 0 && ` (${(a as any).total_rooms} rooms)`}
@@ -272,7 +272,7 @@ function DirectBookingDialog({ open, onClose, assets }: { open: boolean; onClose
 
           <div className="grid grid-cols-2 gap-2">
             <div><Label>{t('propertyUI.renterName')} *</Label><Input value={renterName} onChange={e => setRenterName(e.target.value)} /></div>
-            <div><Label>{t('propertyUI.phone')}</Label><Input value={renterContact} onChange={e => setRenterContact(e.target.value)} /></div>
+            <div><Label>{t('propertyUI.phone')} *</Label><PhoneInput value={renterContact} onChange={setRenterContact} /></div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <div><Label>Occupation</Label><Input value={renterOccupation} onChange={e => setRenterOccupation(e.target.value)} /></div>
@@ -529,7 +529,7 @@ function BookNowDialog({ open, onClose, prefilledPropertyId, prefilledPropertyNa
               </Card>
               <div className="grid grid-cols-2 gap-2">
                 <div><Label>Your Name *</Label><Input value={renterName} onChange={e => setRenterName(e.target.value)} /></div>
-                <div><Label>Your Phone</Label><Input value={renterContact} onChange={e => setRenterContact(e.target.value)} /></div>
+                <div><Label>Your Phone *</Label><PhoneInput value={renterContact} onChange={setRenterContact} /></div>
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <div><Label>Occupation</Label><Input value={renterOccupation} onChange={e => setRenterOccupation(e.target.value)} /></div>
