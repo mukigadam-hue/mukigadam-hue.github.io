@@ -118,8 +118,8 @@ export default function FactorySales() {
 
   function handleBarcodeScan(code: string) {
     const match = activeProducts.find(s => s.barcode && s.barcode === code && s.quantity > 0);
-    if (match) { setSelectedProduct(match.id); toast.success(`Found: ${match.name}`); }
-    else { toast.error(`No product found for barcode: ${code}`); }
+    if (match) { setSelectedProduct(match.id); toast.success(t('factoryUI.foundColon', { name: match.name })); }
+    else { toast.error(t('factoryUI.noProductForBarcodeColon', { code })); }
   }
 
   async function handleSave() {
@@ -392,7 +392,7 @@ export default function FactorySales() {
       {/* Receipt Dialog */}
       <Dialog open={!!receiptSale} onOpenChange={o => { if (!o) setReceiptSale(null); }}>
         <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
-          <DialogHeader><DialogTitle>Sale Receipt</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('factoryUI.saleReceipt')}</DialogTitle></DialogHeader>
           {receiptSale && (
             <Receipt
               items={receiptSale.items.map(i => ({
@@ -424,9 +424,9 @@ export default function FactorySales() {
             return (
               <div className="space-y-3">
                 <div className="p-3 bg-muted/40 rounded-lg border space-y-1">
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Total Charged</span><span className="font-bold">{fmt(total)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Previously Paid</span><span className="font-bold">{fmt(previouslyPaid)}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Remaining Balance</span><span className="font-bold text-destructive">{fmt(remaining)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('factoryUI.totalCharged')}</span><span className="font-bold">{fmt(total)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('factoryUI.previouslyPaid')}</span><span className="font-bold">{fmt(previouslyPaid)}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">{t('factoryUI.remainingBalance')}</span><span className="font-bold text-destructive">{fmt(remaining)}</span></div>
                 </div>
                 <div>
                   <Label>💰 Amount Paying Now</Label>

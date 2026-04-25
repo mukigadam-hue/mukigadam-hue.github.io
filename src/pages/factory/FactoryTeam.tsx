@@ -31,23 +31,24 @@ interface AppMember {
 const RANKS = ['Supervisor', 'Inspector', 'Maintenance', 'Security', 'Worker', 'Operator', 'Quality Control', 'Driver'];
 
 function FactoryShareButtons({ code }: { code: string }) {
+  const { t } = useTranslation();
   const message = `You've been invited to join our factory team! Use this invite code in the BizTrack app: ${code}`;
   const encoded = encodeURIComponent(message);
   async function handleNativeShare() {
     try {
-      if (navigator.share) { await navigator.share({ title: 'Factory Invite Code', text: message }); toast.success('Shared!'); }
-      else { await navigator.clipboard.writeText(message); toast.success('Message copied!'); }
-    } catch (err: any) { if (err?.name !== 'AbortError') { await navigator.clipboard.writeText(message); toast.success('Copied!'); } }
+      if (navigator.share) { await navigator.share({ title: t('factoryUI.factoryInviteCodeShort'), text: message }); toast.success(t('factoryUI.sharedToast')); }
+      else { await navigator.clipboard.writeText(message); toast.success(t('factoryUI.messageCopied')); }
+    } catch (err: any) { if (err?.name !== 'AbortError') { await navigator.clipboard.writeText(message); toast.success(t('factoryUI.copied')); } }
   }
   return (
     <div className="flex items-center gap-2 flex-wrap mt-2">
-      <span className="text-xs text-muted-foreground">Share via:</span>
-      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleNativeShare}><Share2 className="h-4 w-4" />Share</button>
-      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white" onClick={() => window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer')}><MessageCircle className="h-4 w-4" />WhatsApp</button>
-      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-blue-500 hover:bg-blue-600 text-white" onClick={() => window.open(`https://t.me/share/url?url=&text=${encoded}`, '_blank', 'noopener,noreferrer')}><Send className="h-4 w-4" />Telegram</button>
+      <span className="text-xs text-muted-foreground">{t('factoryUI.shareVia')}:</span>
+      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleNativeShare}><Share2 className="h-4 w-4" />{t('factoryUI.share')}</button>
+      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white" onClick={() => window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer')}><MessageCircle className="h-4 w-4" />{t('factoryUI.whatsapp')}</button>
+      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-blue-500 hover:bg-blue-600 text-white" onClick={() => window.open(`https://t.me/share/url?url=&text=${encoded}`, '_blank', 'noopener,noreferrer')}><Send className="h-4 w-4" />{t('factoryUI.telegram')}</button>
       <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-gray-900 hover:bg-black text-white" onClick={() => window.open(`https://x.com/intent/tweet?text=${encoded}`, '_blank', 'noopener,noreferrer')}><Share2 className="h-4 w-4" />X</button>
       <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-muted hover:bg-muted/80 text-foreground" onClick={() => window.open(`sms:?body=${encoded}`, '_blank')}><MessageCircle className="h-4 w-4" />SMS</button>
-      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-muted hover:bg-muted/80 text-foreground" onClick={() => { navigator.clipboard.writeText(code); toast.success('Code copied!'); }}><Share2 className="h-4 w-4" />Copy</button>
+      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-muted hover:bg-muted/80 text-foreground" onClick={() => { navigator.clipboard.writeText(code); toast.success(t('factoryUI.codeCopied')); }}><Share2 className="h-4 w-4" />{t('factoryUI.copy')}</button>
     </div>
   );
 }
@@ -209,12 +210,12 @@ export default function FactoryTeam() {
                   <h2 className="text-base font-semibold flex items-center gap-2 mb-3"><User className="h-4 w-4" /> My Employment Details</h2>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
-                      <p className="text-xs text-muted-foreground">Role</p>
+                      <p className="text-xs text-muted-foreground">{t('factoryUI.role')}</p>
                       <p className="text-sm font-semibold capitalize">{myMembership?.role || 'worker'}</p>
                     </div>
                     {myTeamRecord && (
                       <div className="p-3 rounded-lg bg-success/5 border border-success/20">
-                        <p className="text-xs text-muted-foreground">Salary</p>
+                        <p className="text-xs text-muted-foreground">{t('factoryUI.salary')}</p>
                         <p className="text-sm font-semibold text-success">{fmt(Number(myTeamRecord.salary))}/mo</p>
                       </div>
                     )}
@@ -311,14 +312,14 @@ export default function FactoryTeam() {
                                 <Select value={member.role} onValueChange={v => updateMemberRole(member.user_id, v).then(loadAppMembers)}>
                                   <SelectTrigger className="w-24 h-8 text-xs"><SelectValue /></SelectTrigger>
                                   <SelectContent>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                    <SelectItem value="worker">Worker</SelectItem>
+                                    <SelectItem value="admin">{t('factoryUI.admin')}</SelectItem>
+                                    <SelectItem value="worker">{t('factoryUI.worker')}</SelectItem>
                                   </SelectContent>
                                 </Select>
                                 <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon">
                                   <Trash2 className="h-3.5 w-3.5 text-destructive" />
                                 </Button></AlertDialogTrigger>
-                                <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you sure?</AlertDialogTitle><AlertDialogDescription>This will remove this person and revoke their app access. This cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => removeMember(member.user_id).then(loadAppMembers)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remove</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+                                <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{t('factoryUI.areYouSure')}</AlertDialogTitle><AlertDialogDescription>{t('factoryUI.removeMemberWarn')}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{t('factoryUI.cancel')}</AlertDialogCancel><AlertDialogAction onClick={() => removeMember(member.user_id).then(loadAppMembers)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('factoryUI.remove')}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                               </>
                             ) : (
                               member.role === 'owner' && <span className="text-xs font-medium capitalize px-2 py-1 rounded-full bg-muted">{member.role}</span>
@@ -371,7 +372,7 @@ export default function FactoryTeam() {
                         <div className="flex items-center gap-2">
                           {isOwnerOrAdmin && <span className="text-sm font-semibold text-success tabular-nums">{fmt(Number(m.salary))}/mo</span>}
                           {isOwnerOrAdmin && <Button variant="ghost" size="icon" onClick={() => openEdit(m)}><Edit2 className="h-3.5 w-3.5" /></Button>}
-                          {isOwnerOrAdmin && <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Deactivate {m.full_name}?</AlertDialogTitle><AlertDialogDescription>This will deactivate the worker. You can reactivate them later.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => updateTeamMember(m.id, { is_active: false })} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Deactivate</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>}
+                          {isOwnerOrAdmin && <AlertDialog><AlertDialogTrigger asChild><Button variant="ghost" size="icon"><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{t('factoryUI.deactivateWorkerTitle', { name: m.full_name })}</AlertDialogTitle><AlertDialogDescription>{t('factoryUI.deactivateWorkerDesc')}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{t('factoryUI.cancel')}</AlertDialogCancel><AlertDialogAction onClick={() => updateTeamMember(m.id, { is_active: false })} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('factoryUI.deactivate')}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>}
                         </div>
                       </div>
                     );
@@ -389,8 +390,8 @@ export default function FactoryTeam() {
                   <div key={m.id} className="flex items-center justify-between p-2 rounded border mb-1">
                     <span className="text-sm text-muted-foreground">{m.full_name} — {m.rank}</span>
                     <div className="flex gap-1">
-                      <Button size="sm" variant="outline" onClick={() => updateTeamMember(m.id, { is_active: true })}>Reactivate</Button>
-                      <AlertDialog><AlertDialogTrigger asChild><Button size="sm" variant="destructive">Remove</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Permanently remove {m.full_name}?</AlertDialogTitle><AlertDialogDescription>This will permanently delete this worker's record. This cannot be undone.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => deleteTeamMember(m.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remove</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
+                      <Button size="sm" variant="outline" onClick={() => updateTeamMember(m.id, { is_active: true })}>{t('factoryUI.reactivate')}</Button>
+                      <AlertDialog><AlertDialogTrigger asChild><Button size="sm" variant="destructive">{t('factoryUI.remove')}</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>{t('factoryUI.permanentlyRemoveTitle', { name: m.full_name })}</AlertDialogTitle><AlertDialogDescription>{t('factoryUI.permanentlyRemoveDesc')}</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>{t('factoryUI.cancel')}</AlertDialogCancel><AlertDialogAction onClick={() => deleteTeamMember(m.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t('factoryUI.remove')}</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
                     </div>
                   </div>
                 ))}
@@ -412,17 +413,17 @@ export default function FactoryTeam() {
             <div><Label>Full Name *</Label><Input value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} onBlur={e => setForm(f => ({ ...f, full_name: toTitleCase(e.target.value) }))} required /></div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Rank</Label>
+                <Label>{t('factoryUI.rank')}</Label>
                 <Select value={form.rank} onValueChange={v => setForm(f => ({ ...f, rank: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{RANKS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div><Label>Monthly Salary</Label><Input type="number" min="0" step="0.01" value={form.salary} onChange={e => setForm(f => ({ ...f, salary: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.monthlySalary')}</Label><Input type="number" min="0" step="0.01" value={form.salary} onChange={e => setForm(f => ({ ...f, salary: e.target.value }))} /></div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
-              <div><Label>Hire Date</Label><Input type="date" value={form.hire_date} onChange={e => setForm(f => ({ ...f, hire_date: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.phone')}</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
+              <div><Label>{t('factoryUI.hireDate')}</Label><Input type="date" value={form.hire_date} onChange={e => setForm(f => ({ ...f, hire_date: e.target.value }))} /></div>
             </div>
             <Button type="submit" className="w-full">{editId ? 'Save Changes' : 'Add Member'}</Button>
           </form>
