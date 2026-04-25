@@ -42,13 +42,13 @@ function FactoryShareButtons({ code }: { code: string }) {
   }
   return (
     <div className="flex items-center gap-2 flex-wrap mt-2">
-      <span className="text-xs text-muted-foreground">Share via:</span>
-      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleNativeShare}><Share2 className="h-4 w-4" />Share</button>
-      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white" onClick={() => window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer')}><MessageCircle className="h-4 w-4" />WhatsApp</button>
-      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-blue-500 hover:bg-blue-600 text-white" onClick={() => window.open(`https://t.me/share/url?url=&text=${encoded}`, '_blank', 'noopener,noreferrer')}><Send className="h-4 w-4" />Telegram</button>
+      <span className="text-xs text-muted-foreground">{t('factoryUI.shareVia')}:</span>
+      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-primary hover:bg-primary/90 text-primary-foreground" onClick={handleNativeShare}><Share2 className="h-4 w-4" />{t('factoryUI.share')}</button>
+      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white" onClick={() => window.open(`https://wa.me/?text=${encoded}`, '_blank', 'noopener,noreferrer')}><MessageCircle className="h-4 w-4" />{t('factoryUI.whatsapp')}</button>
+      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-blue-500 hover:bg-blue-600 text-white" onClick={() => window.open(`https://t.me/share/url?url=&text=${encoded}`, '_blank', 'noopener,noreferrer')}><Send className="h-4 w-4" />{t('factoryUI.telegram')}</button>
       <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-gray-900 hover:bg-black text-white" onClick={() => window.open(`https://x.com/intent/tweet?text=${encoded}`, '_blank', 'noopener,noreferrer')}><Share2 className="h-4 w-4" />X</button>
       <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-muted hover:bg-muted/80 text-foreground" onClick={() => window.open(`sms:?body=${encoded}`, '_blank')}><MessageCircle className="h-4 w-4" />SMS</button>
-      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-muted hover:bg-muted/80 text-foreground" onClick={() => { navigator.clipboard.writeText(code); toast.success('Code copied!'); }}><Share2 className="h-4 w-4" />Copy</button>
+      <button className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium bg-muted hover:bg-muted/80 text-foreground" onClick={() => { navigator.clipboard.writeText(code); toast.success(t('factoryUI.codeCopied')); }}><Share2 className="h-4 w-4" />{t('factoryUI.copy')}</button>
     </div>
   );
 }
