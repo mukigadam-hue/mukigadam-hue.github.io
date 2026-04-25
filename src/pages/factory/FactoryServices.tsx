@@ -53,8 +53,8 @@ export default function FactoryServices() {
 
   function handleBarcodeScan(code: string) {
     const match = activeStock.find(s => s.barcode && s.barcode === code);
-    if (match) { setSelectedStock(match.id); toast.success(`Found: ${match.name}`); }
-    else { toast.error(`No item found for barcode: ${code}`); }
+    if (match) { setSelectedStock(match.id); toast.success(t('factoryUI.foundColon', { name: match.name })); }
+    else { toast.error(t('factoryUI.noItemForBarcodeColon', { code })); }
   }
 
   const itemsTotal = itemsUsed.reduce((sum, i) => sum + i.subtotal, 0);

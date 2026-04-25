@@ -85,9 +85,9 @@ export default function FactoryPurchases() {
     const match = activeStock.find(s => s.barcode && s.barcode === code);
     if (match) {
       setForm(f => ({ ...f, name: match.name, category: match.category }));
-      toast.success(`Found: ${match.name}`);
+      toast.success(t('factoryUI.foundColon', { name: match.name }));
     } else {
-      toast.error(`No item found for barcode: ${code}`);
+      toast.error(t('factoryUI.noItemForBarcodeColon', { code }));
     }
   }
 

@@ -95,8 +95,8 @@ export default function FactoryProductStock() {
     <div className="space-y-6">
       <BarcodeScanner open={scannerOpen} onOpenChange={setScannerOpen} onScan={(code) => {
         const match = active.find(s => s.barcode && s.barcode === code);
-        if (match) { toast.success(`Found: ${match.name}`); }
-        else { toast.error(`No product found for barcode: ${code}`); }
+        if (match) { toast.success(t('factoryUI.foundColon', { name: match.name })); }
+        else { toast.error(t('factoryUI.noProductForBarcodeColon', { code })); }
       }} />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold flex items-center gap-2"><Package className="h-6 w-6" /> {t('factory.productStock')}</h1>
