@@ -924,11 +924,14 @@ export default function PropertyBookings() {
       `Booking for "${asset?.name || 'Asset'}" by ${booking.renter_name} has been ${statusLabels[newStatus] || newStatus}.`
     );
 
-    if (newStatus === 'active' || newStatus === 'confirmed') {
-      await supabase.from('property_assets').update({ is_available: false } as any).eq('id', booking.asset_id);
-    }
-    if (newStatus === 'completed' || newStatus === 'cancelled') {
-      await supabase.from('property_assets').update({ is_available: true } as any).eq('id', booking.asset_id);
+    // Only flip availability flag for single-unit assets — multi-unit assets stay listed
+    if (shouldMarkAssetOccupied(asset as any)) {
+      if (newStatus === 'active' || newStatus === 'confirmed') {
+        await supabase.from('property_assets').update({ is_available: false } as any).eq('id', booking.asset_id);
+      }
+      if (newStatus === 'completed' || newStatus === 'cancelled') {
+        await supabase.from('property_assets').update({ is_available: true } as any).eq('id', booking.asset_id);
+      }
     }
 
     // Auto-add to tenant list
