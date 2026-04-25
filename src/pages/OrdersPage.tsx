@@ -1307,14 +1307,14 @@ export default function OrdersPage() {
             variant={orderMode === 'my_order' ? 'default' : 'outline'}
             onClick={() => { setOrderMode('my_order'); setItems([]); setCustomerName(''); }}
           >
-            📋 New Order (Walk-in / Inbox)
+            {t('ordersUI.newOrderWalkin')}
           </Button>
           <Button
             size="sm"
             variant={orderMode === 'request' ? 'default' : 'outline'}
             onClick={() => { setOrderMode('request'); setItems([]); setCustomerName(''); }}
           >
-            📨 Order to Supplier
+            {t('ordersUI.orderToSupplier')}
           </Button>
         </div>
       )}
@@ -1324,71 +1324,71 @@ export default function OrdersPage() {
         <Card className="shadow-card">
           <CardContent className="p-4 space-y-4">
             <h2 className="text-base font-semibold">
-              {orderMode === 'my_order' ? '📋 New Order — Walk-in or Inbox' : '📨 Order Items to a Supplier'}
+              {orderMode === 'my_order' ? t('ordersUI.newOrderHeading') : t('ordersUI.orderItemsToSupplier')}
             </h2>
             {orderMode === 'my_order' && (
-              <p className="text-xs text-muted-foreground">For customers who come to your shop directly, call you, or send their order via WhatsApp/SMS. Add their items one by one, then choose how they pay.</p>
+              <p className="text-xs text-muted-foreground">{t('ordersUI.walkInHelp')}</p>
             )}
 
             {orderMode === 'request' && (
               <div className="p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground border">
-                <strong>How it works:</strong> List the items you need → send to your supplier → they set prices → you review & approve → you pay → they confirm → receipt issued.
+                <strong>{t('ordersUI.howItWorks')}</strong>{t('ordersUI.requestFlowDesc')}
               </div>
             )}
 
             {/* Recipient selector for requests */}
             {orderMode === 'request' && (
               <div className="border rounded-lg p-3 space-y-3">
-                <p className="text-xs font-medium flex items-center gap-1"><Building2 className="h-3.5 w-3.5" /> Send To (Recipient Business)</p>
+                <p className="text-xs font-medium flex items-center gap-1"><Building2 className="h-3.5 w-3.5" /> {t('ordersUI.sendToRecipient')}</p>
                 
                 {/* Pre-filled supplier from Discover page */}
                 {recipientLookup && prefilledSupplierName ? (
                   <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center justify-between">
                     <span className="flex items-center gap-2">
                       <CheckCircle className="h-3.5 w-3.5 text-success" />
-                      Sending to: <strong>{recipientLookup.name}</strong>
+                      {t('ordersUI.sendingTo')} <strong>{recipientLookup.name}</strong>
                     </span>
-                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setRecipientLookup(null); setPrefilledSupplierName(''); setSupplierProducts([]); }}>Change</Button>
+                    <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setRecipientLookup(null); setPrefilledSupplierName(''); setSupplierProducts([]); }}>{t('ordersUI.change')}</Button>
                   </div>
                 ) : (
                   <>
                     <div className="flex gap-2">
                       <Button size="sm" variant={recipientMode === 'contact' ? 'default' : 'outline'} onClick={() => { setRecipientMode('contact'); setRecipientLookup(null); setRecipientCode(''); }}>
-                        From Contacts
+                        {t('ordersUI.fromContacts')}
                       </Button>
                       <Button size="sm" variant={recipientMode === 'code' ? 'default' : 'outline'} onClick={() => { setRecipientMode('code'); setSelectedContactBusinessId(''); }}>
-                        Enter Business Code
+                        {t('ordersUI.enterBusinessCode')}
                       </Button>
                     </div>
 
                     {recipientMode === 'contact' && (
                       <div className="space-y-2">
                         {contacts.length === 0 ? (
-                          <p className="text-xs text-muted-foreground">No contacts saved. Use a business code instead, or add contacts from the Contacts page.</p>
+                          <p className="text-xs text-muted-foreground">{t('ordersUI.noContactsSaved')}</p>
                         ) : (
                           <>
                             {selectedContactBusinessId ? (
                               <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center justify-between">
                                 <span className="flex items-center gap-2">
                                   <CheckCircle className="h-3.5 w-3.5 text-success" />
-                                  Sending to: <strong>{contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.nickname || contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.business_name}</strong>
+                                  {t('ordersUI.sendingTo')} <strong>{contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.nickname || contacts.find(c => c.contact_business_id === selectedContactBusinessId)?.business_name}</strong>
                                 </span>
-                                <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setSelectedContactBusinessId(''); setContactPickerOpen(true); }}>Change</Button>
+                                <Button size="sm" variant="ghost" className="h-6 text-xs" onClick={() => { setSelectedContactBusinessId(''); setContactPickerOpen(true); }}>{t('ordersUI.change')}</Button>
                               </div>
                             ) : (
                               <Button size="sm" variant="outline" className="w-full justify-start gap-2" onClick={() => { setContactPickerOpen(true); setContactSearch(''); }}>
-                                <Search className="h-3.5 w-3.5" /> Select a contact...
+                                <Search className="h-3.5 w-3.5" /> {t('ordersUI.selectContact')}
                               </Button>
                             )}
 
                             <Dialog open={contactPickerOpen} onOpenChange={setContactPickerOpen}>
                               <DialogContent className="max-w-sm">
-                                <DialogHeader><DialogTitle>Choose Contact</DialogTitle></DialogHeader>
+                                <DialogHeader><DialogTitle>{t('ordersUI.chooseContact')}</DialogTitle></DialogHeader>
                                 <div className="space-y-3">
                                   <Input
                                     value={contactSearch}
                                     onChange={e => setContactSearch(e.target.value)}
-                                    placeholder="Search contacts..."
+                                    placeholder={t('ordersUI.searchContactsPh')}
                                     autoFocus
                                   />
                                   <div className="max-h-60 overflow-y-auto space-y-1">
@@ -1429,7 +1429,7 @@ export default function OrdersPage() {
                                       const q = contactSearch.toLowerCase();
                                       return !q || (c.nickname || '').toLowerCase().includes(q) || (c.business_name || '').toLowerCase().includes(q) || (c.business_code || '').toLowerCase().includes(q);
                                     }).length === 0 && (
-                                      <p className="text-xs text-center text-muted-foreground py-4">No contacts match your search</p>
+                                      <p className="text-xs text-center text-muted-foreground py-4">{t('ordersUI.noContactsMatch')}</p>
                                     )}
                                   </div>
                                 </div>
@@ -1445,11 +1445,11 @@ export default function OrdersPage() {
                         <Input
                           value={recipientCode}
                           onChange={e => { setRecipientCode(e.target.value.toUpperCase()); setRecipientLookup(null); }}
-                          placeholder="Enter business code..."
+                          placeholder={t('ordersUI.enterBusinessCodePh')}
                           className="flex-1 uppercase"
                         />
                         <Button size="sm" variant="outline" onClick={lookupRecipientByCode} disabled={lookingUp || recipientCode.length < 3}>
-                          <Search className="h-3.5 w-3.5 mr-1" />{lookingUp ? 'Looking...' : 'Find'}
+                          <Search className="h-3.5 w-3.5 mr-1" />{lookingUp ? t('ordersUI.looking') : t('ordersUI.find')}
                         </Button>
                       </div>
                     )}
@@ -1457,7 +1457,7 @@ export default function OrdersPage() {
                     {recipientMode === 'code' && recipientLookup && (
                       <div className="p-2 bg-success/10 border border-success/20 rounded-md text-xs flex items-center gap-2">
                         <CheckCircle className="h-3.5 w-3.5 text-success" />
-                        <span>Sending to: <strong>{recipientLookup.name}</strong></span>
+                        <span>{t('ordersUI.sendingTo')} <strong>{recipientLookup.name}</strong></span>
                       </div>
                     )}
                   </>
@@ -1466,7 +1466,7 @@ export default function OrdersPage() {
                 {/* Supplier products list when pre-filled */}
                 {supplierProducts.length > 0 && (
                   <div className="bg-muted/30 border rounded-md p-3">
-                    <p className="text-sm font-bold text-foreground mb-2">📦 Available items from {prefilledSupplierName || 'supplier'} ({supplierProducts.length}):</p>
+                    <p className="text-sm font-bold text-foreground mb-2">{t('ordersUI.availableItemsFrom', { name: prefilledSupplierName || 'supplier', count: supplierProducts.length })}</p>
                     <div className="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto">
                       {supplierProducts.map((p, i) => (
                         <button key={i} className="text-base px-4 py-3.5 rounded-lg border-2 bg-background hover:bg-accent hover:border-primary/40 transition-colors text-left flex flex-col gap-1 min-h-[56px]"
@@ -1486,24 +1486,24 @@ export default function OrdersPage() {
             )}
 
             <div>
-              <Label>Your Name / Customer Name ({roleLabel} at {currentBusiness?.name})</Label>
-              <Input value={customerName || userFullName} onChange={e => setCustomerName(e.target.value)} onBlur={() => setCustomerName(toTitleCase(customerName || userFullName))} placeholder="Auto-filled from your profile" />
+              <Label>{t('ordersUI.yourNameCustomer')} ({roleLabel} at {currentBusiness?.name})</Label>
+              <Input value={customerName || userFullName} onChange={e => setCustomerName(e.target.value)} onBlur={() => setCustomerName(toTitleCase(customerName || userFullName))} placeholder={t('ordersUI.autoFilledProfile')} />
               {orderMode === 'request' && currentBusiness && (
-                <p className="text-[10px] text-muted-foreground mt-0.5">📍 Business: {currentBusiness.name} · Contact: {currentBusiness.contact || currentBusiness.email}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">{t('ordersUI.businessLabel', { name: currentBusiness.name, contact: currentBusiness.contact || currentBusiness.email })}</p>
               )}
             </div>
 
             {orderMode === 'request' && (
               <div>
-                <Label className="flex items-center gap-1"><MessageSquare className="h-3.5 w-3.5" /> Comment (optional)</Label>
-                <Textarea value={requestComment} onChange={e => setRequestComment(e.target.value)} placeholder="Add any notes or special requests..." className="min-h-[60px]" />
+                <Label className="flex items-center gap-1"><MessageSquare className="h-3.5 w-3.5" /> {t('ordersUI.commentOptional')}</Label>
+                <Textarea value={requestComment} onChange={e => setRequestComment(e.target.value)} placeholder={t('ordersUI.notesSpecialReq')} className="min-h-[60px]" />
               </div>
             )}
 
             {/* Show supplier products for both walk-in and request modes */}
             {orderMode === 'my_order' && supplierProducts.length > 0 && (
               <div className="bg-muted/30 border rounded-md p-3">
-                <p className="text-sm font-bold text-foreground mb-2">📦 Available items from {prefilledSupplierName || 'supplier'} ({supplierProducts.length}):</p>
+                <p className="text-sm font-bold text-foreground mb-2">{t('ordersUI.availableItemsFrom', { name: prefilledSupplierName || 'supplier', count: supplierProducts.length })}</p>
                 <div className="grid grid-cols-1 gap-2 max-h-80 overflow-y-auto">
                   {supplierProducts.map((p, i) => (
                     <button key={i} className="text-base px-4 py-3.5 rounded-lg border-2 bg-background hover:bg-accent hover:border-primary/40 transition-colors text-left flex flex-col gap-1 min-h-[56px]"
@@ -1567,37 +1567,37 @@ export default function OrdersPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2">
-                <Label>Item Name</Label>
-                <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onBlur={() => applyCase('name')} placeholder="Auto-filled from picker" />
+                <Label>{t('ordersUI.itemName')}</Label>
+                <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} onBlur={() => applyCase('name')} placeholder={t('ordersUI.autoFilledPicker')} />
               </div>
               <div>
-                <Label>Category</Label>
-                <Input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} onBlur={() => applyCase('category')} placeholder="Category..." list="cat-suggestions" />
+                <Label>{t('ordersUI.category')}</Label>
+                <Input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} onBlur={() => applyCase('category')} placeholder={t('ordersUI.categoryPh')} list="cat-suggestions" />
                 <datalist id="cat-suggestions">{existingCategories.map(c => <option key={c} value={c} />)}</datalist>
               </div>
               <div>
-                <Label>Quality</Label>
-                <Input value={form.quality} onChange={e => setForm(f => ({ ...f, quality: e.target.value }))} onBlur={() => applyCase('quality')} placeholder="Quality..." list="qual-suggestions" />
+                <Label>{t('ordersUI.quality')}</Label>
+                <Input value={form.quality} onChange={e => setForm(f => ({ ...f, quality: e.target.value }))} onBlur={() => applyCase('quality')} placeholder={t('ordersUI.qualityPh')} list="qual-suggestions" />
                 <datalist id="qual-suggestions">{existingQualities.map(q => <option key={q} value={q} />)}</datalist>
               </div>
               <div>
-                <Label>Price Type</Label>
+                <Label>{t('ordersUI.priceType')}</Label>
                 <Select value={form.priceType} onValueChange={v => setForm(f => ({ ...f, priceType: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="retail">Retail</SelectItem>
-                    <SelectItem value="wholesale">Wholesale</SelectItem>
+                    <SelectItem value="retail">{t('ordersUI.retail')}</SelectItem>
+                    <SelectItem value="wholesale">{t('ordersUI.wholesale')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               {orderMode !== 'request' && (
-                <div><Label>Price</Label><Input type="number" min="0" step="0.01" value={form.unitPrice} onChange={e => setForm(f => ({ ...f, unitPrice: e.target.value }))} placeholder="Auto" /></div>
+                <div><Label>{t('ordersUI.price')}</Label><Input type="number" min="0" step="0.01" value={form.unitPrice} onChange={e => setForm(f => ({ ...f, unitPrice: e.target.value }))} placeholder={t('ordersUI.autoPh')} /></div>
               )}
               {orderMode !== 'request' && (
-                <div><Label>Alt. Price <span className="text-[10px] text-muted-foreground">(bargain)</span></Label><Input type="number" min="0" step="0.01" value={form.customPrice} onChange={e => setForm(f => ({ ...f, customPrice: e.target.value }))} placeholder="Custom" /></div>
+                <div><Label>{t('ordersUI.altPrice')} <span className="text-[10px] text-muted-foreground">{t('ordersUI.bargain')}</span></Label><Input type="number" min="0" step="0.01" value={form.customPrice} onChange={e => setForm(f => ({ ...f, customPrice: e.target.value }))} placeholder={t('ordersUI.customPh')} /></div>
               )}
               <div>
-                <Label>Serial Number <span className="text-[10px] text-muted-foreground">(optional)</span></Label>
+                <Label>{t('ordersUI.serialNumber')} <span className="text-[10px] text-muted-foreground">{t('ordersUI.optional')}</span></Label>
                 <Input value={form.serial_numbers} onChange={e => setForm(f => ({ ...f, serial_numbers: e.target.value }))} placeholder="e.g. IMEI, S/N..." />
               </div>
             </div>
@@ -1611,14 +1611,14 @@ export default function OrdersPage() {
             />
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Quantity</Label>
+                <Label>{t('ordersUI.quantity')}</Label>
                 <Input type="number" min="1" value={form.quantity} onChange={e => setForm(f => ({ ...f, quantity: e.target.value }))}
                   readOnly={parseInt(form.pieces_per_carton) > 0}
                   className={parseInt(form.pieces_per_carton) > 0 ? 'bg-muted cursor-not-allowed' : ''} />
                 {parseInt(form.pieces_per_carton) > 0 && <p className="text-[10px] text-muted-foreground mt-0.5">Auto-calculated from bulk</p>}
               </div>
             </div>
-            <Button onClick={addItem} disabled={!form.name.trim()} className="w-full"><Plus className="h-4 w-4 mr-1" />Add Item</Button>
+            <Button onClick={addItem} disabled={!form.name.trim()} className="w-full"><Plus className="h-4 w-4 mr-1" />{t('ordersUI.addItem')}</Button>
 
             {items.length > 0 && (
               <>
@@ -1626,11 +1626,11 @@ export default function OrdersPage() {
                   <Table>
                     <TableHeader>
                        <TableRow>
-                        <TableHead>Item</TableHead><TableHead>Category</TableHead><TableHead>Quality</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead className="text-right">Qty</TableHead>
-                        {orderMode !== 'request' && <TableHead className="text-right">Price</TableHead>}
-                        {orderMode !== 'request' && <TableHead className="text-right">Subtotal</TableHead>}
+                        <TableHead>{t('ordersUI.item')}</TableHead><TableHead>{t('ordersUI.category')}</TableHead><TableHead>{t('ordersUI.quality')}</TableHead>
+                        <TableHead>{t('ordersUI.type')}</TableHead>
+                        <TableHead className="text-right">{t('ordersUI.qty')}</TableHead>
+                        {orderMode !== 'request' && <TableHead className="text-right">{t('ordersUI.price')}</TableHead>}
+                        {orderMode !== 'request' && <TableHead className="text-right">{t('ordersUI.subtotal')}</TableHead>}
                         <TableHead></TableHead>
                       </TableRow>
                     </TableHeader>
@@ -1649,7 +1649,7 @@ export default function OrdersPage() {
                       ))}
                       {orderMode !== 'request' && (
                         <TableRow>
-                          <TableCell colSpan={6} className="text-right font-bold">Grand Total</TableCell>
+                          <TableCell colSpan={6} className="text-right font-bold">{t('ordersUI.grandTotal')}</TableCell>
                           <TableCell className="text-right font-bold text-lg text-success tabular-nums">{fmt(grandTotal)}</TableCell>
                           <TableCell></TableCell>
                         </TableRow>
@@ -1700,7 +1700,7 @@ export default function OrdersPage() {
           {!fromDiscover && (
             <TabsTrigger value="verify_payments" className="rounded-lg text-xs sm:text-sm font-semibold data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md gap-1">
               <ShieldCheck className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Verify</span>
+              <span className="hidden sm:inline">{t('ordersUI.verify')}</span>
             </TabsTrigger>
           )}
         </TabsList>
@@ -1719,7 +1719,7 @@ export default function OrdersPage() {
                 </Button>
               )}
               {bulkSelectMode && (
-                <Button size="sm" variant="ghost" className="h-7 text-[10px]" onClick={() => selectAllFinalized(liveOrders)}>Select All Done</Button>
+                <Button size="sm" variant="ghost" className="h-7 text-[10px]" onClick={() => selectAllFinalized(liveOrders)}>{t('ordersUI.selectAllDone')}</Button>
               )}
             </div>
           </div>
