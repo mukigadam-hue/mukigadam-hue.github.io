@@ -1440,6 +1440,8 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const updateServicePayment = useCallback(async (serviceId: string, amountPaid: number, paymentStatus: string) => {
     const service = services.find(s => s.id === serviceId);
     if (!service) return;
+    const previousPaid = Number(service.amount_paid) || 0;
+    const delta = Math.max(0, amountPaid - previousPaid);
     const bal = Math.max(0, Number(service.cost) - amountPaid);
     const status = bal <= 0 ? 'paid' : (amountPaid > 0 ? 'partial' : 'unpaid');
     const { error } = await supabase.from('services').update({
@@ -1447,6 +1449,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     }).eq('id', serviceId);
     if (error) { toast.error(error.message); return; }
     setServices(prev => prev.map(s => s.id === serviceId ? { ...s, amount_paid: amountPaid, balance: bal, payment_status: status } : s));
+    if (delta > 0) await logDebtPayment('service', serviceId, delta, service.seller_name);
     if (status === 'paid' && currentBusiness) {
       await saveReceipt({
         business_id: currentBusiness.id, receipt_type: 'service', transaction_id: serviceId,
@@ -1458,7 +1461,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       });
     }
     toast.success('Service payment updated!');
-  }, [services, currentBusiness]);
+  }, [services, currentBusiness, logDebtPayment]);
 
   const refreshData = useCallback(async () => {
     if (!navigator.onLine) return;
@@ -1468,7 +1471,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   return (
     <BusinessContext.Provider value={{
       currentBusiness, businesses, memberships, userRole,
-      stock, sales, purchases, orders, services, expenses, notifications, loading,
+      stock, sales, purchases, orders, services, expenses, notifications, debtPayments, loading,
       setCurrentBusinessId, createBusiness, deleteBusiness, updateBusiness,
       addStockItem, updateStockItem, deleteStockItem, restoreStockItem, permanentDeleteStockItem,
       addSale, addPurchase, addOrder, updateOrder, completeOrderToSale,
