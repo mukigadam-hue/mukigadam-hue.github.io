@@ -424,9 +424,14 @@ export default function SettingsPage() {
   const totalRevenue = totalStockSalesRevenue + totalServiceRevenue;
 
   // ====== 7. EXPENSES ======
-  const todayExpenses = expenses.filter(e => new Date(e.created_at).toDateString() === today);
+  // Waste-categorized records share the expenses table but belong to the
+  // Waste module — exclude them so the financial summary reflects true
+  // operating expenses only.
+  const WASTE_CATEGORIES = new Set(['Expired', 'Faulty', 'Returned', 'Damaged', 'Spoiled', 'Waste']);
+  const operationalExpenses = expenses.filter(e => !WASTE_CATEGORIES.has(e.category));
+  const todayExpenses = operationalExpenses.filter(e => new Date(e.created_at).toDateString() === today);
   const todayExpenseTotal = todayExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  const totalExpenses = operationalExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
   // Today's total cash collected
   const todayTotalCashCollected = todaySalesCashCollected + todayServiceCashCollected;
