@@ -435,6 +435,26 @@ export default function SettingsPage() {
   const todayCustomerOrdersTotal = todayCustomerOrders.reduce((sum, o) => sum + Number(o.grand_total), 0);
   const todayTotalRevenue = todaySalesGrandTotal + todayServiceFeeTotal + todaySaleServiceFees + todayCustomerOrdersTotal;
 
+  // ====== TODAY'S REPAID DEBTS ======
+  // Payments received today on transactions (sales/services/orders) created on a previous day.
+  // Excludes purchases (those are money paid out, not collected).
+  const todayRepaidPayments = (debtPayments || []).filter(dp => {
+    if (new Date(dp.created_at).toDateString() !== today) return false;
+    if (dp.source_type === 'purchase') return false;
+    let sourceCreatedAt: string | undefined;
+    if (dp.source_type === 'sale') sourceCreatedAt = sales.find(s => s.id === dp.source_id)?.created_at;
+    else if (dp.source_type === 'service') sourceCreatedAt = services.find(s => s.id === dp.source_id)?.created_at;
+    else if (dp.source_type === 'order') sourceCreatedAt = orders.find(o => o.id === dp.source_id)?.created_at;
+    if (!sourceCreatedAt) return true; // include if source unknown (e.g. older record)
+    return new Date(sourceCreatedAt).toDateString() !== today;
+  });
+  const todayRepaidDebtsTotal = todayRepaidPayments.reduce((sum, dp) => sum + Number(dp.amount), 0);
+  const todayRepaidByType = {
+    sale: todayRepaidPayments.filter(d => d.source_type === 'sale').reduce((s, d) => s + Number(d.amount), 0),
+    service: todayRepaidPayments.filter(d => d.source_type === 'service').reduce((s, d) => s + Number(d.amount), 0),
+    order: todayRepaidPayments.filter(d => d.source_type === 'order').reduce((s, d) => s + Number(d.amount), 0),
+  };
+
   // ====== THIS MONTH'S REVENUE (Sales + Services + Customer Orders received) ======
   const monthSales = sales.filter(s => isThisMonth(s.created_at));
   const monthSalesGrandTotal = monthSales.reduce((sum, s) => sum + Number(s.grand_total), 0);
