@@ -1384,6 +1384,8 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const updateSalePayment = useCallback(async (saleId: string, amountPaid: number, paymentStatus: string) => {
     const sale = sales.find(s => s.id === saleId);
     if (!sale) return;
+    const previousPaid = Number(sale.amount_paid) || 0;
+    const delta = Math.max(0, amountPaid - previousPaid);
     const bal = Math.max(0, Number(sale.grand_total) - amountPaid);
     const status = bal <= 0 ? 'paid' : (amountPaid > 0 ? 'partial' : 'unpaid');
     const { error } = await supabase.from('sales').update({
@@ -1391,6 +1393,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     }).eq('id', saleId);
     if (error) { toast.error(error.message); return; }
     setSales(prev => prev.map(s => s.id === saleId ? { ...s, amount_paid: amountPaid, balance: bal, payment_status: status } : s));
+    if (delta > 0) await logDebtPayment('sale', saleId, delta, sale.recorded_by);
     if (status === 'paid' && currentBusiness) {
       await saveReceipt({
         business_id: currentBusiness.id, receipt_type: 'sale', transaction_id: saleId,
@@ -1404,7 +1407,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
     } else {
       toast.success('Payment updated!');
     }
-  }, [sales, currentBusiness]);
+  }, [sales, currentBusiness, logDebtPayment]);
 
   const updatePurchasePayment = useCallback(async (purchaseId: string, amountPaid: number, paymentStatus: string) => {
     const purchase = purchases.find(p => p.id === purchaseId);
