@@ -1,0 +1,93 @@
+import { useState } from 'react';
+import { Camera } from 'lucide-react';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { isDespiaShell, takeNativeScreenshot } from '@/lib/despiaScreenshot';
+
+interface ScreenshotButtonProps {
+  variant?: 'icon' | 'compact';
+  className?: string;
+}
+
+/**
+ * Universal screenshot button.
+ * - In the Despia native shell: triggers `despia("takescreenshot://")` so the
+ *   OS captures the screen and saves it to the gallery (works around web
+ *   restrictions that block screenshots inside the app).
+ * - On the web: falls back to capturing the current page with html2canvas
+ *   and downloading it as a PNG.
+ */
+export default function ScreenshotButton({ variant = 'icon', className }: ScreenshotButtonProps) {
+  const [busy, setBusy] = useState(false);
+
+  async function handleClick() {
+    setBusy(true);
+    try {
+      // Native shell — fastest, most reliable, saves to device gallery.
+      if (isDespiaShell()) {
+        const ok = takeNativeScreenshot();
+        if (ok) {
+          toast.success('Screenshot saved to your gallery');
+          return;
+        }
+      }
+
+      // Web fallback — render current viewport to PNG and trigger download.
+      const html2canvas = (await import('html2canvas')).default;
+      const target = document.body;
+      const canvas = await html2canvas(target, {
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        scale: window.devicePixelRatio || 1,
+      });
+      const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/png'));
+      if (!blob) {
+        toast.error('Could not capture screenshot');
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `screenshot-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      toast.success('Screenshot downloaded');
+    } catch (err) {
+      console.error('Screenshot failed:', err);
+      toast.error('Screenshot failed');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (variant === 'compact') {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`h-7 px-2 gap-1 text-xs ${className || ''}`}
+        onClick={handleClick}
+        disabled={busy}
+        title="Take a screenshot"
+      >
+        <Camera className="h-3.5 w-3.5" /> Screenshot
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className={`h-8 w-8 ${className || ''}`}
+      onClick={handleClick}
+      disabled={busy}
+      title="Take a screenshot"
+    >
+      <Camera className="h-4 w-4" />
+    </Button>
+  );
+}
