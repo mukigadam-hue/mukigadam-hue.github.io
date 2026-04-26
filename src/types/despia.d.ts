@@ -5,8 +5,20 @@
 export {};
 
 declare global {
+  /**
+   * Despia native shell global bridge function.
+   * Called as `despia("takescreenshot://")`, `despia("vibrate://")`, etc.
+   * Only defined when running inside the native Despia wrapper.
+   */
+  function despia(command: string): void;
+
   interface Window {
-    despia?: {
+    /**
+     * Despia native bridge function (also exposed on window).
+     * When this is a function, the app is running inside the native shell.
+     * When it's an object (legacy), the AdMob bridge is exposed under `.AdMob`.
+     */
+    despia?: ((command: string) => void) | {
       AdMob?: {
         showBanner: (options: {
           adId: string;
