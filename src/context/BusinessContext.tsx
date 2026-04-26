@@ -207,6 +207,16 @@ export interface Notification {
   created_at: string;
 }
 
+export interface DebtPayment {
+  id: string;
+  business_id: string;
+  source_type: 'sale' | 'service' | 'order' | 'purchase';
+  source_id: string;
+  amount: number;
+  recorded_by: string;
+  created_at: string;
+}
+
 interface BusinessContextType {
   currentBusiness: Business | null;
   businesses: Business[];
