@@ -293,6 +293,41 @@ function BookingDialog({ open, onClose, asset, propertyName }: { open: boolean; 
             <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="..." rows={2} />
           </div>
 
+          {/* Price negotiation: ask for a lower price */}
+          <div className="rounded-lg border border-dashed p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-semibold">💬 Want a better price?</p>
+                <p className="text-[11px] text-muted-foreground">Ask the owner to lower the listed price. They can accept, refuse, or counter.</p>
+              </div>
+              <Button type="button" size="sm" variant={wantsNegotiate ? 'default' : 'outline'}
+                onClick={() => setWantsNegotiate(v => !v)}>
+                {wantsNegotiate ? 'Cancel' : 'Request lower price'}
+              </Button>
+            </div>
+            {wantsNegotiate && (
+              <div className="space-y-2 pt-1">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-xs">Your offer per {durationType === 'hourly' ? 'hour' : durationType === 'daily' ? 'day' : 'month'}</Label>
+                    <Input type="number" min="0" step="0.01" value={requestedPrice}
+                      onChange={e => setRequestedPrice(e.target.value)} placeholder="e.g. 80" />
+                  </div>
+                  <div className="text-[11px] text-muted-foreground self-end pb-2">
+                    Listed: <span className="font-semibold text-foreground">
+                      {fmt(durationType === 'hourly' ? asset.hourly_price : durationType === 'daily' ? asset.daily_price : asset.monthly_price)}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-xs">Reason / note to the owner</Label>
+                  <Textarea value={negotiationNote} onChange={e => setNegotiationNote(e.target.value)}
+                    rows={2} placeholder="e.g. Long-term stay, cash up-front..." />
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Show landlord's registered payment methods */}
           {asset.business_id && (
             <div className="p-3 bg-muted/30 rounded-lg border">
@@ -302,8 +337,13 @@ function BookingDialog({ open, onClose, asset, propertyName }: { open: boolean; 
           )}
 
           <Button onClick={handleBook} disabled={submitting} className="w-full">
-            <Send className="h-4 w-4 mr-2" />{submitting ? t('propertyUI.loading') : t('propertyUI.requestBooking')}
+            <Send className="h-4 w-4 mr-2" />
+            {submitting ? t('propertyUI.loading') : wantsNegotiate ? 'Send Price Request' : t('propertyUI.requestBooking')}
           </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
         </div>
       </DialogContent>
     </Dialog>
