@@ -344,10 +344,6 @@ function BookingDialog({ open, onClose, asset, propertyName }: { open: boolean; 
       </DialogContent>
     </Dialog>
   );
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
 }
 
 export default function PropertyBrowse() {
