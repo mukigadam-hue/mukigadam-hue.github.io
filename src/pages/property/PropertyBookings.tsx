@@ -849,8 +849,8 @@ function NegotiationPanel({ booking, isOwner, fmt, assetName }: {
       <p className="text-[10px] font-semibold text-muted-foreground">💬 Price Negotiation</p>
       <div className="text-xs space-y-0.5">
         <p>Listed: <span className="font-medium">{fmt(listed)}</span></p>
-        {requested > 0 && <p>Renter offered: <span className="font-medium text-amber-700">{fmt(requested)}</span></p>}
-        {countered > 0 && <p>Owner counter: <span className="font-medium text-blue-700">{fmt(countered)}</span></p>}
+        {requested > 0 && <p>Renter offered: <span className="font-medium text-warning">{fmt(requested)}</span></p>}
+        {countered > 0 && <p>Owner counter: <span className="font-medium text-primary">{fmt(countered)}</span></p>}
         {booking.negotiation_note && (
           <p className="text-muted-foreground italic">"{booking.negotiation_note}"</p>
         )}
