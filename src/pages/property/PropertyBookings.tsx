@@ -1077,6 +1077,7 @@ export default function PropertyBookings() {
             )}
           </div>
 
+          <NegotiationPanel booking={booking} isOwner={isOwnerOrAdmin} fmt={fmt} assetName={asset?.name || 'Asset'} />
           <BookingComments booking={booking} isOwner={isOwnerOrAdmin} />
 
           <div className="flex gap-1 flex-wrap pt-1">
