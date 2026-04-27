@@ -20,6 +20,7 @@ import AdSpace, { withInlineAds } from '@/components/AdSpace';
 import { PaymentMethodsViewer } from '@/components/PaymentMethodsManager';
 import ImageLightbox from '@/components/ImageLightbox';
 import { PhoneInput, isValidIntlPhone } from '@/components/PhoneInput';
+import { sendBookingNotification } from '@/lib/propertyNotifications';
 
 const PAYMENT_FREQUENCIES = [
   { value: 'monthly', label: 'Every Month' },
