@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { LogIn, UserPlus, Eye, EyeOff, HelpCircle, KeyRound, ArrowLeft, Phone, Mail } from 'lucide-react';
 import LegalHelpModal from '@/components/LegalHelpModal';
+import { getAuthRedirectUrl } from '@/lib/authRedirect';
 
 type RecoveryMode = 'none' | 'choose' | 'email' | 'phone' | 'phone-result';
 
@@ -70,8 +71,8 @@ export default function AuthPage() {
     }
     setLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+        redirectTo: getAuthRedirectUrl('/reset-password'),
       });
       if (error) throw error;
       toast.success('Password reset link sent! Check your email inbox.', { duration: 8000 });

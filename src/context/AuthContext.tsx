@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 import { getStoredSession, getStoredUser } from '@/lib/localCache';
+import { getAuthRedirectUrl } from '@/lib/authRedirect';
 
 interface AuthContextType {
   user: User | null;
@@ -90,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: normalizedEmail,
       password,
       options: {
-        emailRedirectTo: window.location.origin,
+        emailRedirectTo: getAuthRedirectUrl('/'),
         data: { full_name: fullName, phone: phone || '' },
       },
     });
