@@ -26,6 +26,12 @@ const SLOT_BY_VARIANT: Record<NonNullable<AdSpaceProps['variant']>, string> = {
   compact: '4713172172',
 };
 
+const HEIGHT_BY_VARIANT: Record<NonNullable<AdSpaceProps['variant']>, number> = {
+  banner: 80,
+  inline: 100,
+  compact: 60,
+};
+
 interface AdSpaceProps {
   variant?: 'banner' | 'inline' | 'compact';
   className?: string;
@@ -39,10 +45,23 @@ export default function AdSpace({ variant = 'banner', className, slotId }: AdSpa
   const insRef = useRef<HTMLModElement | null>(null);
   const pushedRef = useRef(false);
   const [failed, setFailed] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const slot = insRef.current;
+    if (!slot) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting && entry.intersectionRatio > 0),
+      { rootMargin: '96px', threshold: 0.01 },
+    );
+    observer.observe(slot);
+    return () => observer.disconnect();
+  }, [refreshKey]);
 
   // Force a real ad request on mount and on each refresh tick.
   useEffect(() => {
-    if (!showAds) return;
+    if (!showAds || !isVisible) return;
     // Reset for new refresh cycle.
     pushedRef.current = false;
     setFailed(false);
@@ -64,30 +83,29 @@ export default function AdSpace({ variant = 'banner', className, slotId }: AdSpa
     // Defer slightly to ensure the element is laid out before requesting.
     const t = setTimeout(tryPush, 120);
     return () => clearTimeout(t);
-  }, [showAds, variant, refreshKey, onAdLoaded]);
+  }, [showAds, isVisible, variant, refreshKey, onAdLoaded]);
 
   if (!showAds) return null;
 
   const slot = SLOT_BY_VARIANT[variant];
+  const height = HEIGHT_BY_VARIANT[variant];
 
   return (
     <div
       key={refreshKey}
       className={cn(
         'w-full overflow-hidden rounded-lg bg-muted/20 transition-none',
-        variant === 'banner' && 'min-h-[80px]',
-        variant === 'inline' && 'min-h-[100px]',
-        variant === 'compact' && 'min-h-[60px]',
         className,
       )}
+      style={{ height, maxHeight: height }}
     >
       <ins
         ref={insRef}
         className="adsbygoogle block w-full"
-        style={{ display: 'block', width: '100%', minHeight: variant === 'compact' ? 60 : variant === 'banner' ? 80 : 100 }}
+        style={{ display: 'block', width: '100%', height, maxHeight: height, overflow: 'hidden' }}
         data-ad-client={ADSENSE_CLIENT}
         data-ad-slot={slot}
-        data-ad-format={variant === 'inline' ? 'fluid' : 'auto'}
+        data-ad-format="auto"
         data-full-width-responsive="true"
       />
       {failed && (
