@@ -17,8 +17,21 @@ import despia from 'despia-native';
  *   Native (home) unit:   ca-app-pub-9605564713228252/3146574176
  *   Native (general):     ca-app-pub-9605564713228252/4713172172
  */
+/** Log helper: prints to browser console AND forwards to Despia native bridge. */
+export function adLog(message: string) {
+  // eslint-disable-next-line no-console
+  console.log(message);
+  try {
+    // Forward to native shell so the message also appears in device logs.
+    despia(`log://?message=${encodeURIComponent(message)}`);
+  } catch {
+    /* native bridge not present (web) */
+  }
+}
+
 export default function AdMobManager() {
   useEffect(() => {
+    adLog('[AD-INFO] Initializing AdMob and Start.io (ID: 203959336)');
     // 1. Native shell: wake the AdMob pipeline immediately on app startup.
     try {
       despia('initializeAds://');

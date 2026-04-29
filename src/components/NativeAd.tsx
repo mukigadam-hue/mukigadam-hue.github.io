@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAdRefresh } from '@/hooks/useAdRefresh';
+import { adLog } from '@/components/AdMobManager';
 import '@/types/despia.d.ts';
 
 // Production AdMob Native Ad Unit IDs
@@ -36,13 +37,19 @@ export default function NativeAd({ placement = 'general', className, slotId }: N
     let cancelled = false;
 
     const tryStartIOFallback = async (): Promise<boolean> => {
-      if (!window.despia?.StartIO?.showNative) return false;
+      if (!window.despia?.StartIO?.showNative) {
+        adLog('[AD-FAIL] Start.io bridge unavailable');
+        return false;
+      }
+      adLog('[AD-STATUS] Requesting Start.io Native Ad...');
       try {
         await window.despia?.StartIO?.hideNative?.(containerId).catch(() => {});
         if (cancelled) return false;
         await window.despia.StartIO.showNative({ containerId });
+        adLog('[AD-SUCCESS] Start.io ad loaded');
         return true;
-      } catch {
+      } catch (e: any) {
+        adLog(`[AD-FAIL] Start.io failed — reason: ${e?.message || e?.code || 'unknown'}`);
         return false;
       }
     };
@@ -51,32 +58,35 @@ export default function NativeAd({ placement = 'general', className, slotId }: N
       if (loadingRef.current) return;
       loadingRef.current = true;
       try {
-        // Primary: AdMob
         if (hasAdMob) {
+          adLog('[AD-STATUS] Requesting AdMob Native Ad...');
           try {
             await window.despia?.AdMob?.hideNative?.(containerId).catch(() => {});
             if (cancelled) return;
             await window.despia!.AdMob!.showNative!({ adId: adUnitId, containerId });
+            adLog('[AD-SUCCESS] AdMob ad loaded');
             if (!cancelled) {
               setError(null);
               onAdLoaded();
             }
             return;
-          } catch (admobErr) {
-            // Fall through to Start.io fallback
+          } catch (admobErr: any) {
+            const code = admobErr?.code ?? admobErr?.errorCode ?? 'N/A';
+            const msg = admobErr?.message || String(admobErr);
+            adLog('[AD-RETRY] AdMob failed. Switching to Start.io fallback...');
+            adLog(`[AD-ERROR] AdMob error code: ${code} — ${msg}`);
             const ok = await tryStartIOFallback();
             if (!cancelled) {
               if (ok) {
                 setError(null);
                 onAdLoaded();
               } else {
-                setError((admobErr as any)?.message || 'Ad failed');
+                setError(msg || 'Ad failed');
               }
             }
             return;
           }
         }
-        // No AdMob — go straight to Start.io
         const ok = await tryStartIOFallback();
         if (!cancelled) {
           if (ok) {
