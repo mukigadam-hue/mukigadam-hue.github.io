@@ -838,15 +838,15 @@ export default function SettingsPage() {
             <p className="text-[10px] text-muted-foreground mb-2">{t('settings.financial.revenueIncludesOrders')}</p>
 
             <div className="grid grid-cols-2 gap-2 mb-3">
-              <div className="p-2 rounded-lg bg-background/80 border border-success/10">
-                <p className="text-[11px] text-muted-foreground">{t('settings.financial.todaysRevenue')}</p>
-                <p className="text-xl font-bold text-success tabular-nums">{fmt(todayTotalRevenue)}</p>
-                <p className="text-[10px] text-muted-foreground">{t('settings.financial.cashCollectedToday')}: <span className="font-semibold text-success">{fmt(todayTotalCashCollected)}</span></p>
+              <div className="min-w-0 p-2 rounded-lg bg-background/80 border border-success/10">
+                <p className="text-[11px] text-muted-foreground truncate">{t('settings.financial.todaysRevenue')}</p>
+                <p className="text-base sm:text-xl font-bold text-success tabular-nums break-words leading-tight">{fmt(todayTotalRevenue)}</p>
+                <p className="text-[10px] text-muted-foreground break-words">{t('settings.financial.cashCollectedToday')}: <span className="font-semibold text-success">{fmt(todayTotalCashCollected)}</span></p>
               </div>
-              <div className="p-2 rounded-lg bg-background/80 border border-success/20">
-                <p className="text-[11px] text-muted-foreground">{t('settings.financial.thisMonthRevenue')}</p>
-                <p className="text-xl font-bold text-success tabular-nums">{fmt(monthTotalRevenue)}</p>
-                <p className="text-[10px] text-muted-foreground">{t('settings.financial.cashCollectedThisMonth')}: <span className="font-semibold text-success">{fmt(monthTotalCashCollected)}</span></p>
+              <div className="min-w-0 p-2 rounded-lg bg-background/80 border border-success/20">
+                <p className="text-[11px] text-muted-foreground truncate">{t('settings.financial.thisMonthRevenue')}</p>
+                <p className="text-base sm:text-xl font-bold text-success tabular-nums break-words leading-tight">{fmt(monthTotalRevenue)}</p>
+                <p className="text-[10px] text-muted-foreground break-words">{t('settings.financial.cashCollectedThisMonth')}: <span className="font-semibold text-success">{fmt(monthTotalCashCollected)}</span></p>
               </div>
             </div>
 
