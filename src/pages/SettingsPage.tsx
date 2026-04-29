@@ -962,21 +962,21 @@ export default function SettingsPage() {
           <div className="p-3 rounded-lg bg-muted/30 border">
             <p className="text-sm font-semibold mb-2">📊 {t('settings.financial.allTimeRevenueOverview')}</p>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.totalRevenue')}</p>
-                <p className="text-lg font-bold text-success tabular-nums">{fmt(totalRevenue)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.totalRevenue')}</p>
+                <p className="text-base sm:text-lg font-bold text-success tabular-nums break-words leading-tight">{fmt(totalRevenue)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.stockSales')}</p>
-                <p className="text-lg font-bold tabular-nums">{fmt(totalStockSalesRevenue)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.stockSales')}</p>
+                <p className="text-base sm:text-lg font-bold tabular-nums break-words leading-tight">{fmt(totalStockSalesRevenue)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.serviceFees')}</p>
-                <p className="text-lg font-bold tabular-nums">{fmt(totalServiceRevenue)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.serviceFees')}</p>
+                <p className="text-base sm:text-lg font-bold tabular-nums break-words leading-tight">{fmt(totalServiceRevenue)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.totalExpenses')}</p>
-                <p className="text-lg font-bold text-destructive tabular-nums">{fmt(totalExpenses)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.totalExpenses')}</p>
+                <p className="text-base sm:text-lg font-bold text-destructive tabular-nums break-words leading-tight">{fmt(totalExpenses)}</p>
               </div>
             </div>
           </div>
