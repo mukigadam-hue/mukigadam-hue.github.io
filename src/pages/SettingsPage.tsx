@@ -859,17 +859,17 @@ export default function SettingsPage() {
               <p className="text-[10px] text-muted-foreground mb-1.5">{t('settings.financial.todaysRepaidDebtsDesc')}</p>
               {todayRepaidPayments.length > 0 && (
                 <div className="grid grid-cols-3 gap-1 text-[10px]">
-                  <div className="p-1 rounded bg-background/60 text-center">
-                    <p className="text-muted-foreground">📦 {t('settings.financial.fromSales')}</p>
-                    <p className="font-semibold tabular-nums">{fmt(todayRepaidByType.sale)}</p>
+                  <div className="min-w-0 p-1 rounded bg-background/60 text-center">
+                    <p className="text-muted-foreground truncate">📦 {t('settings.financial.fromSales')}</p>
+                    <p className="font-semibold tabular-nums break-words leading-tight">{fmt(todayRepaidByType.sale)}</p>
                   </div>
-                  <div className="p-1 rounded bg-background/60 text-center">
-                    <p className="text-muted-foreground">🛠️ {t('settings.financial.fromServices')}</p>
-                    <p className="font-semibold tabular-nums">{fmt(todayRepaidByType.service)}</p>
+                  <div className="min-w-0 p-1 rounded bg-background/60 text-center">
+                    <p className="text-muted-foreground truncate">🛠️ {t('settings.financial.fromServices')}</p>
+                    <p className="font-semibold tabular-nums break-words leading-tight">{fmt(todayRepaidByType.service)}</p>
                   </div>
-                  <div className="p-1 rounded bg-background/60 text-center">
-                    <p className="text-muted-foreground">📋 {t('settings.financial.fromOrders')}</p>
-                    <p className="font-semibold tabular-nums">{fmt(todayRepaidByType.order)}</p>
+                  <div className="min-w-0 p-1 rounded bg-background/60 text-center">
+                    <p className="text-muted-foreground truncate">📋 {t('settings.financial.fromOrders')}</p>
+                    <p className="font-semibold tabular-nums break-words leading-tight">{fmt(todayRepaidByType.order)}</p>
                   </div>
                 </div>
               )}
