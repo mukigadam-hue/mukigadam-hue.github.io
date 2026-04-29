@@ -23,6 +23,9 @@ export default function AdMobManager() {
     try {
       despia('initializeAds://');
       despia('admobappid://?id=ca-app-pub-9605564713228252~8941826330');
+      // Start.io fallback provider — App ID only (no API key required).
+      despia('startioappid://?id=203959336');
+      despia('initializeStartio://?appid=203959336');
     } catch {
       /* no-op: native bridge not present */
     }

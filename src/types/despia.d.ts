@@ -38,6 +38,12 @@ declare global {
         }) => Promise<void>;
         hideNative?: (containerId?: string) => Promise<void>;
       };
+      /** Start.io native bridge (fallback ad provider). */
+      StartIO?: {
+        initialize?: (options: { appId: string }) => Promise<void>;
+        showNative?: (options: { containerId?: string }) => Promise<void>;
+        hideNative?: (containerId?: string) => Promise<void>;
+      };
     };
   }
 }
