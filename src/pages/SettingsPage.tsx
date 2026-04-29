@@ -787,20 +787,20 @@ export default function SettingsPage() {
           <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
             <div className="flex items-center gap-2 mb-1"><ShoppingCart className="h-4 w-4 text-primary" /><p className="text-sm font-semibold">2. {t('settings.financial.purchases')}</p></div>
             <p className="text-[10px] text-muted-foreground mb-2">{t('settings.financial.purchasesIncludesOrders')}</p>
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <p className="text-[11px] text-muted-foreground">{t('settings.financial.todaysPurchases')}</p>
-                <p className="text-base font-bold tabular-nums">{fmt(todayPurchaseTotal)}</p>
+            <div className="grid grid-cols-1 xs:grid-cols-3 sm:grid-cols-3 gap-2">
+              <div className="min-w-0 p-2 rounded bg-background/60">
+                <p className="text-[11px] text-muted-foreground truncate">{t('settings.financial.todaysPurchases')}</p>
+                <p className="text-sm sm:text-base font-bold tabular-nums break-words leading-tight">{fmt(todayPurchaseTotal)}</p>
                 <p className="text-[10px] text-muted-foreground">{todayPurchaseCount} {t('settings.financial.purchaseCount')}</p>
               </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground">{t('settings.financial.thisMonthPurchases')}</p>
-                <p className="text-base font-bold tabular-nums text-primary">{fmt(monthPurchaseTotal)}</p>
+              <div className="min-w-0 p-2 rounded bg-background/60">
+                <p className="text-[11px] text-muted-foreground truncate">{t('settings.financial.thisMonthPurchases')}</p>
+                <p className="text-sm sm:text-base font-bold tabular-nums text-primary break-words leading-tight">{fmt(monthPurchaseTotal)}</p>
                 <p className="text-[10px] text-muted-foreground">{monthPurchaseCount} {t('settings.financial.purchaseCount')}</p>
               </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground">{t('settings.financial.allTimePurchases')}</p>
-                <p className="text-base font-bold tabular-nums">{fmt(totalPurchases)}</p>
+              <div className="min-w-0 p-2 rounded bg-background/60">
+                <p className="text-[11px] text-muted-foreground truncate">{t('settings.financial.allTimePurchases')}</p>
+                <p className="text-sm sm:text-base font-bold tabular-nums break-words leading-tight">{fmt(totalPurchases)}</p>
                 <p className="text-[10px] text-muted-foreground">{totalPurchaseCount} {t('settings.financial.totalCount')}</p>
               </div>
             </div>
