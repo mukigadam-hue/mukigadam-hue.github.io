@@ -916,14 +916,14 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2 mb-1"><Wrench className="h-4 w-4 text-accent" /><p className="text-sm font-semibold">6. {t('settings.financial.serviceFeeRevenue')}</p></div>
             <p className="text-xs text-muted-foreground mb-1">{t('settings.financial.serviceFeeDesc')}</p>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.todaysServiceFees')}</p>
-                <p className="text-lg font-bold tabular-nums">{fmt(todayTotalServiceFees)}</p>
-                <p className="text-[10px] text-muted-foreground">{todayServices.length} {t('settings.financial.serviceCount')} · {t('settings.financial.cash')}: {fmt(todayServiceCashCollected)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.todaysServiceFees')}</p>
+                <p className="text-base sm:text-lg font-bold tabular-nums break-words leading-tight">{fmt(todayTotalServiceFees)}</p>
+                <p className="text-[10px] text-muted-foreground break-words">{todayServices.length} {t('settings.financial.serviceCount')} · {t('settings.financial.cash')}: {fmt(todayServiceCashCollected)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.allTimeServiceFees')}</p>
-                <p className="text-lg font-bold tabular-nums">{fmt(totalServiceRevenue)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.allTimeServiceFees')}</p>
+                <p className="text-base sm:text-lg font-bold tabular-nums break-words leading-tight">{fmt(totalServiceRevenue)}</p>
                 <p className="text-[10px] text-muted-foreground">{services.length} {t('settings.financial.totalServices')}</p>
               </div>
             </div>
