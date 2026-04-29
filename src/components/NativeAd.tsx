@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAdRefresh } from '@/hooks/useAdRefresh';
+import { adLog } from '@/components/AdMobManager';
 import '@/types/despia.d.ts';
 
 // Production AdMob Native Ad Unit IDs
