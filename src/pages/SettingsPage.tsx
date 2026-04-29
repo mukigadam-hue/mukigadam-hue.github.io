@@ -787,20 +787,20 @@ export default function SettingsPage() {
           <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
             <div className="flex items-center gap-2 mb-1"><ShoppingCart className="h-4 w-4 text-primary" /><p className="text-sm font-semibold">2. {t('settings.financial.purchases')}</p></div>
             <p className="text-[10px] text-muted-foreground mb-2">{t('settings.financial.purchasesIncludesOrders')}</p>
-            <div className="grid grid-cols-3 gap-2">
-              <div>
-                <p className="text-[11px] text-muted-foreground">{t('settings.financial.todaysPurchases')}</p>
-                <p className="text-base font-bold tabular-nums">{fmt(todayPurchaseTotal)}</p>
+            <div className="grid grid-cols-1 xs:grid-cols-3 sm:grid-cols-3 gap-2">
+              <div className="min-w-0 p-2 rounded bg-background/60">
+                <p className="text-[11px] text-muted-foreground truncate">{t('settings.financial.todaysPurchases')}</p>
+                <p className="text-sm sm:text-base font-bold tabular-nums break-words leading-tight">{fmt(todayPurchaseTotal)}</p>
                 <p className="text-[10px] text-muted-foreground">{todayPurchaseCount} {t('settings.financial.purchaseCount')}</p>
               </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground">{t('settings.financial.thisMonthPurchases')}</p>
-                <p className="text-base font-bold tabular-nums text-primary">{fmt(monthPurchaseTotal)}</p>
+              <div className="min-w-0 p-2 rounded bg-background/60">
+                <p className="text-[11px] text-muted-foreground truncate">{t('settings.financial.thisMonthPurchases')}</p>
+                <p className="text-sm sm:text-base font-bold tabular-nums text-primary break-words leading-tight">{fmt(monthPurchaseTotal)}</p>
                 <p className="text-[10px] text-muted-foreground">{monthPurchaseCount} {t('settings.financial.purchaseCount')}</p>
               </div>
-              <div>
-                <p className="text-[11px] text-muted-foreground">{t('settings.financial.allTimePurchases')}</p>
-                <p className="text-base font-bold tabular-nums">{fmt(totalPurchases)}</p>
+              <div className="min-w-0 p-2 rounded bg-background/60">
+                <p className="text-[11px] text-muted-foreground truncate">{t('settings.financial.allTimePurchases')}</p>
+                <p className="text-sm sm:text-base font-bold tabular-nums break-words leading-tight">{fmt(totalPurchases)}</p>
                 <p className="text-[10px] text-muted-foreground">{totalPurchaseCount} {t('settings.financial.totalCount')}</p>
               </div>
             </div>
@@ -838,15 +838,15 @@ export default function SettingsPage() {
             <p className="text-[10px] text-muted-foreground mb-2">{t('settings.financial.revenueIncludesOrders')}</p>
 
             <div className="grid grid-cols-2 gap-2 mb-3">
-              <div className="p-2 rounded-lg bg-background/80 border border-success/10">
-                <p className="text-[11px] text-muted-foreground">{t('settings.financial.todaysRevenue')}</p>
-                <p className="text-xl font-bold text-success tabular-nums">{fmt(todayTotalRevenue)}</p>
-                <p className="text-[10px] text-muted-foreground">{t('settings.financial.cashCollectedToday')}: <span className="font-semibold text-success">{fmt(todayTotalCashCollected)}</span></p>
+              <div className="min-w-0 p-2 rounded-lg bg-background/80 border border-success/10">
+                <p className="text-[11px] text-muted-foreground truncate">{t('settings.financial.todaysRevenue')}</p>
+                <p className="text-base sm:text-xl font-bold text-success tabular-nums break-words leading-tight">{fmt(todayTotalRevenue)}</p>
+                <p className="text-[10px] text-muted-foreground break-words">{t('settings.financial.cashCollectedToday')}: <span className="font-semibold text-success">{fmt(todayTotalCashCollected)}</span></p>
               </div>
-              <div className="p-2 rounded-lg bg-background/80 border border-success/20">
-                <p className="text-[11px] text-muted-foreground">{t('settings.financial.thisMonthRevenue')}</p>
-                <p className="text-xl font-bold text-success tabular-nums">{fmt(monthTotalRevenue)}</p>
-                <p className="text-[10px] text-muted-foreground">{t('settings.financial.cashCollectedThisMonth')}: <span className="font-semibold text-success">{fmt(monthTotalCashCollected)}</span></p>
+              <div className="min-w-0 p-2 rounded-lg bg-background/80 border border-success/20">
+                <p className="text-[11px] text-muted-foreground truncate">{t('settings.financial.thisMonthRevenue')}</p>
+                <p className="text-base sm:text-xl font-bold text-success tabular-nums break-words leading-tight">{fmt(monthTotalRevenue)}</p>
+                <p className="text-[10px] text-muted-foreground break-words">{t('settings.financial.cashCollectedThisMonth')}: <span className="font-semibold text-success">{fmt(monthTotalCashCollected)}</span></p>
               </div>
             </div>
 
@@ -859,17 +859,17 @@ export default function SettingsPage() {
               <p className="text-[10px] text-muted-foreground mb-1.5">{t('settings.financial.todaysRepaidDebtsDesc')}</p>
               {todayRepaidPayments.length > 0 && (
                 <div className="grid grid-cols-3 gap-1 text-[10px]">
-                  <div className="p-1 rounded bg-background/60 text-center">
-                    <p className="text-muted-foreground">📦 {t('settings.financial.fromSales')}</p>
-                    <p className="font-semibold tabular-nums">{fmt(todayRepaidByType.sale)}</p>
+                  <div className="min-w-0 p-1 rounded bg-background/60 text-center">
+                    <p className="text-muted-foreground truncate">📦 {t('settings.financial.fromSales')}</p>
+                    <p className="font-semibold tabular-nums break-words leading-tight">{fmt(todayRepaidByType.sale)}</p>
                   </div>
-                  <div className="p-1 rounded bg-background/60 text-center">
-                    <p className="text-muted-foreground">🛠️ {t('settings.financial.fromServices')}</p>
-                    <p className="font-semibold tabular-nums">{fmt(todayRepaidByType.service)}</p>
+                  <div className="min-w-0 p-1 rounded bg-background/60 text-center">
+                    <p className="text-muted-foreground truncate">🛠️ {t('settings.financial.fromServices')}</p>
+                    <p className="font-semibold tabular-nums break-words leading-tight">{fmt(todayRepaidByType.service)}</p>
                   </div>
-                  <div className="p-1 rounded bg-background/60 text-center">
-                    <p className="text-muted-foreground">📋 {t('settings.financial.fromOrders')}</p>
-                    <p className="font-semibold tabular-nums">{fmt(todayRepaidByType.order)}</p>
+                  <div className="min-w-0 p-1 rounded bg-background/60 text-center">
+                    <p className="text-muted-foreground truncate">📋 {t('settings.financial.fromOrders')}</p>
+                    <p className="font-semibold tabular-nums break-words leading-tight">{fmt(todayRepaidByType.order)}</p>
                   </div>
                 </div>
               )}
@@ -916,14 +916,14 @@ export default function SettingsPage() {
             <div className="flex items-center gap-2 mb-1"><Wrench className="h-4 w-4 text-accent" /><p className="text-sm font-semibold">6. {t('settings.financial.serviceFeeRevenue')}</p></div>
             <p className="text-xs text-muted-foreground mb-1">{t('settings.financial.serviceFeeDesc')}</p>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.todaysServiceFees')}</p>
-                <p className="text-lg font-bold tabular-nums">{fmt(todayTotalServiceFees)}</p>
-                <p className="text-[10px] text-muted-foreground">{todayServices.length} {t('settings.financial.serviceCount')} · {t('settings.financial.cash')}: {fmt(todayServiceCashCollected)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.todaysServiceFees')}</p>
+                <p className="text-base sm:text-lg font-bold tabular-nums break-words leading-tight">{fmt(todayTotalServiceFees)}</p>
+                <p className="text-[10px] text-muted-foreground break-words">{todayServices.length} {t('settings.financial.serviceCount')} · {t('settings.financial.cash')}: {fmt(todayServiceCashCollected)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.allTimeServiceFees')}</p>
-                <p className="text-lg font-bold tabular-nums">{fmt(totalServiceRevenue)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.allTimeServiceFees')}</p>
+                <p className="text-base sm:text-lg font-bold tabular-nums break-words leading-tight">{fmt(totalServiceRevenue)}</p>
                 <p className="text-[10px] text-muted-foreground">{services.length} {t('settings.financial.totalServices')}</p>
               </div>
             </div>
@@ -933,14 +933,14 @@ export default function SettingsPage() {
           <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/20">
             <div className="flex items-center gap-2 mb-1"><Flame className="h-4 w-4 text-destructive" /><p className="text-sm font-semibold">7. {t('settings.financial.nonProductionExpenses')}</p></div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.todaysExpenses')}</p>
-                <p className="text-lg font-bold text-destructive tabular-nums">{fmt(todayExpenseTotal)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.todaysExpenses')}</p>
+                <p className="text-base sm:text-lg font-bold text-destructive tabular-nums break-words leading-tight">{fmt(todayExpenseTotal)}</p>
                 <p className="text-[10px] text-muted-foreground">{todayExpenses.length} {t('settings.financial.expenseCount')}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.allTimeExpenses')}</p>
-                <p className="text-lg font-bold text-destructive tabular-nums">{fmt(totalExpenses)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.allTimeExpenses')}</p>
+                <p className="text-base sm:text-lg font-bold text-destructive tabular-nums break-words leading-tight">{fmt(totalExpenses)}</p>
                 <p className="text-[10px] text-muted-foreground">{operationalExpenses.length} {t('settings.financial.totalCount')}</p>
               </div>
             </div>
@@ -962,21 +962,21 @@ export default function SettingsPage() {
           <div className="p-3 rounded-lg bg-muted/30 border">
             <p className="text-sm font-semibold mb-2">📊 {t('settings.financial.allTimeRevenueOverview')}</p>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.totalRevenue')}</p>
-                <p className="text-lg font-bold text-success tabular-nums">{fmt(totalRevenue)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.totalRevenue')}</p>
+                <p className="text-base sm:text-lg font-bold text-success tabular-nums break-words leading-tight">{fmt(totalRevenue)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.stockSales')}</p>
-                <p className="text-lg font-bold tabular-nums">{fmt(totalStockSalesRevenue)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.stockSales')}</p>
+                <p className="text-base sm:text-lg font-bold tabular-nums break-words leading-tight">{fmt(totalStockSalesRevenue)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.serviceFees')}</p>
-                <p className="text-lg font-bold tabular-nums">{fmt(totalServiceRevenue)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.serviceFees')}</p>
+                <p className="text-base sm:text-lg font-bold tabular-nums break-words leading-tight">{fmt(totalServiceRevenue)}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.totalExpenses')}</p>
-                <p className="text-lg font-bold text-destructive tabular-nums">{fmt(totalExpenses)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.totalExpenses')}</p>
+                <p className="text-base sm:text-lg font-bold text-destructive tabular-nums break-words leading-tight">{fmt(totalExpenses)}</p>
               </div>
             </div>
           </div>
