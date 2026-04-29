@@ -933,14 +933,14 @@ export default function SettingsPage() {
           <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/20">
             <div className="flex items-center gap-2 mb-1"><Flame className="h-4 w-4 text-destructive" /><p className="text-sm font-semibold">7. {t('settings.financial.nonProductionExpenses')}</p></div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.todaysExpenses')}</p>
-                <p className="text-lg font-bold text-destructive tabular-nums">{fmt(todayExpenseTotal)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.todaysExpenses')}</p>
+                <p className="text-base sm:text-lg font-bold text-destructive tabular-nums break-words leading-tight">{fmt(todayExpenseTotal)}</p>
                 <p className="text-[10px] text-muted-foreground">{todayExpenses.length} {t('settings.financial.expenseCount')}</p>
               </div>
-              <div>
-                <p className="text-xs text-muted-foreground">{t('settings.financial.allTimeExpenses')}</p>
-                <p className="text-lg font-bold text-destructive tabular-nums">{fmt(totalExpenses)}</p>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground truncate">{t('settings.financial.allTimeExpenses')}</p>
+                <p className="text-base sm:text-lg font-bold text-destructive tabular-nums break-words leading-tight">{fmt(totalExpenses)}</p>
                 <p className="text-[10px] text-muted-foreground">{operationalExpenses.length} {t('settings.financial.totalCount')}</p>
               </div>
             </div>
