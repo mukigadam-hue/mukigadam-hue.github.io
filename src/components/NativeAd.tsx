@@ -28,26 +28,64 @@ export default function NativeAd({ placement = 'general', className, slotId }: N
   const loadingRef = useRef(false);
 
   useEffect(() => {
-    if (!window.despia?.AdMob?.showNative) return;
+    const hasAdMob = !!window.despia?.AdMob?.showNative;
+    const hasStartIO = !!window.despia?.StartIO?.showNative;
+    if (!hasAdMob && !hasStartIO) return;
     setIsNative(true);
 
     let cancelled = false;
+
+    const tryStartIOFallback = async (): Promise<boolean> => {
+      if (!window.despia?.StartIO?.showNative) return false;
+      try {
+        await window.despia?.StartIO?.hideNative?.(containerId).catch(() => {});
+        if (cancelled) return false;
+        await window.despia.StartIO.showNative({ containerId });
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
     const loadAd = async () => {
       if (loadingRef.current) return;
       loadingRef.current = true;
       try {
-        await window.despia?.AdMob?.hideNative?.(containerId).catch(() => {});
-        if (cancelled) return;
-        await window.despia?.AdMob?.showNative?.({
-          adId: adUnitId,
-          containerId,
-        });
-        if (!cancelled) {
-          setError(null);
-          onAdLoaded();
+        // Primary: AdMob
+        if (hasAdMob) {
+          try {
+            await window.despia?.AdMob?.hideNative?.(containerId).catch(() => {});
+            if (cancelled) return;
+            await window.despia!.AdMob!.showNative!({ adId: adUnitId, containerId });
+            if (!cancelled) {
+              setError(null);
+              onAdLoaded();
+            }
+            return;
+          } catch (admobErr) {
+            // Fall through to Start.io fallback
+            const ok = await tryStartIOFallback();
+            if (!cancelled) {
+              if (ok) {
+                setError(null);
+                onAdLoaded();
+              } else {
+                setError((admobErr as any)?.message || 'Ad failed');
+              }
+            }
+            return;
+          }
         }
-      } catch (err: any) {
-        if (!cancelled) setError(err?.message || 'Ad failed');
+        // No AdMob — go straight to Start.io
+        const ok = await tryStartIOFallback();
+        if (!cancelled) {
+          if (ok) {
+            setError(null);
+            onAdLoaded();
+          } else {
+            setError('Ad failed');
+          }
+        }
       } finally {
         loadingRef.current = false;
       }
@@ -57,6 +95,7 @@ export default function NativeAd({ placement = 'general', className, slotId }: N
     return () => {
       cancelled = true;
       window.despia?.AdMob?.hideNative?.(containerId).catch(() => {});
+      window.despia?.StartIO?.hideNative?.(containerId).catch(() => {});
     };
   }, [adUnitId, containerId, refreshKey, onAdLoaded]);
 
