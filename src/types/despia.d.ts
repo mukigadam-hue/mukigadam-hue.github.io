@@ -1,10 +1,7 @@
 // Global Despia native shell type declarations.
 //
-// The Despia native wrapper injects two things at runtime:
-//   1. A global `despia(command)` function — used to dispatch native bridge
-//      commands like `despia("takescreenshot://")` for screenshot capture,
-//      `despia("vibrate://")`, etc.
-//   2. A `window.despia.AdMob` object — for banner/native AdMob ads.
+// The Despia native wrapper injects a global `despia(command)` function used to
+// dispatch native bridge commands like `despia("takescreenshot://")`.
 //
 // On the web (outside the native shell) both are undefined.
 
@@ -23,31 +20,7 @@ declare global {
     onDespiaNativeAdLoaded?: (payload?: unknown) => void;
     onDespiaNativeAdFailed?: (payload?: unknown) => void;
 
-    /** Same `despia()` function attached to window for safe access checks. */
-    despia?: ((command: string) => void) & {
-      AdMob?: {
-        initialize?: (options?: {
-          appId?: string;
-          requestTrackingAuthorization?: boolean;
-        }) => Promise<void>;
-        showBanner: (options: {
-          adId: string;
-          position?: 'top' | 'bottom';
-          autoShow?: boolean;
-        }) => Promise<void>;
-        hideBanner: () => Promise<void>;
-        showNative?: (options: {
-          adId: string;
-          containerId?: string;
-        }) => Promise<void>;
-        hideNative?: (containerId?: string) => Promise<void>;
-      };
-      /** Start.io native bridge (fallback ad provider). */
-      StartIO?: {
-        initialize?: (options: { appId: string }) => Promise<void>;
-        showNative?: (options: { containerId?: string }) => Promise<void>;
-        hideNative?: (containerId?: string) => Promise<void>;
-      };
-    };
+    /** The Despia SDK may write URL-style bridge commands here internally. */
+    despia?: unknown;
   }
 }
