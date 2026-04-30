@@ -104,24 +104,51 @@ export function requestRewardedAd(): Promise<boolean> {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Native ad placeholders                                                     */
+/* Native Advanced (inline) ads                                               */
 /* -------------------------------------------------------------------------- */
 /*
- * The web app NEVER loads Google ad URLs. We just leave empty placeholder
- * containers in the DOM and let the Despia wrapper inject native ads on top
- * of them. These helpers exist so banner / native ad components have a
- * consistent (no-op on the web) integration point.
+ * Inline Native Advanced ads ONLY. The web layer never loads Google ad URLs;
+ * it just dispatches a Despia bridge command telling the native shell to
+ * render a Native Advanced ad INTO a specific container DIV by id.
+ *
+ * No interstitials, no rewarded, no fullscreen — the ad must stay inside the
+ * referenced container at the requested height.
  */
 
-export function requestNativeAd(_options: {
+export function requestNativeAd(options: {
   containerId: string;
   placement: NativeAdPlacement;
   height: number;
 }) {
-  // No-op on the web. Despia native shell observes `[data-despia-native-ad]`
-  // elements and renders ads over them.
+  const adUnitId = adUnitForPlacement(options.placement);
+  adLog(`[AD-STATUS] Requesting Native Advanced ad in #${options.containerId} (${options.placement}, ${options.height}px)`);
+
+  const params = new URLSearchParams({
+    containerId: options.containerId,
+    placement: options.placement,
+    height: String(options.height),
+    format: 'native_advanced',
+    inline: 'true',
+    fullscreen: 'false',
+    provider: 'admob',
+    fallback: 'startio',
+    adUnitId,
+    admobAppId: ADMOB_APP_ID,
+    startioAppId: START_IO_APP_ID,
+    appAdsTxt: `${APP_ADS_DOMAIN}/app-ads.txt`,
+  });
+
+  try {
+    void despia(`displaynativead://?${params.toString()}` as any);
+  } catch {
+    /* native bridge not present in browser preview */
+  }
 }
 
-export function hideNativeAd(_containerId: string) {
-  // No-op on the web — placeholder cleanup happens via React unmount.
+export function hideNativeAd(containerId: string) {
+  try {
+    void despia(`hidenativead://?containerId=${encodeURIComponent(containerId)}` as any);
+  } catch {
+    /* no-op on web */
+  }
 }
