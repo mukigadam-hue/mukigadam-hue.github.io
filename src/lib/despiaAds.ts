@@ -98,16 +98,18 @@ function normaliseAdEvent(payload: unknown) {
 }
 
 function installNativeAdCallbacks() {
-  if (typeof window === 'undefined' || window.__despiaAdCallbacksInstalled) return;
-  window.__despiaAdCallbacksInstalled = true;
+  if (typeof window === 'undefined') return;
+  const nativeWindow = window as Window & Record<string, any>;
+  if (nativeWindow.__despiaAdCallbacksInstalled) return;
+  nativeWindow.__despiaAdCallbacksInstalled = true;
 
-  window.onDespiaNativeAdLoaded = (payload?: unknown) => {
+  nativeWindow.onDespiaNativeAdLoaded = (payload?: unknown) => {
     const event = normaliseAdEvent(payload);
     const provider = String(event.provider || 'AdMob');
     adLog(`[AD-SUCCESS] ${provider} ad loaded`);
   };
 
-  window.onDespiaNativeAdFailed = (payload?: unknown) => {
+  nativeWindow.onDespiaNativeAdFailed = (payload?: unknown) => {
     const event = normaliseAdEvent(payload);
     const provider = String(event.provider || 'AdMob');
     const code = String(event.code || event.errorCode || 'N/A');
@@ -124,10 +126,10 @@ function installNativeAdCallbacks() {
   };
 
   window.addEventListener('despiaNativeAdLoaded', ((event: CustomEvent) => {
-    window.onDespiaNativeAdLoaded?.(event.detail);
+    nativeWindow.onDespiaNativeAdLoaded?.(event.detail);
   }) as EventListener);
 
   window.addEventListener('despiaNativeAdFailed', ((event: CustomEvent) => {
-    window.onDespiaNativeAdFailed?.(event.detail);
+    nativeWindow.onDespiaNativeAdFailed?.(event.detail);
   }) as EventListener);
 }
