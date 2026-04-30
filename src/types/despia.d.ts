@@ -17,8 +17,11 @@ declare global {
 
   interface Window {
     __despiaAdCallbacksInstalled?: boolean;
+    __despiaRewardedHandlerInstalled?: boolean;
     onDespiaNativeAdLoaded?: (payload?: unknown) => void;
     onDespiaNativeAdFailed?: (payload?: unknown) => void;
+    /** Despia rewarded-ad completion callback. status is 'true' / 'false'. */
+    updateRewardedStatus?: (status: string | boolean) => void;
 
     /** The Despia SDK may write URL-style bridge commands here internally. */
     despia?: unknown;
