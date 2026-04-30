@@ -12,124 +12,116 @@ type NativeAdPlacement = 'banner' | 'inline' | 'compact' | 'home' | 'general' | 
 export function adLog(message: string) {
   // eslint-disable-next-line no-console
   console.log(message);
-  dispatchDespiaCommand(`log://?message=${encodeURIComponent(message)}`, false);
-}
-
-function isLikelyDespiaRuntime() {
-  if (typeof window === 'undefined') return false;
-  const ua = navigator.userAgent.toLowerCase();
-  return (
-    ua.includes('despia') ||
-    Boolean((window as any).ReactNativeWebView) ||
-    Boolean((window as any).webkit?.messageHandlers?.despia)
-  );
-}
-
-function dispatchDespiaCommand(command: string, allowLocationBridge = true) {
   try {
-    void despia(command);
+    void despia(`log://?message=${encodeURIComponent(message)}` as any);
   } catch {
-    /* native bridge not present */
-  }
-
-  // Some Despia native builds listen for URL-scheme navigation instead of only
-  // the SDK setter. Gate it so the browser preview never navigates away.
-  if (allowLocationBridge && command.startsWith('despia://') && isLikelyDespiaRuntime()) {
-    window.location.href = command;
+    /* native bridge not present (browser preview) */
   }
 }
 
-function adUnitForPlacement(placement: NativeAdPlacement) {
-  return placement === 'home' || placement === 'inline'
-    ? ADMOB_NATIVE_HOME_ID
-    : ADMOB_NATIVE_GENERAL_ID;
+/** Last reward callback registered by `requestRewardedAd`. */
+let pendingRewardCallback: ((granted: boolean) => void) | null = null;
+
+function installRewardedHandler() {
+  if (typeof window === 'undefined') return;
+  const w = window as Window & Record<string, any>;
+  if (w.__despiaRewardedHandlerInstalled) return;
+  w.__despiaRewardedHandlerInstalled = true;
+
+  // Despia calls this global when the rewarded ad finishes.
+  w.updateRewardedStatus = (status: string | boolean) => {
+    const granted = status === true || status === 'true';
+    adLog(`[AD-STATUS] updateRewardedStatus -> ${String(status)}`);
+    if (granted) {
+      adLog('[AD-SUCCESS] Rewarded ad completed — granting reward');
+    } else {
+      adLog('[AD-FAIL] Rewarded ad not completed');
+    }
+    if (pendingRewardCallback) {
+      const cb = pendingRewardCallback;
+      pendingRewardCallback = null;
+      try { cb(granted); } catch (err) { console.error(err); }
+    }
+  };
 }
 
-export function initializeNativeAds() {
-  installNativeAdCallbacks();
+/**
+ * Initialize the Despia native ad bridge.
+ *
+ * Per Despia support, the web layer should NOT load Google ad scripts.
+ * Instead, ads are triggered via native protocol commands (e.g.
+ * `displayrewardedad://`) and Despia handles AdMob / Start.io natively.
+ *
+ * On startup we also verify the bridge by reading the device UUID.
+ */
+export async function initializeNativeAds() {
+  installRewardedHandler();
+
   adLog(`[AD-INFO] Initializing AdMob and Start.io (ID: ${START_IO_APP_ID})`);
   adLog(`[AD-INFO] app-ads.txt developer domain: ${APP_ADS_DOMAIN}/app-ads.txt`);
 
-  const params = new URLSearchParams({
-    admobAppId: ADMOB_APP_ID,
-    startioAppId: START_IO_APP_ID,
-    appAdsTxt: `${APP_ADS_DOMAIN}/app-ads.txt`,
-    developerDomain: APP_ADS_DOMAIN,
-  });
-
-  dispatchDespiaCommand(`despia://initializeAds?${params.toString()}`);
-  dispatchDespiaCommand(`admobappid://?id=${encodeURIComponent(ADMOB_APP_ID)}`, false);
-  dispatchDespiaCommand(`startioappid://?id=${encodeURIComponent(START_IO_APP_ID)}`, false);
-  dispatchDespiaCommand(`appadsdomain://?url=${encodeURIComponent(`${APP_ADS_DOMAIN}/app-ads.txt`)}`, false);
-  dispatchDespiaCommand(`developerdomain://?url=${encodeURIComponent(APP_ADS_DOMAIN)}`, false);
-  dispatchDespiaCommand(`startioappadsdomain://?url=${encodeURIComponent(`${APP_ADS_DOMAIN}/app-ads.txt`)}`, false);
+  // Verify the native bridge is connected (Despia documented check).
+  try {
+    const device = await despia('get-uuid://' as any, ['uuid']) as { uuid?: string };
+    if (device?.uuid) {
+      adLog(`[AD-INFO] Despia native bridge connected. Device UUID: ${device.uuid}`);
+    } else {
+      adLog('[AD-INFO] Despia bridge call returned no UUID (likely web preview).');
+    }
+  } catch {
+    adLog('[AD-INFO] Despia bridge not available (web preview).');
+  }
 }
 
-export function requestNativeAd(options: {
+/**
+ * Trigger the native rewarded ad. Resolves with `true` if the user earned
+ * the reward, `false` otherwise. Safe to call from any component.
+ */
+export function requestRewardedAd(): Promise<boolean> {
+  installRewardedHandler();
+  adLog('[AD-STATUS] Requesting rewarded ad via despia://displayrewardedad');
+
+  return new Promise<boolean>((resolve) => {
+    pendingRewardCallback = resolve;
+    try {
+      void despia('displayrewardedad://' as any);
+    } catch (err) {
+      adLog(`[AD-FAIL] Failed to dispatch rewarded ad: ${(err as Error)?.message ?? err}`);
+      pendingRewardCallback = null;
+      resolve(false);
+    }
+
+    // Safety timeout: if Despia never calls back (e.g. web preview), resolve
+    // with `false` after 30s so callers don't hang forever.
+    setTimeout(() => {
+      if (pendingRewardCallback === resolve) {
+        pendingRewardCallback = null;
+        adLog('[AD-FAIL] Rewarded ad timed out (no native callback)');
+        resolve(false);
+      }
+    }, 30_000);
+  });
+}
+
+/* -------------------------------------------------------------------------- */
+/* Native ad placeholders                                                     */
+/* -------------------------------------------------------------------------- */
+/*
+ * The web app NEVER loads Google ad URLs. We just leave empty placeholder
+ * containers in the DOM and let the Despia wrapper inject native ads on top
+ * of them. These helpers exist so banner / native ad components have a
+ * consistent (no-op on the web) integration point.
+ */
+
+export function requestNativeAd(_options: {
   containerId: string;
   placement: NativeAdPlacement;
   height: number;
 }) {
-  const adUnitId = adUnitForPlacement(options.placement);
-  adLog('[AD-STATUS] Requesting AdMob Native Ad...');
-
-  const params = new URLSearchParams({
-    containerId: options.containerId,
-    placement: options.placement,
-    height: String(options.height),
-    provider: 'admob',
-    fallback: 'startio',
-    adUnitId,
-    admobAppId: ADMOB_APP_ID,
-    startioAppId: START_IO_APP_ID,
-    appAdsTxt: `${APP_ADS_DOMAIN}/app-ads.txt`,
-  });
-
-  dispatchDespiaCommand(`despia://showNativeAd?${params.toString()}`);
+  // No-op on the web. Despia native shell observes `[data-despia-native-ad]`
+  // elements and renders ads over them.
 }
 
-export function hideNativeAd(containerId: string) {
-  dispatchDespiaCommand(`despia://hideNativeAd?containerId=${encodeURIComponent(containerId)}`);
-}
-
-function normaliseAdEvent(payload: unknown) {
-  if (payload && typeof payload === 'object') return payload as Record<string, unknown>;
-  return { message: payload };
-}
-
-function installNativeAdCallbacks() {
-  if (typeof window === 'undefined') return;
-  const nativeWindow = window as Window & Record<string, any>;
-  if (nativeWindow.__despiaAdCallbacksInstalled) return;
-  nativeWindow.__despiaAdCallbacksInstalled = true;
-
-  nativeWindow.onDespiaNativeAdLoaded = (payload?: unknown) => {
-    const event = normaliseAdEvent(payload);
-    const provider = String(event.provider || 'AdMob');
-    adLog(`[AD-SUCCESS] ${provider} ad loaded`);
-  };
-
-  nativeWindow.onDespiaNativeAdFailed = (payload?: unknown) => {
-    const event = normaliseAdEvent(payload);
-    const provider = String(event.provider || 'AdMob');
-    const code = String(event.code || event.errorCode || 'N/A');
-    const reason = String(event.reason || event.message || 'unknown');
-
-    if (provider.toLowerCase().includes('admob')) {
-      adLog('[AD-RETRY] AdMob failed. Switching to Start.io fallback...');
-      adLog(`[AD-ERROR] AdMob error code: ${code} — ${reason}`);
-      adLog('[AD-STATUS] Requesting Start.io Native Ad...');
-      return;
-    }
-
-    adLog(`[AD-FAIL] ${provider} failed — reason: ${reason}`);
-  };
-
-  window.addEventListener('despiaNativeAdLoaded', ((event: CustomEvent) => {
-    nativeWindow.onDespiaNativeAdLoaded?.(event.detail);
-  }) as EventListener);
-
-  window.addEventListener('despiaNativeAdFailed', ((event: CustomEvent) => {
-    nativeWindow.onDespiaNativeAdFailed?.(event.detail);
-  }) as EventListener);
+export function hideNativeAd(_containerId: string) {
+  // No-op on the web — placeholder cleanup happens via React unmount.
 }
