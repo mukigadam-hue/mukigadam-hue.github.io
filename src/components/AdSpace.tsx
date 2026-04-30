@@ -6,8 +6,8 @@ import { hideNativeAd, requestNativeAd } from '@/lib/despiaAds';
 
 /**
  * Empty native-ad placeholder for Despia.
- * The app must never load Google ad scripts, iframes, <ins> tags, or
- * DoubleClick URLs in the WebView. Despia injects the native ad over this box.
+ * The app must never load Google ad scripts, iframes, or DoubleClick URLs in
+ * the WebView. Despia injects the native ad over this box.
  */
 
 const HEIGHT_BY_VARIANT: Record<NonNullable<AdSpaceProps['variant']>, number> = {
