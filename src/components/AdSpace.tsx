@@ -1,30 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { usePremium } from '@/hooks/usePremium';
 import { useAdRefresh } from '@/hooks/useAdRefresh';
+import { hideNativeAd, requestNativeAd } from '@/lib/despiaAds';
 
 /**
- * Real Google AdMob inline ad slot through Despia WebView API for Ads.
- *
- * The screenshot showed a DoubleClick ad URL being opened as a normal page.
- * That happens when an ad response is navigated to instead of rendered in an
- * inline slot. This component keeps the Google tag inside a fixed-size <ins>
- * element and only pushes after that element is mounted and measurable.
- *
- * The component:
- *  - renders for every user during testing,
- *  - pushes a real ad request on mount and every compliant 60s refresh tick,
- *  - avoids unsupported native-display URL schemes for inline placements.
+ * Empty native-ad placeholder for Despia.
+ * The app must never load Google ad scripts, iframes, <ins> tags, or
+ * DoubleClick URLs in the WebView. Despia injects the native ad over this box.
  */
-
-const ADSENSE_CLIENT = 'ca-pub-9605564713228252';
-
-// Real AdMob ad unit IDs (slot portion mirrors the AdMob unit).
-const SLOT_BY_VARIANT: Record<NonNullable<AdSpaceProps['variant']>, string> = {
-  banner: '4713172172',
-  inline: '3146574176',
-  compact: '4713172172',
-};
 
 const HEIGHT_BY_VARIANT: Record<NonNullable<AdSpaceProps['variant']>, number> = {
   banner: 80,
@@ -40,15 +24,15 @@ interface AdSpaceProps {
 
 export default function AdSpace({ variant = 'banner', className, slotId }: AdSpaceProps) {
   const { showAds } = usePremium();
-  const id = slotId || `adspace-${variant}`;
+  const reactId = useId().replace(/:/g, '');
+  const id = slotId || `adspace-${variant}-${reactId}`;
+  const containerId = `despia-native-${id}`;
   const { refreshKey, onAdLoaded } = useAdRefresh(id);
-  const insRef = useRef<HTMLModElement | null>(null);
-  const pushedRef = useRef(false);
-  const [failed, setFailed] = useState(false);
+  const slotRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    const slot = insRef.current;
+    const slot = slotRef.current;
     if (!slot) return;
 
     const observer = new IntersectionObserver(
@@ -59,61 +43,31 @@ export default function AdSpace({ variant = 'banner', className, slotId }: AdSpa
     return () => observer.disconnect();
   }, [refreshKey]);
 
-  // Force a real ad request on mount and on each refresh tick.
   useEffect(() => {
     if (!showAds || !isVisible) return;
-    // Reset for new refresh cycle.
-    pushedRef.current = false;
-    setFailed(false);
-
-    const tryPush = () => {
-      if (pushedRef.current) return;
-      if (!insRef.current || insRef.current.offsetWidth <= 0) return;
-      try {
-        const w = window as any;
-        w.adsbygoogle = w.adsbygoogle || [];
-        w.adsbygoogle.push({});
-        pushedRef.current = true;
-        onAdLoaded();
-      } catch (err) {
-        setFailed(true);
-      }
-    };
-
-    // Defer slightly to ensure the element is laid out before requesting.
-    const t = setTimeout(tryPush, 120);
-    return () => clearTimeout(t);
-  }, [showAds, isVisible, variant, refreshKey, onAdLoaded]);
+    requestNativeAd({ containerId, placement: variant, height: HEIGHT_BY_VARIANT[variant] });
+    onAdLoaded();
+    return () => hideNativeAd(containerId);
+  }, [showAds, isVisible, variant, refreshKey, containerId, onAdLoaded]);
 
   if (!showAds) return null;
 
-  const slot = SLOT_BY_VARIANT[variant];
   const height = HEIGHT_BY_VARIANT[variant];
 
   return (
     <div
+      ref={slotRef}
+      id={containerId}
       key={refreshKey}
+      data-despia-native-ad="true"
+      data-ad-placement={variant}
       className={cn(
         'w-full overflow-hidden rounded-lg bg-muted/20 transition-none',
         className,
       )}
       style={{ height, maxHeight: height }}
-    >
-      <ins
-        ref={insRef}
-        className="adsbygoogle block w-full"
-        style={{ display: 'block', width: '100%', height, maxHeight: height, overflow: 'hidden' }}
-        data-ad-client={ADSENSE_CLIENT}
-        data-ad-slot={slot}
-        data-ad-format="auto"
-        data-full-width-responsive="true"
-      />
-      {failed && (
-        <div className="flex items-center justify-center py-2 text-[10px] uppercase tracking-widest text-muted-foreground/60">
-          Sponsored
-        </div>
-      )}
-    </div>
+      aria-hidden="true"
+    />
   );
 }
 
