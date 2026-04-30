@@ -19,6 +19,10 @@ declare global {
   function despia(command: string): void;
 
   interface Window {
+    __despiaAdCallbacksInstalled?: boolean;
+    onDespiaNativeAdLoaded?: (payload?: unknown) => void;
+    onDespiaNativeAdFailed?: (payload?: unknown) => void;
+
     /** Same `despia()` function attached to window for safe access checks. */
     despia?: ((command: string) => void) & {
       AdMob?: {
