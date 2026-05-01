@@ -6,26 +6,15 @@ import { hideNativeAd, requestNativeAd } from '@/lib/despiaAds';
 
 /**
  * NativeAdSlot — designated inline container for a Despia Native Advanced ad.
- *
- * - Stays INSIDE the app layout (no fullscreen, no interstitial, no rewarded).
- * - Renders an empty <div> with a unique `id` that the Despia native shell
- *   targets when filling the Native Advanced ad.
- * - Hidden for premium users (no ads).
- *
- * Usage:
- *   <NativeAdSlot variant="inline" />
+ * Fixed 250px tall, light-grey background, with a tiny centered "Loading Ad..."
+ * label and shimmer until the native ad is injected. Despia's "Downloading
+ * file" system toast is suppressed via bridge flags in despiaAds.ts.
  */
 
-const HEIGHT_BY_VARIANT = {
-  banner: 80,
-  inline: 120,
-  compact: 60,
-} as const;
-
-type Variant = keyof typeof HEIGHT_BY_VARIANT;
+const AD_HEIGHT = 250;
 
 interface NativeAdSlotProps {
-  variant?: Variant;
+  variant?: 'banner' | 'inline' | 'compact';
   className?: string;
   slotId?: string;
 }
@@ -38,17 +27,14 @@ export default function NativeAdSlot({
   const { showAds } = usePremium();
   const reactId = useId().replace(/:/g, '');
   const id = slotId || `nativead-${variant}-${reactId}`;
-  // The Despia native shell uses this DOM id as the target container.
   const containerId = `despia-native-${id}`;
   const { refreshKey, onAdLoaded } = useAdRefresh(id);
   const slotRef = useRef<HTMLDivElement | null>(null);
   const [isVisible, setIsVisible] = useState(false);
 
-  // Only request the ad when the slot scrolls into view (saves impressions).
   useEffect(() => {
     const slot = slotRef.current;
     if (!slot) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => setIsVisible(entry.isIntersecting && entry.intersectionRatio > 0),
       { rootMargin: '96px', threshold: 0.01 },
@@ -59,18 +45,12 @@ export default function NativeAdSlot({
 
   useEffect(() => {
     if (!showAds || !isVisible) return;
-    requestNativeAd({
-      containerId,
-      placement: variant,
-      height: HEIGHT_BY_VARIANT[variant],
-    });
+    requestNativeAd({ containerId, placement: variant, height: AD_HEIGHT });
     onAdLoaded();
     return () => hideNativeAd(containerId);
   }, [showAds, isVisible, variant, refreshKey, containerId, onAdLoaded]);
 
   if (!showAds) return null;
-
-  const height = HEIGHT_BY_VARIANT[variant];
 
   return (
     <div
@@ -81,11 +61,15 @@ export default function NativeAdSlot({
       data-ad-format="native_advanced"
       data-ad-placement={variant}
       className={cn(
-        'w-full overflow-hidden rounded-lg bg-muted/20 transition-none',
+        'ad-shimmer w-full overflow-hidden rounded-lg flex items-center justify-center',
         className,
       )}
-      style={{ height, maxHeight: height }}
+      style={{ height: AD_HEIGHT, maxHeight: AD_HEIGHT }}
       aria-label="Sponsored"
-    />
+    >
+      <span className="ad-loading-label text-[10px] text-muted-foreground/70 tracking-wide">
+        Loading Ad…
+      </span>
+    </div>
   );
 }

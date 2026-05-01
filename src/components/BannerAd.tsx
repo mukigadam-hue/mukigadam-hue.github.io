@@ -3,6 +3,8 @@ import { useAdRefresh } from '@/hooks/useAdRefresh';
 import { hideNativeAd, requestNativeAd } from '@/lib/despiaAds';
 import '@/types/despia.d.ts';
 
+const AD_HEIGHT = 250;
+
 interface BannerAdProps {
   position?: 'top' | 'bottom';
   className?: string;
@@ -16,7 +18,7 @@ export default function BannerAd({ position = 'bottom', className, slotId }: Ban
   const { refreshKey, onAdLoaded } = useAdRefresh(id);
 
   useEffect(() => {
-    requestNativeAd({ containerId, placement: position, height: 50 });
+    requestNativeAd({ containerId, placement: position, height: AD_HEIGHT });
     onAdLoaded();
     return () => hideNativeAd(containerId);
   }, [position, refreshKey, containerId, onAdLoaded]);
@@ -26,9 +28,13 @@ export default function BannerAd({ position = 'bottom', className, slotId }: Ban
       id={containerId}
       data-despia-native-ad="true"
       data-ad-placement={position}
-      className={`w-full flex items-center justify-center transition-none ${className ?? ''}`}
-      style={{ minHeight: 50 }}
-      aria-hidden="true"
-    />
+      className={`ad-shimmer w-full flex items-center justify-center overflow-hidden rounded-lg ${className ?? ''}`}
+      style={{ height: AD_HEIGHT, maxHeight: AD_HEIGHT }}
+      aria-label="Sponsored"
+    >
+      <span className="ad-loading-label text-[10px] text-muted-foreground/70 tracking-wide">
+        Loading Ad…
+      </span>
+    </div>
   );
 }

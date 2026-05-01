@@ -7,16 +7,17 @@ import '@/types/despia.d.ts';
 export const NATIVE_AD_UNIT_HOME = 'ca-app-pub-9605564713228252/3146574176';
 export const NATIVE_AD_UNIT_GENERAL = 'ca-app-pub-9605564713228252/4713172172';
 
+const AD_HEIGHT = 250;
+
 interface NativeAdProps {
-  /** Which native ad unit to load. Defaults to general. */
   placement?: 'home' | 'general';
   className?: string;
   slotId?: string;
 }
 
 /**
- * Empty native-ad placeholder. Despia renders the native ad over this element;
- * the web app never loads Google ad URLs inside the WebView.
+ * Empty native-ad placeholder. Despia renders the native ad over this element
+ * (silently — system download notifications are suppressed via bridge flags).
  */
 export default function NativeAd({ placement = 'general', className, slotId }: NativeAdProps) {
   const reactId = useId().replace(/:/g, '');
@@ -25,7 +26,7 @@ export default function NativeAd({ placement = 'general', className, slotId }: N
   const { refreshKey, onAdLoaded } = useAdRefresh(id);
 
   useEffect(() => {
-    requestNativeAd({ containerId, placement, height: 100 });
+    requestNativeAd({ containerId, placement, height: AD_HEIGHT });
     onAdLoaded();
     return () => hideNativeAd(containerId);
   }, [placement, containerId, refreshKey, onAdLoaded]);
@@ -35,9 +36,13 @@ export default function NativeAd({ placement = 'general', className, slotId }: N
       id={containerId}
       data-despia-native-ad="true"
       data-ad-placement={placement}
-      className={`w-full flex items-center justify-center transition-none ${className ?? ''}`}
-      style={{ minHeight: 100 }}
-      aria-hidden="true"
-    />
+      className={`ad-shimmer w-full flex items-center justify-center overflow-hidden rounded-lg ${className ?? ''}`}
+      style={{ height: AD_HEIGHT, maxHeight: AD_HEIGHT }}
+      aria-label="Sponsored"
+    >
+      <span className="ad-loading-label text-[10px] text-muted-foreground/70 tracking-wide">
+        Loading Ad…
+      </span>
+    </div>
   );
 }
