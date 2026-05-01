@@ -1259,5 +1259,31 @@
     "duration": "Muda",
     "startDate": "Tarehe ya Kuanza",
     "endDate": "Tarehe ya Kumaliza"
+  },
+  "invoice": {
+    "invoice": "Ankara",
+    "receipt": "Risiti",
+    "balance": "Salio",
+    "total": "Jumla",
+    "paid": "Imelipwa",
+    "recordPayment": "Rekodi Malipo",
+    "amount": "Kiasi",
+    "method": "Njia",
+    "recordedBy": "Imerekodiwa na",
+    "recordedByPh": "Jina lako",
+    "notes": "Maelezo",
+    "save": "Hifadhi",
+    "saving": "Inahifadhi…",
+    "cancel": "Ghairi",
+    "invalidAmount": "Kiasi batili",
+    "exceedsBalance": "Kiasi kinazidi salio",
+    "paymentRecorded": "Malipo yamerekodiwa",
+    "methods": {
+      "cash": "Pesa Taslimu",
+      "mobileMoney": "Pesa za Simu",
+      "bank": "Benki",
+      "card": "Kadi",
+      "other": "Nyingine"
+    }
   }
 }

@@ -1192,5 +1192,31 @@
     "duration": "Duración",
     "startDate": "Fecha de inicio",
     "endDate": "Fecha de fin"
+  },
+  "invoice": {
+    "invoice": "Factura",
+    "receipt": "Recibo",
+    "balance": "Saldo",
+    "total": "Total",
+    "paid": "Pagado",
+    "recordPayment": "Registrar pago",
+    "amount": "Monto",
+    "method": "Método",
+    "recordedBy": "Registrado por",
+    "recordedByPh": "Tu nombre",
+    "notes": "Notas",
+    "save": "Guardar pago",
+    "saving": "Guardando…",
+    "cancel": "Cancelar",
+    "invalidAmount": "Ingrese un monto válido",
+    "exceedsBalance": "El monto excede el saldo",
+    "paymentRecorded": "Pago registrado",
+    "methods": {
+      "cash": "Efectivo",
+      "mobileMoney": "Dinero móvil",
+      "bank": "Banco",
+      "card": "Tarjeta",
+      "other": "Otro"
+    }
   }
 }

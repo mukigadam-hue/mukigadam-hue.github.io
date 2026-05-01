@@ -1234,5 +1234,31 @@
     "duration": "Durée",
     "startDate": "Date de début",
     "endDate": "Date de fin"
+  },
+  "invoice": {
+    "invoice": "Facture",
+    "receipt": "Reçu",
+    "balance": "Solde",
+    "total": "Total",
+    "paid": "Payé",
+    "recordPayment": "Enregistrer le paiement",
+    "amount": "Montant",
+    "method": "Méthode",
+    "recordedBy": "Enregistré par",
+    "recordedByPh": "Votre nom",
+    "notes": "Notes",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "invalidAmount": "Montant invalide",
+    "exceedsBalance": "Le montant dépasse le solde",
+    "paymentRecorded": "Paiement enregistré",
+    "methods": {
+      "cash": "Espèces",
+      "mobileMoney": "Argent mobile",
+      "bank": "Banque",
+      "card": "Carte",
+      "other": "Autre"
+    }
   }
 }

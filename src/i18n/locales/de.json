@@ -1192,5 +1192,31 @@
     "duration": "Dauer",
     "startDate": "Startdatum",
     "endDate": "Enddatum"
+  },
+  "invoice": {
+    "invoice": "Rechnung",
+    "receipt": "Quittung",
+    "balance": "Saldo",
+    "total": "Gesamt",
+    "paid": "Bezahlt",
+    "recordPayment": "Zahlung erfassen",
+    "amount": "Betrag",
+    "method": "Methode",
+    "recordedBy": "Erfasst von",
+    "recordedByPh": "Ihr Name",
+    "notes": "Notizen",
+    "save": "Speichern",
+    "saving": "Speichern…",
+    "cancel": "Abbrechen",
+    "invalidAmount": "Ungültiger Betrag",
+    "exceedsBalance": "Betrag übersteigt Saldo",
+    "paymentRecorded": "Zahlung erfasst",
+    "methods": {
+      "cash": "Bargeld",
+      "mobileMoney": "Mobiles Geld",
+      "bank": "Bank",
+      "card": "Karte",
+      "other": "Andere"
+    }
   }
 }

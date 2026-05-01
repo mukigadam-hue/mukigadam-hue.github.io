@@ -1192,5 +1192,31 @@
     "duration": "기간",
     "startDate": "시작일",
     "endDate": "종료일"
+  },
+  "invoice": {
+    "invoice": "청구서",
+    "receipt": "영수증",
+    "balance": "잔액",
+    "total": "합계",
+    "paid": "지불됨",
+    "recordPayment": "결제 기록",
+    "amount": "금액",
+    "method": "방법",
+    "recordedBy": "기록자",
+    "recordedByPh": "이름",
+    "notes": "메모",
+    "save": "저장",
+    "saving": "저장 중…",
+    "cancel": "취소",
+    "invalidAmount": "잘못된 금액",
+    "exceedsBalance": "잔액 초과",
+    "paymentRecorded": "결제가 기록됨",
+    "methods": {
+      "cash": "현금",
+      "mobileMoney": "모바일머니",
+      "bank": "은행",
+      "card": "카드",
+      "other": "기타"
+    }
   }
 }

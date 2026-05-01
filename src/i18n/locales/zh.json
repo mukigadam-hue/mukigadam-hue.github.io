@@ -1192,5 +1192,31 @@
     "duration": "持续时间",
     "startDate": "开始日期",
     "endDate": "结束日期"
+  },
+  "invoice": {
+    "invoice": "发票",
+    "receipt": "收据",
+    "balance": "余额",
+    "total": "总计",
+    "paid": "已付",
+    "recordPayment": "记录付款",
+    "amount": "金额",
+    "method": "方式",
+    "recordedBy": "记录人",
+    "recordedByPh": "您的姓名",
+    "notes": "备注",
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "取消",
+    "invalidAmount": "金额无效",
+    "exceedsBalance": "金额超过余额",
+    "paymentRecorded": "付款已记录",
+    "methods": {
+      "cash": "现金",
+      "mobileMoney": "移动支付",
+      "bank": "银行",
+      "card": "银行卡",
+      "other": "其他"
+    }
   }
 }

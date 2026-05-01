@@ -1192,5 +1192,31 @@
     "duration": "المدة",
     "startDate": "تاريخ البدء",
     "endDate": "تاريخ الانتهاء"
+  },
+  "invoice": {
+    "invoice": "فاتورة",
+    "receipt": "إيصال",
+    "balance": "الرصيد",
+    "total": "الإجمالي",
+    "paid": "مدفوع",
+    "recordPayment": "تسجيل دفعة",
+    "amount": "المبلغ",
+    "method": "الطريقة",
+    "recordedBy": "سجل بواسطة",
+    "recordedByPh": "اسمك",
+    "notes": "ملاحظات",
+    "save": "حفظ",
+    "saving": "جارٍ الحفظ…",
+    "cancel": "إلغاء",
+    "invalidAmount": "مبلغ غير صالح",
+    "exceedsBalance": "المبلغ يتجاوز الرصيد",
+    "paymentRecorded": "تم تسجيل الدفعة",
+    "methods": {
+      "cash": "نقدًا",
+      "mobileMoney": "محفظة جوال",
+      "bank": "بنك",
+      "card": "بطاقة",
+      "other": "أخرى"
+    }
   }
 }
