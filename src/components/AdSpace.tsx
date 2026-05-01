@@ -5,16 +5,13 @@ import { useAdRefresh } from '@/hooks/useAdRefresh';
 import { hideNativeAd, requestNativeAd } from '@/lib/despiaAds';
 
 /**
- * Empty native-ad placeholder for Despia.
- * The app must never load Google ad scripts, iframes, or DoubleClick URLs in
- * the WebView. Despia injects the native ad over this box.
+ * Empty native-ad placeholder for Despia. Fixed 250px tall light-grey
+ * shimmer with a centered tiny "Loading Ad..." label. Despia injects the
+ * native ad over this box; the system "Downloading file" toast is suppressed
+ * via bridge flags in despiaAds.ts.
  */
 
-const HEIGHT_BY_VARIANT: Record<NonNullable<AdSpaceProps['variant']>, number> = {
-  banner: 80,
-  inline: 100,
-  compact: 60,
-};
+const AD_HEIGHT = 250;
 
 interface AdSpaceProps {
   variant?: 'banner' | 'inline' | 'compact';
@@ -45,14 +42,12 @@ export default function AdSpace({ variant = 'banner', className, slotId }: AdSpa
 
   useEffect(() => {
     if (!showAds || !isVisible) return;
-    requestNativeAd({ containerId, placement: variant, height: HEIGHT_BY_VARIANT[variant] });
+    requestNativeAd({ containerId, placement: variant, height: AD_HEIGHT });
     onAdLoaded();
     return () => hideNativeAd(containerId);
   }, [showAds, isVisible, variant, refreshKey, containerId, onAdLoaded]);
 
   if (!showAds) return null;
-
-  const height = HEIGHT_BY_VARIANT[variant];
 
   return (
     <div
@@ -62,12 +57,16 @@ export default function AdSpace({ variant = 'banner', className, slotId }: AdSpa
       data-despia-native-ad="true"
       data-ad-placement={variant}
       className={cn(
-        'w-full overflow-hidden rounded-lg bg-muted/20 transition-none',
+        'ad-shimmer w-full overflow-hidden rounded-lg flex items-center justify-center',
         className,
       )}
-      style={{ height, maxHeight: height }}
-      aria-hidden="true"
-    />
+      style={{ height: AD_HEIGHT, maxHeight: AD_HEIGHT }}
+      aria-label="Sponsored"
+    >
+      <span className="ad-loading-label text-[10px] text-muted-foreground/70 tracking-wide">
+        Loading Ad…
+      </span>
+    </div>
   );
 }
 

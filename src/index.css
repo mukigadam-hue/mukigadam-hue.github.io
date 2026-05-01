@@ -183,6 +183,30 @@
   background: linear-gradient(145deg, hsl(217 72% 12%) 0%, hsl(217 72% 18%) 35%, hsl(210 60% 25%) 65%, hsl(42 80% 45%) 100%);
 }
 
+/* Native ad shimmer placeholder (silent loading state) */
+@keyframes ad-shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.ad-shimmer {
+  background-color: hsl(0 0% 92%);
+  background-image: linear-gradient(
+    90deg,
+    hsl(0 0% 92%) 0%,
+    hsl(0 0% 96%) 50%,
+    hsl(0 0% 92%) 100%
+  );
+  background-size: 800px 100%;
+  background-repeat: no-repeat;
+  animation: ad-shimmer 1.6s linear infinite;
+}
+/* Despia injects native ad children — hide the shimmer label once filled */
+[data-despia-native-ad="true"]:not(:empty) .ad-loading-label,
+[data-despia-native-ad="true"]:not(:empty) {
+  animation: none;
+  background: transparent;
+}
+
 /* Hide html5-qrcode default UI elements for custom overlay */
 #barcode-reader img[alt="Info icon"],
 #barcode-reader > div:last-child {
