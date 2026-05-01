@@ -356,7 +356,7 @@ export default function FactorySales() {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-medium">👤 {s.customer_name}</span>
                       <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${s.payment_status === 'paid' ? 'bg-success/10 text-success' : s.payment_status === 'partial' ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive'}`}>
-                        {s.payment_status === 'paid' ? '✅ Paid' : s.payment_status === 'partial' ? `⚠️ Partial (${fmt(Number(s.amount_paid))})` : '❌ Unpaid'}
+                        {s.payment_status === 'paid' ? `✅ ${t('invoice.receipt')}` : `📄 ${t('invoice.invoice')} · ${t('invoice.balance')}: ${fmt(Number(s.balance))}${s.payment_status === 'partial' ? ` (${t('invoice.paid')} ${fmt(Number(s.amount_paid))})` : ''}`}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
