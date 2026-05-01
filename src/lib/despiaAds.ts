@@ -105,6 +105,12 @@ export function requestNativeAd(options: {
     admobAppId: ADMOB_APP_ID,
     startioAppId: START_IO_APP_ID,
     appAdsTxt: `${APP_ADS_DOMAIN}/app-ads.txt`,
+    // Suppress Despia's "Downloading file" toast and any system progress UI.
+    silent: 'true',
+    showToast: 'false',
+    showProgress: 'false',
+    showDownloadNotification: 'false',
+    background: 'true',
   });
 
   try {
