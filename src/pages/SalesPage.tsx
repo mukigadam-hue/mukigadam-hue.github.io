@@ -253,7 +253,7 @@ export default function SalesPage() {
               {sale.customer_name && <span className="text-sm font-medium">👤 {sale.customer_name}</span>}
               {sale.from_order_code && <span className="text-xs bg-accent/10 text-accent px-1.5 py-0.5 rounded-full">From Order {sale.from_order_code}</span>}
               <span className={`text-xs px-1.5 py-0.5 rounded-full font-semibold ${isPaid ? 'bg-success/10 text-success' : isPartial ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive'}`}>
-                {isPaid ? '✅ Paid' : isPartial ? `⚠️ Partial (${fmt(Number(sale.amount_paid))})` : '❌ Unpaid'}
+                {isPaid ? `✅ ${t('invoice.receipt')}` : `📄 ${t('invoice.invoice')} · ${t('invoice.balance')}: ${fmt(Number(sale.balance))}${isPartial ? ` (${t('invoice.paid')} ${fmt(Number(sale.amount_paid))})` : ''}`}
               </span>
             </div>
             {sale.recorded_by && <p className="text-xs text-muted-foreground">Seller: {sale.recorded_by}</p>}
