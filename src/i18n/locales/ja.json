@@ -1192,5 +1192,31 @@
     "duration": "期間",
     "startDate": "開始日",
     "endDate": "終了日"
+  },
+  "invoice": {
+    "invoice": "請求書",
+    "receipt": "領収書",
+    "balance": "残高",
+    "total": "合計",
+    "paid": "支払済",
+    "recordPayment": "支払い記録",
+    "amount": "金額",
+    "method": "方法",
+    "recordedBy": "記録者",
+    "recordedByPh": "お名前",
+    "notes": "メモ",
+    "save": "保存",
+    "saving": "保存中…",
+    "cancel": "キャンセル",
+    "invalidAmount": "無効な金額",
+    "exceedsBalance": "残高を超えています",
+    "paymentRecorded": "支払いを記録しました",
+    "methods": {
+      "cash": "現金",
+      "mobileMoney": "モバイルマネー",
+      "bank": "銀行",
+      "card": "カード",
+      "other": "その他"
+    }
   }
 }

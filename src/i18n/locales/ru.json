@@ -1192,5 +1192,31 @@
     "duration": "Длительность",
     "startDate": "Дата начала",
     "endDate": "Дата окончания"
+  },
+  "invoice": {
+    "invoice": "Счёт",
+    "receipt": "Чек",
+    "balance": "Остаток",
+    "total": "Итого",
+    "paid": "Оплачено",
+    "recordPayment": "Записать платёж",
+    "amount": "Сумма",
+    "method": "Способ",
+    "recordedBy": "Записал",
+    "recordedByPh": "Ваше имя",
+    "notes": "Заметки",
+    "save": "Сохранить",
+    "saving": "Сохранение…",
+    "cancel": "Отмена",
+    "invalidAmount": "Неверная сумма",
+    "exceedsBalance": "Сумма превышает остаток",
+    "paymentRecorded": "Платёж записан",
+    "methods": {
+      "cash": "Наличные",
+      "mobileMoney": "Мобильные деньги",
+      "bank": "Банк",
+      "card": "Карта",
+      "other": "Другое"
+    }
   }
 }

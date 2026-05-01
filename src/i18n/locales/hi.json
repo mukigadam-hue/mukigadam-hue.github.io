@@ -1192,5 +1192,31 @@
     "duration": "अवधि",
     "startDate": "प्रारंभ तिथि",
     "endDate": "समाप्ति तिथि"
+  },
+  "invoice": {
+    "invoice": "चालान",
+    "receipt": "रसीद",
+    "balance": "शेष",
+    "total": "कुल",
+    "paid": "भुगतान",
+    "recordPayment": "भुगतान दर्ज करें",
+    "amount": "राशि",
+    "method": "तरीका",
+    "recordedBy": "दर्ज किया",
+    "recordedByPh": "आपका नाम",
+    "notes": "टिप्पणियाँ",
+    "save": "सहेजें",
+    "saving": "सहेजा जा रहा…",
+    "cancel": "रद्द",
+    "invalidAmount": "अमान्य राशि",
+    "exceedsBalance": "राशि शेष से अधिक है",
+    "paymentRecorded": "भुगतान दर्ज",
+    "methods": {
+      "cash": "नकद",
+      "mobileMoney": "मोबाइल मनी",
+      "bank": "बैंक",
+      "card": "कार्ड",
+      "other": "अन्य"
+    }
   }
 }

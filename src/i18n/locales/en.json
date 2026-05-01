@@ -1266,5 +1266,31 @@
     "duration": "Duration",
     "startDate": "Start Date",
     "endDate": "End Date"
+  },
+  "invoice": {
+    "invoice": "Invoice",
+    "receipt": "Receipt",
+    "balance": "Balance",
+    "total": "Total",
+    "paid": "Paid",
+    "recordPayment": "Record Payment",
+    "amount": "Amount",
+    "method": "Method",
+    "recordedBy": "Recorded by",
+    "recordedByPh": "Your name",
+    "notes": "Notes",
+    "save": "Save Payment",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "invalidAmount": "Enter a valid amount",
+    "exceedsBalance": "Amount exceeds balance",
+    "paymentRecorded": "Payment recorded",
+    "methods": {
+      "cash": "Cash",
+      "mobileMoney": "Mobile Money",
+      "bank": "Bank",
+      "card": "Card",
+      "other": "Other"
+    }
   }
 }

@@ -1069,8 +1069,11 @@ export default function PropertyBookings() {
               <span>💰 Paid: <span className="text-success font-medium">{fmt(Number(booking.amount_paid))}</span></span>
               {outstanding > 0 && <span>Balance: <span className="text-warning font-medium">{fmt(outstanding)}</span></span>}
             </div>
-            <p>📋 Payment: <span className={booking.payment_status === 'paid' ? 'text-success' : 'text-amber-600'}>{booking.payment_status}</span>
-              {(booking as any).payment_method && ` · ${payMethodLabel((booking as any).payment_method)}`}
+            <p>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold ${booking.payment_status === 'paid' ? 'bg-success/10 text-success' : booking.payment_status === 'partial' ? 'bg-warning/10 text-warning' : 'bg-destructive/10 text-destructive'}`}>
+                {booking.payment_status === 'paid' ? `✅ ${t('invoice.receipt')}` : `📄 ${t('invoice.invoice')} · ${t('invoice.balance')}: ${fmt(outstanding)}`}
+              </span>
+              {(booking as any).payment_method && <span className="ml-1 text-[10px] text-muted-foreground">· {payMethodLabel((booking as any).payment_method)}</span>}
             </p>
             {(booking as any).proof_url && (
               <a href={(booking as any).proof_url} target="_blank" rel="noopener noreferrer" className="text-primary underline text-[10px]">📎 View Payment Proof</a>

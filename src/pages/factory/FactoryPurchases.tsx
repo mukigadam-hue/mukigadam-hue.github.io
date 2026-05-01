@@ -310,7 +310,12 @@ export default function FactoryPurchases() {
                   </div>
                   {p.payment_status && p.payment_status !== 'paid' && (
                     <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold bg-destructive/10 text-destructive">
-                      {p.payment_status === 'partial' ? `⚠️ Partial — Balance: ${fmt(Number(p.balance))}` : '❌ Unpaid'}
+                      📄 {t('invoice.invoice')} · {t('invoice.balance')}: {fmt(Number(p.balance))}{p.payment_status === 'partial' ? ` (${t('invoice.paid')} ${fmt(Number(p.amount_paid))})` : ''}
+                    </span>
+                  )}
+                  {p.payment_status === 'paid' && (
+                    <span className="text-xs px-1.5 py-0.5 rounded-full font-semibold bg-success/10 text-success">
+                      ✅ {t('invoice.receipt')}
                     </span>
                   )}
                   <p className="text-xs text-muted-foreground">{new Date(p.created_at).toLocaleString()}</p>
