@@ -1041,6 +1041,45 @@ export type Database = {
           },
         ]
       }
+      invoice_payments: {
+        Row: {
+          amount: number
+          business_id: string
+          created_at: string
+          id: string
+          notes: string
+          payment_method: string
+          proof_url: string | null
+          recorded_by: string
+          source_id: string
+          source_type: string
+        }
+        Insert: {
+          amount?: number
+          business_id: string
+          created_at?: string
+          id?: string
+          notes?: string
+          payment_method?: string
+          proof_url?: string | null
+          recorded_by?: string
+          source_id: string
+          source_type: string
+        }
+        Update: {
+          amount?: number
+          business_id?: string
+          created_at?: string
+          id?: string
+          notes?: string
+          payment_method?: string
+          proof_url?: string | null
+          recorded_by?: string
+          source_id?: string
+          source_type?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           business_id: string
@@ -2489,6 +2528,10 @@ export type Database = {
         Returns: {
           masked_email: string
         }[]
+      }
+      recompute_invoice_status: {
+        Args: { _source_id: string; _source_type: string }
+        Returns: undefined
       }
       search_businesses: {
         Args: {
