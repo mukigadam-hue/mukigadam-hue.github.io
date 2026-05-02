@@ -260,8 +260,7 @@ export default function FactoryDashboard() {
       {/* Worker Activity Tracker */}
       <WorkerActivityTracker />
 
-      <AdSpace variant="banner" />
-
+      {/* Single bottom native AdMob banner */}
       <BannerAd position="bottom" />
     </div>
   );
