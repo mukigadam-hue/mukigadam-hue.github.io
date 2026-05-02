@@ -122,15 +122,35 @@ export default function Receipt({ items, grandTotal, buyerName, sellerName, cust
             <Separator />
             <div className="flex justify-between font-bold text-base">
               <span>TOTAL</span>
-              <span className="text-success tabular-nums">{fmt(grandTotal)}</span>
+              <span className="text-foreground tabular-nums">{fmt(grandTotal)}</span>
             </div>
+            {isInvoice && (
+              <div className="space-y-1 bg-warning/5 border border-warning/20 rounded-md p-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Amount Paid:</span>
+                  <span className="font-semibold text-success tabular-nums">{fmt(paid)}</span>
+                </div>
+                <div className="flex justify-between text-base font-bold">
+                  <span className="text-warning">Balance Due:</span>
+                  <span className="text-warning tabular-nums">{fmt(balance)}</span>
+                </div>
+              </div>
+            )}
+            {!isInvoice && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Paid:</span>
+                <span className="font-semibold text-success tabular-nums">{fmt(paid)}</span>
+              </div>
+            )}
             {recordedBy && (
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Recorded by:</span>
                 <span className="font-medium text-foreground">{recordedBy} {recordedByRole && <span className="text-[10px]">({recordedByRole})</span>}</span>
               </div>
             )}
-            <p className="text-center text-xs text-muted-foreground pt-2">Thank you for your business!</p>
+            <p className="text-center text-xs text-muted-foreground pt-2">
+              {isInvoice ? 'Please settle the outstanding balance. Thank you!' : 'Thank you for your business!'}
+            </p>
           </CardContent>
         </Card>
       </div>
