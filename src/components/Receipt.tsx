@@ -29,14 +29,21 @@ interface ReceiptProps {
   counterpartyInfo?: { name: string; contact: string };
   recordedBy?: string;
   recordedByRole?: string;
+  amountPaid?: number;
+  paymentStatus?: string;
 }
 
-export default function Receipt({ items, grandTotal, buyerName, sellerName, customerName, code, date, type, businessInfo, counterpartyInfo, recordedBy, recordedByRole }: ReceiptProps) {
+export default function Receipt({ items, grandTotal, buyerName, sellerName, customerName, code, date, type, businessInfo, counterpartyInfo, recordedBy, recordedByRole, amountPaid, paymentStatus }: ReceiptProps) {
   const { fmt } = useCurrency();
   const { canShareReceipts, canDownloadReceipts, canPrintReceipts } = usePremium();
   const buyer = buyerName || customerName || '';
   const receiptRef = useRef<HTMLDivElement>(null);
-  const fileName = `receipt-${type}-${code || new Date(date).toISOString().slice(0, 10)}`;
+  const paid = Number(amountPaid ?? grandTotal);
+  const balance = Math.max(grandTotal - paid, 0);
+  const status = paymentStatus || (paid <= 0 ? 'unpaid' : paid >= grandTotal ? 'paid' : 'partial');
+  const isInvoice = status !== 'paid';
+  const docLabel = isInvoice ? 'INVOICE' : 'RECEIPT';
+  const fileName = `${isInvoice ? 'invoice' : 'receipt'}-${type}-${code || new Date(date).toISOString().slice(0, 10)}`;
 
   return (
     <div className="space-y-2">
