@@ -2273,6 +2273,8 @@ export default function OrdersPage() {
               code={receiptOrder.code}
               date={receiptOrder.created_at}
               type="order"
+              amountPaid={Number((receiptOrder as any).amount_paid ?? receiptOrder.grand_total)}
+              paymentStatus={(receiptOrder as any).payment_status}
               businessInfo={currentBusiness ? { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email } : undefined}
             />
           )}
