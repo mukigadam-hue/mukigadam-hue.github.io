@@ -403,6 +403,8 @@ export default function FactorySales() {
               buyerName={receiptSale.customer_name}
               sellerName={receiptSale.recorded_by}
               date={receiptSale.created_at} type="sale"
+              amountPaid={Number((receiptSale as any).amount_paid ?? receiptSale.grand_total)}
+              paymentStatus={(receiptSale as any).payment_status}
               businessInfo={currentBusiness ? { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email } : undefined}
             />
           )}

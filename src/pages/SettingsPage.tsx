@@ -1568,6 +1568,8 @@ export default function SettingsPage() {
               code={viewingReceipt.code || undefined}
               date={viewingReceipt.created_at}
               type={viewingReceipt.receipt_type as any}
+              amountPaid={Number((viewingReceipt as any).amount_paid ?? viewingReceipt.grand_total)}
+              paymentStatus={(viewingReceipt as any).payment_status}
               businessInfo={viewingReceipt.business_info as any}
             />
           )}

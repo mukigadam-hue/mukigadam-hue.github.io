@@ -621,6 +621,8 @@ function ReceiptDialog({ booking, asset, businessInfo, open, onClose }: { bookin
           items={[{ itemName: asset?.name || 'Asset Rental', category: asset?.category || 'rental', quantity: 1, unitPrice: Number(booking.total_price), subtotal: Number(booking.total_price) }]}
           grandTotal={Number(booking.total_price)} buyerName={booking.renter_name}
           sellerName={businessInfo?.name || ''} date={booking.created_at} type="sale" businessInfo={businessInfo}
+          amountPaid={Number(booking.amount_paid ?? booking.total_price)}
+          paymentStatus={booking.payment_status}
         />
       </DialogContent>
     </Dialog>

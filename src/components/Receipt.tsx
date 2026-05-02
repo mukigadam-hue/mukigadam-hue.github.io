@@ -29,14 +29,21 @@ interface ReceiptProps {
   counterpartyInfo?: { name: string; contact: string };
   recordedBy?: string;
   recordedByRole?: string;
+  amountPaid?: number;
+  paymentStatus?: string;
 }
 
-export default function Receipt({ items, grandTotal, buyerName, sellerName, customerName, code, date, type, businessInfo, counterpartyInfo, recordedBy, recordedByRole }: ReceiptProps) {
+export default function Receipt({ items, grandTotal, buyerName, sellerName, customerName, code, date, type, businessInfo, counterpartyInfo, recordedBy, recordedByRole, amountPaid, paymentStatus }: ReceiptProps) {
   const { fmt } = useCurrency();
   const { canShareReceipts, canDownloadReceipts, canPrintReceipts } = usePremium();
   const buyer = buyerName || customerName || '';
   const receiptRef = useRef<HTMLDivElement>(null);
-  const fileName = `receipt-${type}-${code || new Date(date).toISOString().slice(0, 10)}`;
+  const paid = Number(amountPaid ?? grandTotal);
+  const balance = Math.max(grandTotal - paid, 0);
+  const status = paymentStatus || (paid <= 0 ? 'unpaid' : paid >= grandTotal ? 'paid' : 'partial');
+  const isInvoice = status !== 'paid';
+  const docLabel = isInvoice ? 'INVOICE' : 'RECEIPT';
+  const fileName = `${isInvoice ? 'invoice' : 'receipt'}-${type}-${code || new Date(date).toISOString().slice(0, 10)}`;
 
   return (
     <div className="space-y-2">
@@ -58,8 +65,13 @@ export default function Receipt({ items, grandTotal, buyerName, sellerName, cust
               </div>
             )}
             <Separator />
+            <div className={`text-center py-1.5 rounded-md font-bold tracking-wider ${isInvoice ? 'bg-warning/15 text-warning border border-warning/30' : 'bg-success/10 text-success border border-success/30'}`}>
+              {isInvoice ? '📄' : '✅'} {docLabel}
+              {isInvoice && status === 'partial' && <span className="ml-1 text-[10px] font-semibold">(PARTIAL)</span>}
+              {isInvoice && status === 'unpaid' && <span className="ml-1 text-[10px] font-semibold">(UNPAID)</span>}
+            </div>
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{type === 'order' ? 'Order' : type === 'service' ? 'Service' : 'Sale'} Receipt</span>
+              <span>{type === 'order' ? 'Order' : type === 'service' ? 'Service' : type === 'purchase' ? 'Purchase' : 'Sale'} {isInvoice ? 'Invoice' : 'Receipt'}</span>
               <span>{new Date(date).toLocaleString()}</span>
             </div>
             {code && <div className="text-xs text-muted-foreground">Ref: <span className="font-semibold text-foreground">{code}</span></div>}
@@ -110,15 +122,35 @@ export default function Receipt({ items, grandTotal, buyerName, sellerName, cust
             <Separator />
             <div className="flex justify-between font-bold text-base">
               <span>TOTAL</span>
-              <span className="text-success tabular-nums">{fmt(grandTotal)}</span>
+              <span className="text-foreground tabular-nums">{fmt(grandTotal)}</span>
             </div>
+            {isInvoice && (
+              <div className="space-y-1 bg-warning/5 border border-warning/20 rounded-md p-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Amount Paid:</span>
+                  <span className="font-semibold text-success tabular-nums">{fmt(paid)}</span>
+                </div>
+                <div className="flex justify-between text-base font-bold">
+                  <span className="text-warning">Balance Due:</span>
+                  <span className="text-warning tabular-nums">{fmt(balance)}</span>
+                </div>
+              </div>
+            )}
+            {!isInvoice && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Paid:</span>
+                <span className="font-semibold text-success tabular-nums">{fmt(paid)}</span>
+              </div>
+            )}
             {recordedBy && (
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Recorded by:</span>
                 <span className="font-medium text-foreground">{recordedBy} {recordedByRole && <span className="text-[10px]">({recordedByRole})</span>}</span>
               </div>
             )}
-            <p className="text-center text-xs text-muted-foreground pt-2">Thank you for your business!</p>
+            <p className="text-center text-xs text-muted-foreground pt-2">
+              {isInvoice ? 'Please settle the outstanding balance. Thank you!' : 'Thank you for your business!'}
+            </p>
           </CardContent>
         </Card>
       </div>
