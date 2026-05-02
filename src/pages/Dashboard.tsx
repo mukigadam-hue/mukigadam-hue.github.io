@@ -148,8 +148,7 @@ export default function Dashboard() {
       </Button>
       <QuickAddItem open={showQuickAdd} onOpenChange={setShowQuickAdd} />
 
-      <AdSpace variant="banner" />
-      {/* Home-screen native AdMob (only renders inside Despia native shell) */}
+      {/* Single home-screen native AdMob slot (renders inside Despia native shell) */}
       <NativeAd placement="home" />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
@@ -413,9 +412,7 @@ export default function Dashboard() {
       {/* Worker Activity Tracker */}
       <WorkerActivityTracker />
 
-      <AdSpace variant="banner" />
-
-      {/* Native AdMob banner — only shows in Despia native shell */}
+      {/* Single bottom native AdMob banner — only shows in Despia native shell */}
       <BannerAd position="bottom" />
     </div>
   );
