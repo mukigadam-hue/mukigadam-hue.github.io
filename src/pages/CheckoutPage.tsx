@@ -412,6 +412,8 @@ export default function CheckoutPage() {
                 sellerName={currentBusiness?.name || ''}
                 date={completedOrder.created_at}
                 type="checkout"
+                amountPaid={Number((completedOrder as any).amount_paid ?? completedOrder.grand_total)}
+                paymentStatus={(completedOrder as any).payment_status}
                 businessInfo={currentBusiness ? { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email } : undefined}
               />
             </div>
