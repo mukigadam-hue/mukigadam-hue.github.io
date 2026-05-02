@@ -747,6 +747,8 @@ export default function SalesPage() {
               code={receiptSale.from_order_code || undefined}
               date={receiptSale.created_at}
               type="sale"
+              amountPaid={Number(receiptSale.amount_paid ?? receiptSale.grand_total)}
+              paymentStatus={receiptSale.payment_status}
               businessInfo={currentBusiness ? { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email } : undefined}
             />
           )}
