@@ -36,8 +36,7 @@ export default function PropertyDashboard() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] text-muted-foreground font-mono">v{APP_VERSION}</span>
+      <div className="flex items-center justify-end">
         <LanguageSelector variant="compact" />
       </div>
 

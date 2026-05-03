@@ -81,8 +81,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Language Selector - compact on dashboard header */}
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] text-muted-foreground font-mono">v{APP_VERSION}</span>
+      <div className="flex items-center justify-end">
         <LanguageSelector variant="compact" />
       </div>
 
