@@ -438,7 +438,6 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
               <Button variant="ghost" size="sm" className="text-sidebar-foreground text-[11px] h-6 px-1.5" onClick={signOut}>
                 <LogOut className="h-3 w-3 mr-1" />{t('nav.signOut')}
               </Button>
-              <span className="text-[9px] text-sidebar-muted">v{APP_VERSION}</span>
             </div>
           </div>
         </aside>
@@ -575,7 +574,6 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
                 <Button variant="ghost" size="sm" className="text-destructive text-[11px] h-6 px-1.5" onClick={signOut}>
                   <LogOut className="h-3 w-3 mr-1" /> {t('nav.signOut')}
                 </Button>
-                <span className="text-[9px] text-muted-foreground">v{APP_VERSION}</span>
               </div>
             </div>
           </SheetContent>
