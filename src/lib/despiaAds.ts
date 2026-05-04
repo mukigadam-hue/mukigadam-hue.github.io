@@ -9,7 +9,7 @@ export const ADMOB_APP_ID = 'ca-app-pub-9605564713228252~8941826330';
 // Native Advanced ad units (300x250 fixed). Re-used as AdSense slot ids.
 export const ADMOB_NATIVE_HOME_SLOT = '3146574176';
 export const ADMOB_NATIVE_GENERAL_SLOT = '4713172172';
-export const APP_ADS_DOMAIN = 'https://mukigadam-hue.github.io';
+export const APP_ADS_DOMAIN = 'https://ndamwesigaapp.store';
 
 export type AdPlacement =
   | 'banner'
@@ -40,6 +40,10 @@ export function adSlotForPlacement(placement: AdPlacement): string {
     : ADMOB_NATIVE_GENERAL_SLOT;
 }
 
+export function isNativeAdPlacement(placement: AdPlacement): boolean {
+  return placement === 'home' || placement === 'inline' || placement === 'general' || placement === 'compact';
+}
+
 /* -------------------------------------------------------------------------- */
 /* Initialization                                                             */
 /* -------------------------------------------------------------------------- */
@@ -60,6 +64,7 @@ export async function initializeNativeAds() {
   adLog(`[AD-INFO] AdMob via WebView API for Ads. App ID: ${ADMOB_APP_ID}`);
   adLog(`[AD-INFO] AdSense client: ${ADSENSE_PUBLISHER_ID}`);
   adLog(`[AD-INFO] app-ads.txt: ${APP_ADS_DOMAIN}/app-ads.txt`);
+  ensureAdsenseScript();
 
   try {
     const device = (await despia('get-uuid://' as any, ['uuid'])) as { uuid?: string };
@@ -84,9 +89,29 @@ export function pushAdsbygoogle() {
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any;
+    ensureAdsenseScript();
     w.adsbygoogle = w.adsbygoogle || [];
     w.adsbygoogle.push({});
   } catch (e) {
     adLog(`[AD-WARN] adsbygoogle push failed: ${(e as Error)?.message ?? e}`);
   }
+}
+
+export function ensureAdsenseScript() {
+  const src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+  const existing = document.querySelector<HTMLScriptElement>('script[data-despia-adsense="true"], script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]');
+
+  if (existing) {
+    existing.setAttribute('data-ad-client', ADSENSE_PUBLISHER_ID);
+    existing.setAttribute('data-despia-adsense', 'true');
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = src;
+  script.setAttribute('data-ad-client', ADSENSE_PUBLISHER_ID);
+  script.setAttribute('data-despia-adsense', 'true');
+  script.crossOrigin = 'anonymous';
+  document.head.appendChild(script);
 }

@@ -7,6 +7,8 @@ import {
   AdPlacement,
   adLog,
   adSlotForPlacement,
+  ensureAdsenseScript,
+  isNativeAdPlacement,
   pushAdsbygoogle,
 } from '@/lib/despiaAds';
 
@@ -38,16 +40,27 @@ export default function AdSenseSlot({
   const id = slotId || `adsense-${placement}-${reactId}`;
   const { refreshKey, onAdLoaded } = useAdRefresh(id);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const insRef = useRef<HTMLModElement | null>(null);
   const dataAdSlot = adSlotForPlacement(placement);
+  const isNative = isNativeAdPlacement(placement);
 
   useEffect(() => {
     if (!showAds) return;
-    // Defer one tick so the <ins> is in the DOM before we push.
-    const t = setTimeout(() => {
-      adLog(`[AD-STATUS] AdSense push for slot=${dataAdSlot} placement=${placement}`);
+    ensureAdsenseScript();
+
+    const requestAd = () => {
+      const slot = insRef.current;
+      if (!slot || slot.offsetWidth <= 0) {
+        setTimeout(requestAd, 250);
+        return;
+      }
+
+      adLog(`[AD-STATUS] AdSense request slot=${dataAdSlot} placement=${placement} width=${slot.offsetWidth}`);
       pushAdsbygoogle();
       onAdLoaded();
-    }, 0);
+    };
+
+    const t = setTimeout(requestAd, 250);
     return () => clearTimeout(t);
   }, [showAds, refreshKey, dataAdSlot, placement, onAdLoaded]);
 
@@ -66,10 +79,14 @@ export default function AdSenseSlot({
       aria-label="Sponsored"
     >
       <ins
+        ref={insRef}
         className="adsbygoogle"
-        style={{ display: 'inline-block', width: AD_WIDTH, height: AD_HEIGHT }}
+        style={{ display: 'block', width: AD_WIDTH, height: AD_HEIGHT }}
         data-ad-client={ADSENSE_PUBLISHER_ID}
         data-ad-slot={dataAdSlot}
+        data-ad-format={isNative ? 'fluid' : 'auto'}
+        data-ad-layout={isNative ? 'in-article' : undefined}
+        data-full-width-responsive={isNative ? undefined : 'true'}
       />
     </div>
   );
