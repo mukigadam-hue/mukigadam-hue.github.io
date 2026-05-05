@@ -193,9 +193,11 @@
     padding-right: max(env(safe-area-inset-right, 0px), 0px);
   }
   .min-h-screen-safe {
+    min-height: calc(100vh - var(--safe-top) - var(--safe-bottom));
     min-height: calc(100svh - var(--safe-top) - var(--safe-bottom));
   }
   .h-screen-safe {
+    height: calc(100vh - var(--safe-top) - var(--safe-bottom));
     height: calc(100svh - var(--safe-top) - var(--safe-bottom));
   }
 }
