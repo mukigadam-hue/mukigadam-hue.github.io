@@ -18,7 +18,8 @@ export default function DailyTipBanner() {
 
   useEffect(() => {
     // Check if already dismissed today
-    const dismissedDate = localStorage.getItem('tip_dismissed_date');
+    let dismissedDate: string | null = null;
+    try { dismissedDate = localStorage.getItem('tip_dismissed_date'); } catch {}
     if (dismissedDate === new Date().toDateString()) {
       setDismissed(true);
       return;
@@ -40,7 +41,7 @@ export default function DailyTipBanner() {
   if (dismissed || !tip) return null;
 
   function dismiss() {
-    localStorage.setItem('tip_dismissed_date', new Date().toDateString());
+    try { localStorage.setItem('tip_dismissed_date', new Date().toDateString()); } catch {}
     setDismissed(true);
   }
 

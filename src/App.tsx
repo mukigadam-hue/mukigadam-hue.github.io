@@ -85,7 +85,7 @@ function AppContent() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen-safe flex items-center justify-center bg-background overflow-y-auto p-4">
         <div className="text-center space-y-3">
           <div className="text-4xl">📦</div>
           <p className="text-muted-foreground">Loading Business Manager...</p>
@@ -133,7 +133,7 @@ function BusinessContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen-safe flex items-center justify-center bg-background overflow-y-auto p-4">
         <div className="text-center space-y-3">
           <div className="text-4xl">📦</div>
           <p className="text-muted-foreground">Loading your business...</p>

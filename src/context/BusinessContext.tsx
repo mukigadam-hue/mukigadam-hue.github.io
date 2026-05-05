@@ -306,7 +306,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       const biz = businesses.find(b => b.id === nextId);
       const resolvedCurrency = resolveCurrencySymbol(nextId, biz?.currency_symbol);
       if (resolvedCurrency) {
-        localStorage.setItem('biztrack_currency_symbol', resolvedCurrency);
+        try { localStorage.setItem('biztrack_currency_symbol', resolvedCurrency); } catch {}
         broadcastCurrency(resolvedCurrency);
       }
     } else {
@@ -335,7 +335,8 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) {
-      const hasSession = Object.keys(localStorage).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token'));
+      let hasSession = false;
+      try { hasSession = Object.keys(localStorage).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token')); } catch {}
       if (!hasSession) {
         setBusinesses([]);
         setMemberships([]);
@@ -415,7 +416,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
           const activeBiz = businessData.find(b => b.id === activeId);
           const resolvedCurrency = resolveCurrencySymbol(activeId, activeBiz?.currency_symbol);
           if (resolvedCurrency) {
-            localStorage.setItem('biztrack_currency_symbol', resolvedCurrency);
+            try { localStorage.setItem('biztrack_currency_symbol', resolvedCurrency); } catch {}
             broadcastCurrency(resolvedCurrency);
           }
         }
@@ -560,7 +561,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
           setBusinesses(prev => prev.map(b => b.id === currentBusinessId ? { ...b, ...payload.new } as Business : b));
           const newCurrency = resolveCurrencySymbol(currentBusinessId, (payload.new as any).currency_symbol);
           if (newCurrency) {
-            localStorage.setItem('biztrack_currency_symbol', newCurrency);
+            try { localStorage.setItem('biztrack_currency_symbol', newCurrency); } catch {}
             broadcastCurrency(newCurrency);
           }
         }

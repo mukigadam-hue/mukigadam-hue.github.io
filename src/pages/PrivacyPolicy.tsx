@@ -6,7 +6,7 @@ export default function PrivacyPolicy() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen-safe bg-background overflow-y-auto">
       <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12 space-y-8">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
@@ -24,7 +24,7 @@ export default function PrivacyPolicy() {
               Welcome to Business Manager ("we," "our," or "us"). We are committed to protecting
               your personal information and your right to privacy. This Privacy Policy explains
               how we collect, use, disclose, and safeguard your information when you use our
-              mobile application and services.
+              mobile application and services at https://ndamwesigaapp.store.
             </p>
           </section>
 
@@ -66,7 +66,7 @@ export default function PrivacyPolicy() {
             </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
               <li><strong className="text-foreground">B2B Features:</strong> Your business name, contact details, and products description are shared with other businesses when you enable discoverability.</li>
-              <li><strong className="text-foreground">Service Providers:</strong> We use trusted third-party services (Supabase for database and authentication, Google AdMob for advertisements) that may process your data.</li>
+              <li><strong className="text-foreground">Service Providers:</strong> We use trusted third-party services for database, authentication, and Google AdMob advertisements that may process your data.</li>
               <li><strong className="text-foreground">Legal Requirements:</strong> We may disclose data if required by law or to protect our legal rights.</li>
             </ul>
           </section>
@@ -134,6 +134,7 @@ export default function PrivacyPolicy() {
               If you have questions about this Privacy Policy, please contact us at:
             </p>
             <p className="text-foreground font-medium">nextworldforbetterquality@gmail.com</p>
+            <p className="text-sm text-muted-foreground">Official website: https://ndamwesigaapp.store</p>
           </section>
         </div>
 

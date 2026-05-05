@@ -1,5 +1,3 @@
-import despia from 'despia-native';
-
 /* -------------------------------------------------------------------------- */
 /* IDs                                                                        */
 /* -------------------------------------------------------------------------- */
@@ -27,10 +25,19 @@ export type AdPlacement =
 export function adLog(message: string) {
   // eslint-disable-next-line no-console
   console.log(message);
+}
+
+function isNativeShell(): boolean {
+  return typeof window !== 'undefined' && window.navigator.userAgent.includes('wv');
+}
+
+async function callDespia<T extends Record<string, unknown>>(command: string, watch: string[]): Promise<T | null> {
+  if (!isNativeShell()) return null;
   try {
-    void despia(`log://?message=${encodeURIComponent(message)}` as any);
+    const mod = await import('despia-native');
+    return (await mod.default(command as any, watch)) as T;
   } catch {
-    /* not in native shell */
+    return null;
   }
 }
 
@@ -64,18 +71,10 @@ export async function initializeNativeAds() {
   adLog(`[AD-INFO] AdMob via WebView API for Ads. App ID: ${ADMOB_APP_ID}`);
   adLog(`[AD-INFO] AdSense client: ${ADSENSE_PUBLISHER_ID}`);
   adLog(`[AD-INFO] app-ads.txt: ${APP_ADS_DOMAIN}/app-ads.txt`);
-  ensureAdsenseScript();
 
-  try {
-    const device = (await despia('get-uuid://' as any, ['uuid'])) as { uuid?: string };
-    if (device?.uuid) {
-      adLog(`[AD-INFO] Despia native bridge connected. Device UUID: ${device.uuid}`);
-    } else {
-      adLog('[AD-INFO] No UUID returned (likely web preview).');
-    }
-  } catch {
-    adLog('[AD-INFO] Despia bridge not available (web preview).');
-  }
+  if (!isNativeShell()) return;
+  const device = await callDespia<{ uuid?: string }>('get-uuid://', ['uuid']);
+  if (device?.uuid) adLog('[AD-INFO] Despia native bridge connected.');
 }
 
 /* -------------------------------------------------------------------------- */

@@ -17,8 +17,10 @@ export default function AnnouncementsBanner() {
   const [dismissedIds, setDismissedIds] = useState<string[]>([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem('dismissed_announcements');
-    if (stored) setDismissedIds(JSON.parse(stored));
+    try {
+      const stored = localStorage.getItem('dismissed_announcements');
+      if (stored) setDismissedIds(JSON.parse(stored));
+    } catch {}
 
     async function load() {
       const { data } = await supabase
@@ -38,7 +40,7 @@ export default function AnnouncementsBanner() {
   function dismiss(id: string) {
     const updated = [...dismissedIds, id];
     setDismissedIds(updated);
-    localStorage.setItem('dismissed_announcements', JSON.stringify(updated));
+    try { localStorage.setItem('dismissed_announcements', JSON.stringify(updated)); } catch {}
   }
 
   const typeStyles: Record<string, string> = {

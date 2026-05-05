@@ -336,11 +336,11 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
 }
 
   return (
-    <div className="flex h-screen overflow-hidden flex-col">
+    <div className="flex h-screen-safe min-h-screen-safe overflow-hidden flex-col">
       <NetworkStatusBanner />
       {currentBusiness && <BusinessRoleBanner userRole={userRole!} businessName={currentBusiness.name} businessType={(currentBusiness as any).business_type || 'business'} />}
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Desktop Sidebar */}
         <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
           <div className="p-5 border-b border-sidebar-border flex items-center justify-between">
@@ -442,7 +442,7 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto pb-20 md:pb-10">
+        <main className="flex-1 min-w-0 min-h-0 overflow-y-auto pb-[calc(5.5rem+env(safe-area-inset-bottom,0px))] md:pb-10">
           {/* Mobile refresh bar */}
           <div className="md:hidden flex items-center justify-between px-3 pt-2 pb-1">
             <span className="text-xs font-semibold text-muted-foreground truncate">{currentBusiness?.name}</span>
@@ -463,7 +463,7 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
       <ProofVideoButton />
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center py-1.5 pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center py-1.5 pb-safe px-safe">
         {mobileMainNav.map(({ to, label, icon: Icon }) => {
           const active = pathname === to;
           return (

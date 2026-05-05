@@ -1,9 +1,24 @@
 import { useEffect, useState } from 'react';
-import despia from 'despia-native';
 import { supabase } from '@/integrations/supabase/client';
 import { adLog } from '@/lib/despiaAds';
 
-const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.despia.biztrack';
+const PLAY_STORE_URL = 'https://google.com';
+
+function isNativeShell(): boolean {
+  return typeof window !== 'undefined' && window.navigator.userAgent.includes('wv');
+}
+
+async function getDeviceVersion(): Promise<string> {
+  if (!isNativeShell()) return '';
+
+  try {
+    const mod = await import('despia-native');
+    const res = (await mod.default('getappversion://' as any, ['versionNumber'])) as { versionNumber?: string };
+    return res?.versionNumber || '';
+  } catch {
+    return '';
+  }
+}
 
 function parseVersion(v: string): number[] {
   return (v || '0').replace(/[^0-9.]/g, '').split('.').map((n) => parseInt(n, 10) || 0);
@@ -32,14 +47,7 @@ export default function UpdateGate() {
     const check = async () => {
       try {
         // 1. Get device version via Despia bridge
-        let device = '';
-        try {
-          const res = (await despia('getappversion://' as any, ['version'])) as { version?: string };
-          device = res?.version || '';
-        } catch {
-          // Web preview / bridge unavailable — skip the gate
-          return;
-        }
+        const device = await getDeviceVersion();
         if (!device) {
           adLog('[UPDATE-GATE] No device version returned (web preview). Skipping.');
           return;
@@ -96,7 +104,7 @@ export default function UpdateGate() {
 
   return (
     <div
-      className="fixed inset-0 z-[2147483647] bg-background/95 backdrop-blur-sm flex items-center justify-center p-6"
+      className="fixed inset-0 z-[2147483647] bg-background/95 backdrop-blur-sm flex items-center justify-center p-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.preventDefault()}
       role="dialog"
