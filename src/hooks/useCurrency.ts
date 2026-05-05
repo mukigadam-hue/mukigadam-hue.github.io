@@ -12,30 +12,34 @@ function getOverrideKey(businessId: string) {
 
 export function getCurrencyOverride(businessId?: string) {
   if (!businessId) return null;
-  return localStorage.getItem(getOverrideKey(businessId));
+  try { return localStorage.getItem(getOverrideKey(businessId)); } catch { return null; }
 }
 
 export function resolveCurrencySymbol(businessId?: string, businessCurrencySymbol?: string) {
-  return getCurrencyOverride(businessId) || businessCurrencySymbol || localStorage.getItem(STORAGE_KEY) || 'KSh';
+  let stored: string | null = null;
+  try { stored = localStorage.getItem(STORAGE_KEY); } catch {}
+  return getCurrencyOverride(businessId) || businessCurrencySymbol || stored || 'KSh';
 }
 
 export function broadcastCurrency(symbol: string) {
   window.dispatchEvent(new CustomEvent(CURRENCY_EVENT, { detail: symbol }));
-  window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY, newValue: symbol }));
+  try { window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEY, newValue: symbol })); } catch {}
 }
 
 export function useCurrency() {
   const [currency, setCurrencyState] = useState<string>(() => {
-    return localStorage.getItem(STORAGE_KEY) || 'KSh';
+    try { return localStorage.getItem(STORAGE_KEY) || 'KSh'; } catch { return 'KSh'; }
   });
 
   function setCurrency(symbol: string, options?: { businessId?: string; persistAsOverride?: boolean }) {
-    localStorage.setItem(STORAGE_KEY, symbol);
-    if (options?.businessId) {
-      const overrideKey = getOverrideKey(options.businessId);
-      if (options.persistAsOverride) localStorage.setItem(overrideKey, symbol);
-      else localStorage.removeItem(overrideKey);
-    }
+    try {
+      localStorage.setItem(STORAGE_KEY, symbol);
+      if (options?.businessId) {
+        const overrideKey = getOverrideKey(options.businessId);
+        if (options.persistAsOverride) localStorage.setItem(overrideKey, symbol);
+        else localStorage.removeItem(overrideKey);
+      }
+    } catch {}
     setCurrencyState(symbol);
     broadcastCurrency(symbol);
   }
@@ -60,7 +64,7 @@ export function useCurrency() {
   function syncFromBusiness(businessCurrencySymbol: string | undefined, businessId?: string) {
     const resolved = resolveCurrencySymbol(businessId, businessCurrencySymbol);
     if (resolved && resolved !== currency) {
-      localStorage.setItem(STORAGE_KEY, resolved);
+      try { localStorage.setItem(STORAGE_KEY, resolved); } catch {}
       setCurrencyState(resolved);
     }
   }
