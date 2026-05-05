@@ -16,13 +16,23 @@ import {
  * AdSenseSlot — renders a real Google AdSense <ins> tag that Despia's
  * WebView API for Ads bridges into AdMob native ad requests.
  *
- * Sizing: Native Advanced ads in AdMob are typically delivered as a 300x250
- * Medium Rectangle when bridged through the WebView. We pin the slot to that
- * exact size so Google never rejects creatives for layout overflow.
+ * Responsive sizing across all Android gadgets (phones, foldables, tablets):
+ *   - Native (inline / home / general / compact): min 300x250, scales up to
+ *     468x300 on tablets while keeping a guaranteed paint area Google can fill.
+ *   - Banner (top / bottom): fluid full width up to a 728px leaderboard with
+ *     a 90px min height so banners render correctly on tablets too.
+ *
+ * `max-width: 100%` ensures we never overflow narrow phones in landscape or
+ * split-screen mode. Min-height guarantees AdSense never sees a 0-height slot
+ * (which is the #1 reason ad requests get silently dropped).
  */
 
-const AD_WIDTH = 300;
-const AD_HEIGHT = 250;
+const NATIVE_MIN_WIDTH = 300;
+const NATIVE_MIN_HEIGHT = 250;
+const NATIVE_MAX_WIDTH = 468;
+const NATIVE_MAX_HEIGHT = 300;
+const BANNER_MIN_HEIGHT = 90;
+const BANNER_MAX_WIDTH = 728;
 
 interface AdSenseSlotProps {
   placement?: AdPlacement;
@@ -74,6 +84,26 @@ export default function AdSenseSlot({
 
   if (!showAds) return null;
 
+  const isBanner = placement === 'top' || placement === 'bottom' || placement === 'banner';
+
+  const containerStyle: React.CSSProperties = isBanner
+    ? {
+        width: '100%',
+        maxWidth: BANNER_MAX_WIDTH,
+        minHeight: BANNER_MIN_HEIGHT,
+      }
+    : {
+        width: '100%',
+        minWidth: NATIVE_MIN_WIDTH,
+        maxWidth: NATIVE_MAX_WIDTH,
+        minHeight: NATIVE_MIN_HEIGHT,
+        maxHeight: NATIVE_MAX_HEIGHT,
+      };
+
+  const insStyle: React.CSSProperties = isBanner
+    ? { display: 'block', width: '100%', minHeight: BANNER_MIN_HEIGHT }
+    : { display: 'block', width: '100%', minHeight: NATIVE_MIN_HEIGHT };
+
   return (
     <div
       ref={containerRef}
@@ -83,18 +113,18 @@ export default function AdSenseSlot({
         'ad-shimmer w-full overflow-hidden rounded-lg flex items-center justify-center mx-auto',
         className,
       )}
-      style={{ maxWidth: AD_WIDTH, height: AD_HEIGHT, maxHeight: AD_HEIGHT }}
+      style={containerStyle}
       aria-label="Sponsored"
     >
       <ins
         ref={insRef}
         className="adsbygoogle"
-        style={{ display: 'block', width: AD_WIDTH, height: AD_HEIGHT }}
+        style={insStyle}
         data-ad-client={ADSENSE_PUBLISHER_ID}
         data-ad-slot={dataAdSlot}
         data-ad-format={isNative ? 'fluid' : 'auto'}
         data-ad-layout={isNative ? 'in-article' : undefined}
-        data-full-width-responsive={isNative ? undefined : 'true'}
+        data-full-width-responsive="true"
       />
     </div>
   );
