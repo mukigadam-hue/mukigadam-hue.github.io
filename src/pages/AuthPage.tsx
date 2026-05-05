@@ -137,7 +137,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start p-4 sm:p-6 overflow-y-auto" style={{ background: 'linear-gradient(145deg, hsl(217 72% 12%) 0%, hsl(217 72% 18%) 35%, hsl(210 60% 25%) 65%, hsl(42 80% 45%) 100%)' }}>
+    <div className="min-h-screen-safe flex flex-col items-center justify-start p-4 sm:p-6 overflow-y-auto" style={{ background: 'linear-gradient(145deg, hsl(217 72% 12%) 0%, hsl(217 72% 18%) 35%, hsl(210 60% 25%) 65%, hsl(42 80% 45%) 100%)' }}>
       {/* Hero Section */}
       <div className="w-full max-w-md sm:max-w-xl text-center pt-8 sm:pt-14 pb-6 sm:pb-10 px-2">
         <h1 className="text-3xl sm:text-5xl font-extrabold drop-shadow-lg leading-tight mb-3 sm:mb-5" style={{ color: 'hsl(210, 40%, 98%)' }}>
