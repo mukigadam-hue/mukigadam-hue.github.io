@@ -128,7 +128,7 @@ export default function BusinessSetupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen-safe flex items-center justify-center bg-background p-4 overflow-y-auto">
       <Card className="w-full max-w-md shadow-card">
         <CardContent className="p-6 space-y-6">
           <div className="text-center space-y-2">
