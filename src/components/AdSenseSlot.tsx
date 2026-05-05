@@ -84,6 +84,26 @@ export default function AdSenseSlot({
 
   if (!showAds) return null;
 
+  const isBanner = placement === 'top' || placement === 'bottom' || placement === 'banner';
+
+  const containerStyle: React.CSSProperties = isBanner
+    ? {
+        width: '100%',
+        maxWidth: BANNER_MAX_WIDTH,
+        minHeight: BANNER_MIN_HEIGHT,
+      }
+    : {
+        width: '100%',
+        minWidth: NATIVE_MIN_WIDTH,
+        maxWidth: NATIVE_MAX_WIDTH,
+        minHeight: NATIVE_MIN_HEIGHT,
+        maxHeight: NATIVE_MAX_HEIGHT,
+      };
+
+  const insStyle: React.CSSProperties = isBanner
+    ? { display: 'block', width: '100%', minHeight: BANNER_MIN_HEIGHT }
+    : { display: 'block', width: '100%', minHeight: NATIVE_MIN_HEIGHT };
+
   return (
     <div
       ref={containerRef}
@@ -93,18 +113,18 @@ export default function AdSenseSlot({
         'ad-shimmer w-full overflow-hidden rounded-lg flex items-center justify-center mx-auto',
         className,
       )}
-      style={{ maxWidth: AD_WIDTH, height: AD_HEIGHT, maxHeight: AD_HEIGHT }}
+      style={containerStyle}
       aria-label="Sponsored"
     >
       <ins
         ref={insRef}
         className="adsbygoogle"
-        style={{ display: 'block', width: AD_WIDTH, height: AD_HEIGHT }}
+        style={insStyle}
         data-ad-client={ADSENSE_PUBLISHER_ID}
         data-ad-slot={dataAdSlot}
         data-ad-format={isNative ? 'fluid' : 'auto'}
         data-ad-layout={isNative ? 'in-article' : undefined}
-        data-full-width-responsive={isNative ? undefined : 'true'}
+        data-full-width-responsive="true"
       />
     </div>
   );
