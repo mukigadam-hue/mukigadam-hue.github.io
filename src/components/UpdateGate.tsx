@@ -104,7 +104,7 @@ export default function UpdateGate() {
 
   return (
     <div
-      className="fixed inset-0 z-[2147483647] bg-background/95 backdrop-blur-sm flex items-center justify-center p-6"
+      className="fixed inset-0 z-[2147483647] bg-background/95 backdrop-blur-sm flex items-center justify-center p-6 pt-[calc(1.5rem+env(safe-area-inset-top,0px))] pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))]"
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.preventDefault()}
       role="dialog"
