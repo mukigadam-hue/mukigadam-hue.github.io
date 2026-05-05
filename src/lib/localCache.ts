@@ -46,12 +46,16 @@ function parseStoredSession(raw: string | null): Session | null {
 export function getStoredSession(): Session | null {
   if (typeof window === 'undefined') return null;
 
-  const candidateKeys = [
-    PRIMARY_AUTH_STORAGE_KEY,
-    ...Object.keys(window.localStorage).filter(
+  let keys: string[] = [];
+  try {
+    keys = Object.keys(window.localStorage).filter(
       (key) => key.startsWith('sb-') && key.endsWith(AUTH_TOKEN_SUFFIX),
-    ),
-  ];
+    );
+  } catch {
+    return null;
+  }
+
+  const candidateKeys = [PRIMARY_AUTH_STORAGE_KEY, ...keys];
 
   for (const key of candidateKeys) {
     const session = parseStoredSession(window.localStorage.getItem(key));
