@@ -48,10 +48,14 @@ export default function AdSenseSlot({
     if (!showAds) return;
     ensureAdsenseScript();
 
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | null = null;
+
     const requestAd = () => {
+      if (cancelled) return;
       const slot = insRef.current;
       if (!slot || slot.offsetWidth <= 0) {
-        setTimeout(requestAd, 250);
+        retryTimer = setTimeout(requestAd, 250);
         return;
       }
 
@@ -61,7 +65,11 @@ export default function AdSenseSlot({
     };
 
     const t = setTimeout(requestAd, 250);
-    return () => clearTimeout(t);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+      if (retryTimer) clearTimeout(retryTimer);
+    };
   }, [showAds, refreshKey, dataAdSlot, placement, onAdLoaded]);
 
   if (!showAds) return null;

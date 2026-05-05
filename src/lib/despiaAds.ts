@@ -27,18 +27,10 @@ export function adLog(message: string) {
   console.log(message);
 }
 
-function isNativeShell(): boolean {
-  return typeof window !== 'undefined' && window.navigator.userAgent.includes('wv');
-}
-
-async function callDespia<T extends Record<string, unknown>>(command: string, watch: string[]): Promise<T | null> {
-  if (!isNativeShell()) return null;
-  try {
-    const mod = await import('despia-native');
-    return (await mod.default(command as any, watch)) as T;
-  } catch {
-    return null;
-  }
+export function isDespiaNativeShell(): boolean {
+  if (typeof window === 'undefined') return false;
+  const ua = window.navigator.userAgent.toLowerCase();
+  return ua.includes('despia') || ua.includes('biztrack') || ua.includes('com.despia.biztrack');
 }
 
 export function adSlotForPlacement(placement: AdPlacement): string {
@@ -71,10 +63,7 @@ export async function initializeNativeAds() {
   adLog(`[AD-INFO] AdMob via WebView API for Ads. App ID: ${ADMOB_APP_ID}`);
   adLog(`[AD-INFO] AdSense client: ${ADSENSE_PUBLISHER_ID}`);
   adLog(`[AD-INFO] app-ads.txt: ${APP_ADS_DOMAIN}/app-ads.txt`);
-
-  if (!isNativeShell()) return;
-  const device = await callDespia<{ uuid?: string }>('get-uuid://', ['uuid']);
-  if (device?.uuid) adLog('[AD-INFO] Despia native bridge connected.');
+  adLog('[AD-INFO] Inline ad bridge is activated by the rebuilt native app; no startup bridge command required.');
 }
 
 /* -------------------------------------------------------------------------- */
@@ -97,6 +86,7 @@ export function pushAdsbygoogle() {
 }
 
 export function ensureAdsenseScript() {
+  if (typeof document === 'undefined') return;
   const src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
   const existing = document.querySelector<HTMLScriptElement>('script[data-despia-adsense="true"], script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]');
 
