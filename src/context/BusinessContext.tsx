@@ -306,7 +306,7 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
       const biz = businesses.find(b => b.id === nextId);
       const resolvedCurrency = resolveCurrencySymbol(nextId, biz?.currency_symbol);
       if (resolvedCurrency) {
-        localStorage.setItem('biztrack_currency_symbol', resolvedCurrency);
+        try { localStorage.setItem('biztrack_currency_symbol', resolvedCurrency); } catch {}
         broadcastCurrency(resolvedCurrency);
       }
     } else {
@@ -335,7 +335,8 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!user) {
-      const hasSession = Object.keys(localStorage).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token'));
+      let hasSession = false;
+      try { hasSession = Object.keys(localStorage).some((key) => key.startsWith('sb-') && key.endsWith('-auth-token')); } catch {}
       if (!hasSession) {
         setBusinesses([]);
         setMemberships([]);
