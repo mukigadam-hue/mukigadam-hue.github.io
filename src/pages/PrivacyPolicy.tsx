@@ -9,132 +9,174 @@ export default function PrivacyPolicy() {
     <div className="min-h-screen-safe bg-background overflow-y-auto">
       <div className="max-w-3xl mx-auto px-4 py-8 sm:py-12 space-y-8">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} aria-label="Go back">
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-3xl font-bold text-foreground">Privacy Policy</h1>
         </div>
 
-        <p className="text-sm text-muted-foreground">Last updated: March 20, 2026</p>
+        <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm text-muted-foreground space-y-1">
+          <p><strong className="text-foreground">App name:</strong> Business Manager (BizTrack / My Factory)</p>
+          <p><strong className="text-foreground">Developer:</strong> Ndamwesiga App</p>
+          <p><strong className="text-foreground">Package ID:</strong> com.despia.biztrack</p>
+          <p><strong className="text-foreground">Official website:</strong> https://ndamwesigaapp.store</p>
+          <p><strong className="text-foreground">Privacy Policy URL:</strong> https://ndamwesigaapp.store/privacy</p>
+          <p><strong className="text-foreground">Contact:</strong> nextworldforbetterquality@gmail.com</p>
+          <p><strong className="text-foreground">Effective date:</strong> May 5, 2026</p>
+        </div>
 
         <div className="prose prose-sm dark:prose-invert max-w-none space-y-6">
           <section className="space-y-3">
             <h2 className="text-xl font-semibold text-foreground">1. Introduction</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Welcome to Business Manager ("we," "our," or "us"). We are committed to protecting
-              your personal information and your right to privacy. This Privacy Policy explains
-              how we collect, use, disclose, and safeguard your information when you use our
-              mobile application and services at https://ndamwesigaapp.store.
+              Business Manager ("we", "our", "us", or "the App") is a business and factory
+              management application published on Google Play under the package
+              <strong className="text-foreground"> com.despia.biztrack</strong>. This Privacy
+              Policy explains what information the App collects, how it is used, with whom it
+              is shared, and the rights you have. It applies to the Android app, the website
+              at https://ndamwesigaapp.store, and any related services we provide.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">2. Data Collection</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              We collect the following types of information:
-            </p>
+            <h2 className="text-xl font-semibold text-foreground">2. Information We Collect</h2>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-              <li><strong className="text-foreground">Account Information:</strong> Email address, full name, and password when you create an account.</li>
-              <li><strong className="text-foreground">Business Information:</strong> Business name, address, contact details, business type, and country code that you provide during business setup.</li>
-              <li><strong className="text-foreground">Transaction Data:</strong> Sales, purchases, expenses, orders, and service records you create within the app.</li>
-              <li><strong className="text-foreground">Team Data:</strong> Names, phone numbers, and payment information for team members you add.</li>
-              <li><strong className="text-foreground">Property Data:</strong> Asset details, booking records, and tenant information for property management features.</li>
-              <li><strong className="text-foreground">Device Information:</strong> Device type and operating system for app optimization.</li>
+              <li><strong className="text-foreground">Account Information:</strong> email, full name, phone number, password (stored as a secure hash), and optional profile photo.</li>
+              <li><strong className="text-foreground">Business Information:</strong> business name, address, district/region, country, business type, and currency.</li>
+              <li><strong className="text-foreground">Financial &amp; Transaction Data:</strong> sales, purchases, expenses, services, orders, debts, stock and waste records you create inside the App.</li>
+              <li><strong className="text-foreground">Team &amp; Contact Data:</strong> names, phone numbers and payment details for team members and B2B contacts you choose to add.</li>
+              <li><strong className="text-foreground">Property &amp; Booking Data:</strong> asset listings, rental bookings and tenant details where you use the property module.</li>
+              <li><strong className="text-foreground">Photos &amp; Files:</strong> images of products, receipts and proof videos that you upload from your device camera or gallery.</li>
+              <li><strong className="text-foreground">Device &amp; Technical Data:</strong> device model, OS version, app version, language, crash logs, and a non-permanent advertising identifier used by Google AdMob.</li>
+              <li><strong className="text-foreground">Approximate Location:</strong> only the district/region you enter manually. We do not collect precise GPS location.</li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">3. Data Usage</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              We use your information for the following purposes:
-            </p>
+            <h2 className="text-xl font-semibold text-foreground">3. How We Use Your Information</h2>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-              <li>To provide and maintain our business management services.</li>
-              <li>To process transactions, generate receipts, and manage your business records.</li>
-              <li>To enable business-to-business (B2B) interactions including orders, contacts, and discovery features.</li>
-              <li>To send important notifications about your account, orders, and business activities.</li>
-              <li>To improve our app's functionality and user experience.</li>
-              <li>To display relevant advertisements (free tier users only).</li>
-              <li>To provide customer support and respond to inquiries.</li>
+              <li>Provide core business management features (sales, stock, orders, receipts, factory and property modules).</li>
+              <li>Authenticate you, secure your account, and sync data across your devices.</li>
+              <li>Enable optional B2B features (discovery, orders, contacts) when you turn them on.</li>
+              <li>Send you in-app notifications and important account or order alerts.</li>
+              <li>Display advertisements through Google AdMob to users on the free tier.</li>
+              <li>Diagnose crashes, improve stability, and prevent abuse or fraud.</li>
+              <li>Comply with applicable laws and respond to lawful requests.</li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">4. Data Sharing</h2>
+            <h2 className="text-xl font-semibold text-foreground">4. Advertising &amp; Google AdMob</h2>
             <p className="text-muted-foreground leading-relaxed">
-              We do not sell your personal data. We may share limited information in the following cases:
+              The free version of the App displays ads served by Google AdMob. AdMob may
+              collect and process the device's advertising ID, coarse network information,
+              and standard ad-event data in order to serve and measure ads. We do not share
+              your name, email, business records or financial data with AdMob.
             </p>
+            <p className="text-muted-foreground leading-relaxed">
+              You can reset or limit your advertising ID at any time in your Android device
+              settings (Settings → Privacy → Ads). Premium users do not see ads. For more
+              information see Google's policy at
+              <a href="https://policies.google.com/technologies/ads" className="text-primary underline ml-1" target="_blank" rel="noopener noreferrer">policies.google.com/technologies/ads</a>.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl font-semibold text-foreground">5. Permissions We Request</h2>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-              <li><strong className="text-foreground">B2B Features:</strong> Your business name, contact details, and products description are shared with other businesses when you enable discoverability.</li>
-              <li><strong className="text-foreground">Service Providers:</strong> We use trusted third-party services for database, authentication, and Google AdMob advertisements that may process your data.</li>
-              <li><strong className="text-foreground">Legal Requirements:</strong> We may disclose data if required by law or to protect our legal rights.</li>
+              <li><strong className="text-foreground">Internet / Network state:</strong> required to sync data with our backend.</li>
+              <li><strong className="text-foreground">Camera:</strong> only when you choose to take a product photo, scan a barcode, or record a proof video.</li>
+              <li><strong className="text-foreground">Photos / Media / Files:</strong> only when you choose to upload an image or receipt from your gallery.</li>
+              <li><strong className="text-foreground">Notifications:</strong> to deliver order alerts and reminders.</li>
+              <li><strong className="text-foreground">Advertising ID:</strong> used by Google AdMob (free tier only).</li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">5. Data Security</h2>
+            <h2 className="text-xl font-semibold text-foreground">6. How We Share Information</h2>
             <p className="text-muted-foreground leading-relaxed">
-              We implement industry-standard security measures to protect your data:
+              We do <strong className="text-foreground">not</strong> sell your personal
+              information. We share data only in the limited cases below:
             </p>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-              <li>All data is encrypted in transit using TLS/SSL protocols.</li>
-              <li>Row-Level Security (RLS) policies ensure users can only access their own business data.</li>
-              <li>Authentication is handled through secure, industry-standard protocols.</li>
-              <li>Passwords are hashed and never stored in plain text.</li>
-              <li>Regular security audits are performed on our infrastructure.</li>
+              <li><strong className="text-foreground">Other businesses inside the App</strong> – only the public profile fields you choose to make discoverable (business name, district, products description, contact you opt in to share).</li>
+              <li><strong className="text-foreground">Service providers</strong> – our managed cloud backend (database, authentication, storage, edge functions) and Google AdMob, strictly to operate the service.</li>
+              <li><strong className="text-foreground">Legal &amp; safety</strong> – when required by law, court order, or to protect rights, safety and integrity of users.</li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">6. Data Retention</h2>
+            <h2 className="text-xl font-semibold text-foreground">7. Data Security</h2>
+            <ul className="list-disc pl-6 text-muted-foreground space-y-2">
+              <li>All traffic between the App and our servers is encrypted with TLS/HTTPS.</li>
+              <li>Row-Level Security policies isolate every business's data from other tenants.</li>
+              <li>Passwords are stored as one-way hashes; we never see them in plain text.</li>
+              <li>Sensitive secrets are stored in an encrypted secrets vault.</li>
+            </ul>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl font-semibold text-foreground">8. Data Retention &amp; Account Deletion</h2>
             <p className="text-muted-foreground leading-relaxed">
-              We retain your data for as long as your account is active. You may request
-              deletion of your account and all associated data at any time through the
-              Settings page in the app. Upon account deletion, all personal and business
-              data is permanently removed from our systems.
+              We keep your data for as long as your account is active. You can delete your
+              account at any time from <strong className="text-foreground">Settings → Account → Delete Account</strong>
+              inside the App. Account deletion permanently removes your profile, business
+              records, team members, photos, orders and all related child data from our
+              systems, usually within 30 days. You may also request deletion by emailing
+              <a href="mailto:nextworldforbetterquality@gmail.com" className="text-primary underline ml-1">nextworldforbetterquality@gmail.com</a>
+              from the email address linked to your account.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">7. Your Rights</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              You have the right to:
-            </p>
+            <h2 className="text-xl font-semibold text-foreground">9. Your Rights</h2>
             <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-              <li>Access and review your personal data stored in the app.</li>
-              <li>Update or correct your personal information.</li>
+              <li>Access, review and export the data linked to your account.</li>
+              <li>Correct or update inaccurate information.</li>
               <li>Delete your account and all associated data.</li>
-              <li>Opt out of business discoverability features.</li>
-              <li>Request a copy of your data.</li>
+              <li>Withdraw consent for optional features such as B2B discoverability.</li>
+              <li>Lodge a complaint with your local data-protection authority.</li>
             </ul>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">8. Children's Privacy</h2>
+            <h2 className="text-xl font-semibold text-foreground">10. Children's Privacy</h2>
             <p className="text-muted-foreground leading-relaxed">
-              Our services are not directed to individuals under the age of 13. We do not
-              knowingly collect personal information from children under 13. If we become
-              aware that a child under 13 has provided us with personal data, we will take
-              steps to delete such information.
+              The App is intended for business owners and is not directed to children under
+              13. We do not knowingly collect personal information from children. If you
+              believe a child has provided us with personal data, contact us and we will
+              delete it.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">9. Changes to This Policy</h2>
+            <h2 className="text-xl font-semibold text-foreground">11. International Transfers</h2>
             <p className="text-muted-foreground leading-relaxed">
-              We may update this Privacy Policy from time to time. We will notify you of
-              any changes by posting the new Privacy Policy on this page and updating the
-              "Last updated" date.
+              Our cloud backend may store and process data in data centres outside your
+              country. We rely on industry-standard safeguards to protect your information
+              wherever it is processed.
             </p>
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-xl font-semibold text-foreground">10. Contact Us</h2>
+            <h2 className="text-xl font-semibold text-foreground">12. Changes to This Policy</h2>
             <p className="text-muted-foreground leading-relaxed">
-              If you have questions about this Privacy Policy, please contact us at:
+              We may update this Privacy Policy from time to time. The latest version will
+              always be available at
+              <a href="https://ndamwesigaapp.store/privacy" className="text-primary underline ml-1" target="_blank" rel="noopener noreferrer">https://ndamwesigaapp.store/privacy</a>
+              with an updated effective date.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-xl font-semibold text-foreground">13. Contact Us</h2>
+            <p className="text-muted-foreground leading-relaxed">
+              For questions about this Privacy Policy, account deletion, or any privacy
+              concern, contact:
             </p>
             <p className="text-foreground font-medium">nextworldforbetterquality@gmail.com</p>
-            <p className="text-sm text-muted-foreground">Official website: https://ndamwesigaapp.store</p>
+            <p className="text-sm text-muted-foreground">Website: https://ndamwesigaapp.store</p>
+            <p className="text-sm text-muted-foreground">App package: com.despia.biztrack</p>
           </section>
         </div>
 
