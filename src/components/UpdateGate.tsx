@@ -1,20 +1,26 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { adLog } from '@/lib/despiaAds';
+import { adLog, isDespiaNativeShell } from '@/lib/despiaAds';
 
 const PLAY_STORE_URL = 'https://google.com';
 
-function isNativeShell(): boolean {
-  return typeof window !== 'undefined' && window.navigator.userAgent.includes('wv');
+function withTimeout<T>(promise: Promise<T>, fallback: T, ms = 2500): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((resolve) => setTimeout(() => resolve(fallback), ms)),
+  ]);
 }
 
 async function getDeviceVersion(): Promise<string> {
-  if (!isNativeShell()) return '';
+  if (!isDespiaNativeShell()) return '';
 
   try {
     const mod = await import('despia-native');
-    const res = (await mod.default('getappversion://' as any, ['versionNumber'])) as { versionNumber?: string };
-    return res?.versionNumber || '';
+    const res = await withTimeout(
+      mod.default('getappversion://' as any, ['versionNumber', 'version']) as Promise<{ versionNumber?: string; version?: string }>,
+      {},
+    );
+    return res?.versionNumber || res?.version || '';
   } catch {
     return '';
   }
