@@ -11,7 +11,6 @@ import { FactoryProvider } from "@/context/FactoryContext";
 import { PropertyProvider } from "@/context/PropertyContext";
 import AppLayout from "@/components/AppLayout";
 import AdMobManager from "@/components/AdMobManager";
-import UpdateGate from "@/components/UpdateGate";
 import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import BusinessSetupPage from "./pages/BusinessSetupPage";
@@ -257,7 +256,6 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AdMobManager />
-      <UpdateGate />
       <AuthProvider>
         <AppContent />
       </AuthProvider>
