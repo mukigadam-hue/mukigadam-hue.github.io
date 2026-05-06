@@ -221,6 +221,8 @@ export default function SalesPage() {
         business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
         code: null,
       });
+      const { suppressNextInterstitial } = await import('@/lib/interstitialAd');
+      suppressNextInterstitial();
       setReceiptSale(newSale);
     }
 
