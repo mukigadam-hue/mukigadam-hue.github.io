@@ -1,4 +1,4 @@
-import { adLog, APP_ADS_DOMAIN, ADMOB_APP_ID } from '@/lib/despiaAds';
+import { adLog, APP_ADS_DOMAIN, ADMOB_APP_ID, ADMOB_INTERSTITIAL_AD_UNIT_ID } from '@/lib/despiaAds';
 import { useEffect } from 'react';
 
 /**
@@ -17,6 +17,7 @@ export default function AdMobManager() {
   useEffect(() => {
     adLog(`[AD-INFO] AdMob App ID: ${ADMOB_APP_ID}`);
     adLog(`[AD-INFO] app-ads.txt: ${APP_ADS_DOMAIN}/app-ads.txt`);
+    adLog(`[AD-INFO] Interstitial Ad Unit: ${ADMOB_INTERSTITIAL_AD_UNIT_ID}`);
     adLog('[AD-INFO] Ad format: Despia Interstitial (60-minute global cooldown).');
   }, []);
   return null;
