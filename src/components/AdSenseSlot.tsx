@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { usePremium } from '@/hooks/usePremium';
 import { useAdRefresh } from '@/hooks/useAdRefresh';
@@ -9,6 +9,7 @@ import {
   adSlotForPlacement,
   ensureAdsenseScript,
   isNativeAdPlacement,
+  isDespiaNativeShell,
   pushAdsbygoogle,
 } from '@/lib/despiaAds';
 
@@ -53,9 +54,11 @@ export default function AdSenseSlot({
   const insRef = useRef<HTMLModElement | null>(null);
   const dataAdSlot = adSlotForPlacement(placement);
   const isNative = isNativeAdPlacement(placement);
+  const nativeShell = useMemo(() => isDespiaNativeShell(), []);
 
   useEffect(() => {
     if (!showAds) return;
+    if (!nativeShell) return;
     ensureAdsenseScript();
 
     let cancelled = false;
@@ -80,7 +83,7 @@ export default function AdSenseSlot({
       clearTimeout(t);
       if (retryTimer) clearTimeout(retryTimer);
     };
-  }, [showAds, refreshKey, dataAdSlot, placement, onAdLoaded]);
+  }, [showAds, nativeShell, refreshKey, dataAdSlot, placement, onAdLoaded]);
 
   if (!showAds) return null;
 
@@ -110,7 +113,7 @@ export default function AdSenseSlot({
       key={refreshKey}
       data-ad-placement={placement}
       className={cn(
-        'ad-shimmer w-full overflow-hidden rounded-lg flex items-center justify-center mx-auto',
+        'ad-shimmer w-full max-w-full overflow-hidden rounded-lg flex items-center justify-center mx-auto',
         className,
       )}
       style={containerStyle}
