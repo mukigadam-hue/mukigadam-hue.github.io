@@ -97,10 +97,8 @@ export default function AdSenseSlot({
       }
     : {
         width: '100%',
-        minWidth: NATIVE_MIN_WIDTH,
         maxWidth: NATIVE_MAX_WIDTH,
         minHeight: NATIVE_MIN_HEIGHT,
-        maxHeight: NATIVE_MAX_HEIGHT,
       };
 
   const insStyle: React.CSSProperties = isBanner
