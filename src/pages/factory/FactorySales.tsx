@@ -392,7 +392,7 @@ export default function FactorySales() {
       </Card>
 
       {/* Receipt Dialog */}
-      <Dialog open={!!receiptSale} onOpenChange={o => { if (!o) setReceiptSale(null); }}>
+      <Dialog open={!!receiptSale} onOpenChange={o => { if (!o) { setReceiptSale(null); import('@/lib/interstitialAd').then(m => m.triggerInterstitial('close-sale-receipt')); } }}>
         <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{t('factoryUI.saleReceipt')}</DialogTitle></DialogHeader>
           {receiptSale && (
