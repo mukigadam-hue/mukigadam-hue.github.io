@@ -124,6 +124,7 @@ function InterstitialOnNavigate() {
     maybeShowInterstitial(`route:${location.pathname}`);
   }, [location.pathname]);
   return null;
+}
 
 function BusinessContent() {
   const { currentBusiness, loading } = useBusiness();
