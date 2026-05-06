@@ -23,7 +23,8 @@ export default defineConfig(({ mode }) => ({
         },
       },
     },
-    target: "esnext",
+    target: "es2020",
+    cssTarget: "chrome80",
     minify: "esbuild",
   },
   plugins: [
@@ -31,6 +32,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      selfDestroying: true,
       includeAssets: ["favicon.ico", "placeholder.svg"],
       devOptions: {
         enabled: false,

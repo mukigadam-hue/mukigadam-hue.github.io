@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 
-import { isDespiaNativeShell } from '@/lib/despiaAds';
+import { shouldRequestInlineAds } from '@/lib/despiaAds';
 
 const REFRESH_INTERVAL = 60_000; // 60 seconds
 
@@ -15,7 +15,7 @@ export function useAdRefresh(slotId: string) {
   const [refreshKey, setRefreshKey] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const visibleRef = useRef(true);
-  const shouldRefresh = isDespiaNativeShell();
+  const shouldRefresh = shouldRequestInlineAds();
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {

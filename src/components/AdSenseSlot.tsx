@@ -9,8 +9,8 @@ import {
   adSlotForPlacement,
   ensureAdsenseScript,
   isNativeAdPlacement,
-  isDespiaNativeShell,
   pushAdsbygoogle,
+  shouldRequestInlineAds,
 } from '@/lib/despiaAds';
 
 /**
@@ -52,11 +52,11 @@ export default function AdSenseSlot({
   const insRef = useRef<HTMLModElement | null>(null);
   const dataAdSlot = adSlotForPlacement(placement);
   const isNative = isNativeAdPlacement(placement);
-  const nativeShell = useMemo(() => isDespiaNativeShell(), []);
+  const adsEnabled = useMemo(() => shouldRequestInlineAds(), []);
 
   useEffect(() => {
     if (!showAds) return;
-    if (!nativeShell) return;
+    if (!adsEnabled) return;
     ensureAdsenseScript();
 
     let cancelled = false;
@@ -81,7 +81,7 @@ export default function AdSenseSlot({
       clearTimeout(t);
       if (retryTimer) clearTimeout(retryTimer);
     };
-  }, [showAds, nativeShell, refreshKey, dataAdSlot, placement, onAdLoaded]);
+  }, [showAds, adsEnabled, refreshKey, dataAdSlot, placement, onAdLoaded]);
 
   if (!showAds) return null;
 
