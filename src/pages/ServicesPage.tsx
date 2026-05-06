@@ -312,7 +312,7 @@ export default function ServicesPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!receiptService} onOpenChange={o => { if (!o) setReceiptService(null); }}>
+      <Dialog open={!!receiptService} onOpenChange={o => { if (!o) { setReceiptService(null); import('@/lib/interstitialAd').then(m => m.triggerInterstitial('close-service-receipt')); } }}>
         <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Service Receipt</DialogTitle></DialogHeader>
           {receiptService && (

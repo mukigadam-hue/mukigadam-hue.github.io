@@ -66,6 +66,8 @@ export default function RegisterBusinessPage() {
     }
     setLoading(false);
     toast.success(`${typeLabels[businessType].title} created successfully!`);
+    const { triggerInterstitial } = await import('@/lib/interstitialAd');
+    triggerInterstitial('register-business-success');
     window.location.href = '/';
   }
 

@@ -4,6 +4,7 @@ import { Share2, Download, Image, FileText, Printer, Loader2 } from 'lucide-reac
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { triggerInterstitial } from '@/lib/interstitialAd';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,6 +109,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
         downloadBlob(blob, `${fileName}.png`);
         toast.success('Image downloaded — share it from your gallery!');
       }
+      triggerInterstitial('export-share-image');
     } catch { toast.error('Share failed'); }
     finally { setBusy(false); }
   }
@@ -122,6 +124,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
         downloadBlob(blob, `${fileName}.pdf`);
         toast.success('PDF downloaded — share it from your files!');
       }
+      triggerInterstitial('export-share-pdf');
     } catch { toast.error('Share failed'); }
     finally { setBusy(false); }
   }
@@ -133,6 +136,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
       if (!blob) { toast.error('Failed'); return; }
       downloadBlob(blob, `${fileName}.png`);
       toast.success('Image saved!');
+      triggerInterstitial('export-save-image');
     } catch { toast.error('Save failed'); }
     finally { setBusy(false); }
   }
@@ -144,6 +148,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
       if (!blob) { toast.error('Failed'); return; }
       downloadBlob(blob, `${fileName}.pdf`);
       toast.success('PDF saved!');
+      triggerInterstitial('export-save-pdf');
     } catch { toast.error('Save failed'); }
     finally { setBusy(false); }
   }
@@ -155,7 +160,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
       const blob = await getImageBlob();
       if (blob) {
         const shared = await nativeFileShare(blob, `${fileName}.png`, 'image/png');
-        if (shared) { setBusy(false); return; }
+        if (shared) { triggerInterstitial('export-print'); setBusy(false); return; }
       }
 
       // Strategy 2: Download as image + prompt user to print from gallery (best mobile compatibility)
@@ -187,6 +192,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
           }
         }
       }
+      triggerInterstitial('export-print');
     } catch { toast.error('Print failed'); }
     finally { setBusy(false); }
   }
