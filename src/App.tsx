@@ -95,7 +95,6 @@ function AppContent() {
 
   return (
     <BrowserRouter>
-      <InterstitialOnNavigate />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Public routes */}
@@ -113,15 +112,6 @@ function AppContent() {
       </Suspense>
     </BrowserRouter>
   );
-}
-
-function InterstitialOnNavigate() {
-  const location = useLocation();
-  useEffect(() => {
-    // Skip the initial mount; only fire on subsequent route changes.
-    maybeShowInterstitial(`route:${location.pathname}`);
-  }, [location.pathname]);
-  return null;
 }
 
 function BusinessContent() {
