@@ -160,7 +160,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
       const blob = await getImageBlob();
       if (blob) {
         const shared = await nativeFileShare(blob, `${fileName}.png`, 'image/png');
-        if (shared) { setBusy(false); return; }
+        if (shared) { triggerInterstitial('export-print'); setBusy(false); return; }
       }
 
       // Strategy 2: Download as image + prompt user to print from gallery (best mobile compatibility)
