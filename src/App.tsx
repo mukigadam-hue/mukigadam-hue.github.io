@@ -4,7 +4,9 @@ import { useOfflineQueue } from "@/hooks/useOfflineQueue";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { maybeShowInterstitial } from "@/lib/interstitialAd";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { BusinessProvider, useBusiness } from "@/context/BusinessContext";
 import { FactoryProvider } from "@/context/FactoryContext";
@@ -95,6 +97,7 @@ function AppContent() {
 
   return (
     <BrowserRouter>
+      <InterstitialOnNavigate />
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Public routes */}
@@ -112,6 +115,15 @@ function AppContent() {
       </Suspense>
     </BrowserRouter>
   );
+}
+
+function InterstitialOnNavigate() {
+  const location = useLocation();
+  useEffect(() => {
+    // Skip the initial mount; only fire on subsequent route changes.
+    maybeShowInterstitial(`route:${location.pathname}`);
+  }, [location.pathname]);
+  return null;
 }
 
 function BusinessContent() {

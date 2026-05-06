@@ -1,32 +1,23 @@
+import { adLog, APP_ADS_DOMAIN, ADMOB_APP_ID } from '@/lib/despiaAds';
 import { useEffect } from 'react';
-import { adLog, APP_ADS_DOMAIN, initializeNativeAds } from '@/lib/despiaAds';
 
 /**
- * AdMobManager
+ * AdMobManager — startup logger for Despia's AdMob configuration.
  *
- * Initializes the Despia native bridge once on app mount.
+ * Native Advanced ads have been removed. The app now uses Despia
+ * Interstitial ads (beta) triggered on screen changes from
+ * `src/lib/interstitialAd.ts`.
  *
- * The web layer must not load Google ad scripts or DoubleClick URLs directly.
- * It only sends native bridge commands so the Despia wrapper can render ads.
- *
- * Real AdMob IDs used by this project:
- *   App ID:               ca-app-pub-9605564713228252~8941826330
- *   Banner unit:          ca-app-pub-9605564713228252/4713172172
- *   Native (home) unit:   ca-app-pub-9605564713228252/3146574176
- *   Native (general):     ca-app-pub-9605564713228252/4713172172
- */
-/**
- * Official developer domain hosting the verified app-ads.txt file.
- * This is the domain registered in Google Play Console & AdMob and is what
- * crawlers fetch /app-ads.txt from — it must match regardless of the
- * preview / published Lovable URL.
+ * `app-ads.txt` is still served from {@link APP_ADS_DOMAIN} so the AdMob
+ * app remains verified for crawlers.
  */
 export { adLog, APP_ADS_DOMAIN };
 
 export default function AdMobManager() {
   useEffect(() => {
-    initializeNativeAds();
+    adLog(`[AD-INFO] AdMob App ID: ${ADMOB_APP_ID}`);
+    adLog(`[AD-INFO] app-ads.txt: ${APP_ADS_DOMAIN}/app-ads.txt`);
+    adLog('[AD-INFO] Ad format: Despia Interstitial (60-minute global cooldown).');
   }, []);
-
   return null;
 }

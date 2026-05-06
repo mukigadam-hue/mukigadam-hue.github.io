@@ -143,6 +143,8 @@ export default function FactorySales() {
         business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
         code: null,
       });
+      const { suppressNextInterstitial } = await import('@/lib/interstitialAd');
+      suppressNextInterstitial();
       setReceiptSale(sale);
     }
     setItems([]); setCustomerName(''); setSellerName(userFullName); setPaymentStatus('paid'); setAmountPaid('');
