@@ -1,5 +1,7 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 
+import { isDespiaNativeShell } from '@/lib/despiaAds';
+
 const REFRESH_INTERVAL = 60_000; // 60 seconds
 
 // Global map: tracks last refresh timestamp per ad slot
@@ -13,6 +15,7 @@ export function useAdRefresh(slotId: string) {
   const [refreshKey, setRefreshKey] = useState(0);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const visibleRef = useRef(true);
+  const shouldRefresh = isDespiaNativeShell();
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) {
@@ -42,6 +45,7 @@ export function useAdRefresh(slotId: string) {
 
   // On mount: check if enough time passed, else wait remainder
   useEffect(() => {
+    if (!shouldRefresh) return;
     const last = lastRefreshMap.get(slotId) || 0;
     if (Date.now() - last >= REFRESH_INTERVAL) {
       lastRefreshMap.set(slotId, Date.now());
@@ -60,7 +64,7 @@ export function useAdRefresh(slotId: string) {
       clearTimer();
       document.removeEventListener('visibilitychange', onVisChange);
     };
-  }, [slotId, scheduleNext, clearTimer]);
+  }, [shouldRefresh, slotId, scheduleNext, clearTimer]);
 
   return { refreshKey, onAdLoaded };
 }
