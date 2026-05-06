@@ -4,6 +4,7 @@ import { Share2, Download, Image, FileText, Printer, Loader2 } from 'lucide-reac
 import { toast } from 'sonner';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { triggerInterstitial } from '@/lib/interstitialAd';
 import {
   DropdownMenu,
   DropdownMenuContent,
