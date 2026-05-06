@@ -2259,7 +2259,7 @@ export default function OrdersPage() {
       )}
 
       {/* Receipt Dialog */}
-      <Dialog open={!!receiptOrder} onOpenChange={o => { if (!o) setReceiptOrder(null); }}>
+      <Dialog open={!!receiptOrder} onOpenChange={o => { if (!o) { setReceiptOrder(null); import('@/lib/interstitialAd').then(m => m.triggerInterstitial('close-order-receipt')); } }}>
         <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>Receipt</DialogTitle></DialogHeader>
           {receiptOrder && (
