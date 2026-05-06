@@ -192,6 +192,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
           }
         }
       }
+      triggerInterstitial('export-print');
     } catch { toast.error('Print failed'); }
     finally { setBusy(false); }
   }
