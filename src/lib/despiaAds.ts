@@ -33,6 +33,16 @@ export function isDespiaNativeShell(): boolean {
   return ua.includes('despia') || ua.includes('biztrack') || ua.includes('com.despia.biztrack');
 }
 
+export function shouldRequestInlineAds(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('ads') === '1';
+  } catch {
+    return false;
+  }
+}
+
 export function adSlotForPlacement(placement: AdPlacement): string {
   return placement === 'home' || placement === 'inline'
     ? ADMOB_NATIVE_HOME_SLOT
@@ -75,6 +85,7 @@ export async function initializeNativeAds() {
  */
 export function pushAdsbygoogle() {
   try {
+    if (!shouldRequestInlineAds()) return;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const w = window as any;
     ensureAdsenseScript();
@@ -87,6 +98,7 @@ export function pushAdsbygoogle() {
 
 export function ensureAdsenseScript() {
   if (typeof document === 'undefined') return;
+  if (!shouldRequestInlineAds()) return;
   const src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
   const existing = document.querySelector<HTMLScriptElement>('script[data-despia-adsense="true"], script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]');
 
