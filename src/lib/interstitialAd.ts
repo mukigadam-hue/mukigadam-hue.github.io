@@ -84,9 +84,12 @@ export function maybeShowInterstitial(reason = 'navigation') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const fn = (window as any).despia as ((cmd: string) => void) | undefined;
     if (typeof fn === 'function') {
-      fn('displayinterstitialad://');
+      // Per Despia docs: https://setup.despia.com/native-features/admob/Iinterstitial
+      // Correct bridge command is `admob://interstitial`. The Ad Unit ID is
+      // read from the Despia Editor (App > Integrations > AdMob).
+      fn('admob://interstitial');
       writeNumber(STORAGE_KEY, now);
-      adLog(`[AD-INTERSTITIAL] Requested displayinterstitialad:// reason=${reason}`);
+      adLog(`[AD-INTERSTITIAL] Requested admob://interstitial reason=${reason}`);
     } else {
       adLog('[AD-INTERSTITIAL] Despia bridge function not available.');
     }
