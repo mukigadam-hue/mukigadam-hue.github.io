@@ -28,10 +28,8 @@ import {
  * (which is the #1 reason ad requests get silently dropped).
  */
 
-const NATIVE_MIN_WIDTH = 300;
 const NATIVE_MIN_HEIGHT = 250;
 const NATIVE_MAX_WIDTH = 468;
-const NATIVE_MAX_HEIGHT = 300;
 const BANNER_MIN_HEIGHT = 90;
 const BANNER_MAX_WIDTH = 728;
 
