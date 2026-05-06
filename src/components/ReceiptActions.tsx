@@ -109,6 +109,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
         downloadBlob(blob, `${fileName}.png`);
         toast.success('Image downloaded — share it from your gallery!');
       }
+      triggerInterstitial('export-share-image');
     } catch { toast.error('Share failed'); }
     finally { setBusy(false); }
   }
@@ -123,6 +124,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
         downloadBlob(blob, `${fileName}.pdf`);
         toast.success('PDF downloaded — share it from your files!');
       }
+      triggerInterstitial('export-share-pdf');
     } catch { toast.error('Share failed'); }
     finally { setBusy(false); }
   }
@@ -134,6 +136,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
       if (!blob) { toast.error('Failed'); return; }
       downloadBlob(blob, `${fileName}.png`);
       toast.success('Image saved!');
+      triggerInterstitial('export-save-image');
     } catch { toast.error('Save failed'); }
     finally { setBusy(false); }
   }
@@ -145,6 +148,7 @@ export default function ReceiptActions({ receiptRef, fileName = 'receipt', canSh
       if (!blob) { toast.error('Failed'); return; }
       downloadBlob(blob, `${fileName}.pdf`);
       toast.success('PDF saved!');
+      triggerInterstitial('export-save-pdf');
     } catch { toast.error('Save failed'); }
     finally { setBusy(false); }
   }
