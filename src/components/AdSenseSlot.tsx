@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useMemo, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { usePremium } from '@/hooks/usePremium';
 import { useAdRefresh } from '@/hooks/useAdRefresh';
@@ -9,6 +9,7 @@ import {
   adSlotForPlacement,
   ensureAdsenseScript,
   isNativeAdPlacement,
+  isDespiaNativeShell,
   pushAdsbygoogle,
 } from '@/lib/despiaAds';
 
@@ -27,10 +28,8 @@ import {
  * (which is the #1 reason ad requests get silently dropped).
  */
 
-const NATIVE_MIN_WIDTH = 300;
 const NATIVE_MIN_HEIGHT = 250;
 const NATIVE_MAX_WIDTH = 468;
-const NATIVE_MAX_HEIGHT = 300;
 const BANNER_MIN_HEIGHT = 90;
 const BANNER_MAX_WIDTH = 728;
 
@@ -53,9 +52,11 @@ export default function AdSenseSlot({
   const insRef = useRef<HTMLModElement | null>(null);
   const dataAdSlot = adSlotForPlacement(placement);
   const isNative = isNativeAdPlacement(placement);
+  const nativeShell = useMemo(() => isDespiaNativeShell(), []);
 
   useEffect(() => {
     if (!showAds) return;
+    if (!nativeShell) return;
     ensureAdsenseScript();
 
     let cancelled = false;
@@ -80,7 +81,7 @@ export default function AdSenseSlot({
       clearTimeout(t);
       if (retryTimer) clearTimeout(retryTimer);
     };
-  }, [showAds, refreshKey, dataAdSlot, placement, onAdLoaded]);
+  }, [showAds, nativeShell, refreshKey, dataAdSlot, placement, onAdLoaded]);
 
   if (!showAds) return null;
 
@@ -94,10 +95,8 @@ export default function AdSenseSlot({
       }
     : {
         width: '100%',
-        minWidth: NATIVE_MIN_WIDTH,
         maxWidth: NATIVE_MAX_WIDTH,
         minHeight: NATIVE_MIN_HEIGHT,
-        maxHeight: NATIVE_MAX_HEIGHT,
       };
 
   const insStyle: React.CSSProperties = isBanner
@@ -110,7 +109,7 @@ export default function AdSenseSlot({
       key={refreshKey}
       data-ad-placement={placement}
       className={cn(
-        'ad-shimmer w-full overflow-hidden rounded-lg flex items-center justify-center mx-auto',
+        'ad-shimmer w-full max-w-full overflow-hidden rounded-lg flex items-center justify-center mx-auto',
         className,
       )}
       style={containerStyle}
