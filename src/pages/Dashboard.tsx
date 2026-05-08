@@ -13,6 +13,7 @@ import AdSpace from '@/components/AdSpace';
 import BannerAd from '@/components/BannerAd';
 import NativeAd from '@/components/NativeAd';
 import LanguageSelector from '@/components/LanguageSelector';
+import HelpGuide from '@/components/HelpGuide';
 import DailyTipBanner from '@/components/DailyTipBanner';
 import AnnouncementsBanner from '@/components/AnnouncementsBanner';
 import WorkerActivityTracker from '@/components/WorkerActivityTracker';
@@ -80,8 +81,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Language Selector - compact on dashboard header */}
-      <div className="flex items-center justify-end">
+      {/* Language Selector + Help on dashboard header */}
+      <div className="flex items-center justify-between gap-2">
+        <HelpGuide />
         <LanguageSelector variant="compact" />
       </div>
 

@@ -1233,5 +1233,52 @@
     "success_one": "오래된 기록 {{count}}건 삭제됨",
     "success_other": "오래된 기록 {{count}}건 삭제됨",
     "none": "일치하는 기록 없음"
+  },
+  "help": {
+    "button": "Help",
+    "title": "How to use this app",
+    "intro": "A quick, simple guide for new users. Tap any topic below.",
+    "topics": {
+      "gettingStarted": {
+        "title": "Getting started",
+        "body": "After signing up, register your business, factory, or property. Fill in your name, country and contact. The app will set your language and currency automatically — you can change them in Settings anytime."
+      },
+      "settings": {
+        "title": "Settings (the most useful page)",
+        "body": "Open Settings from the menu. Here you can:\n• Change your business code, name, logo, address & contact\n• Set the currency symbol (right at the top, below the business code)\n• Change the language\n• Manage workers, payments, premium and more\nVisit Settings once and explore — most app behavior is controlled from here."
+      },
+      "discover": {
+        "title": "Discover",
+        "body": "Discover lets you find other businesses, factories and rentals nearby or worldwide. Use it to send orders, message owners, or book assets. You can also make your own business public so others can find you."
+      },
+      "addingItems": {
+        "title": "Adding items to stock",
+        "body": "Go to Stock and tap \"Add Item\". Fill in the name, unit, prices and quantity. You can add a photo now or later.\n\nBe patient — adding many items takes time. The good news: you only do it once. If you have workers, they can add items from their own phones after you invite them to your team."
+      },
+      "team": {
+        "title": "Team (workers)",
+        "body": "In Team, invite workers using their phone or email. Set their role (Admin or Worker). Workers can sell, add items, record purchases and more from their own phones. This saves you a lot of work."
+      },
+      "receipts": {
+        "title": "Receipts, invoices & sharing",
+        "body": "Every sale, purchase and service can produce a receipt or invoice. Tap a record to view, share via WhatsApp/SMS, or print. All receipts are saved permanently in Settings → Receipt Archive, even if the original record is deleted."
+      },
+      "orders": {
+        "title": "Orders & bargaining",
+        "body": "Customers can order from you through Discover. You can also order from suppliers the same way. Orders support back-and-forth bargaining: send a price, the other side accepts or counters. Once both agree, the order is confirmed and stock moves automatically."
+      },
+      "wasteExpenses": {
+        "title": "Waste & other expenses",
+        "body": "Use Waste to record damaged or lost items — the stock is reduced and the loss is logged as an expense. Use Expenses for other costs like rent, transport or salaries. These keep your profit reports accurate."
+      },
+      "multiBusiness": {
+        "title": "Switching & multiple businesses",
+        "body": "You can register more than one business, factory or property under the same account. Use the business switcher at the top to move between them. Each one has its own stock, team, sales and reports."
+      },
+      "tips": {
+        "title": "Quick tips",
+        "body": "• Use the search bar above lists to quickly find a customer or debt\n• Use Multi-Delete to clean old records (debts are kept safe)\n• Bookmark this Help — open it any time you forget something"
+      }
+    }
   }
 }
