@@ -932,9 +932,18 @@ export default function PropertyBookings() {
   }, []);
 
   const isOwnerOrAdmin = userRole === 'owner' || userRole === 'admin';
-  const pending = bookings.filter(b => b.status === 'pending');
-  const active = bookings.filter(b => b.status === 'active' || b.status === 'confirmed');
-  const completed = bookings.filter(b => b.status === 'completed' || b.status === 'cancelled');
+  const [bookingSearch, setBookingSearch] = useState('');
+  const matchesSearch = (b: any) => {
+    const q = bookingSearch.trim().toLowerCase();
+    if (!q) return true;
+    const asset = assets.find(a => a.id === b.asset_id);
+    return (b.renter_name || '').toLowerCase().includes(q)
+      || (b.renter_contact || '').toLowerCase().includes(q)
+      || (asset?.name || '').toLowerCase().includes(q);
+  };
+  const pending = bookings.filter(b => b.status === 'pending').filter(matchesSearch);
+  const active = bookings.filter(b => b.status === 'active' || b.status === 'confirmed').filter(matchesSearch);
+  const completed = bookings.filter(b => b.status === 'completed' || b.status === 'cancelled').filter(matchesSearch);
 
   const statusColor = (s: string) => {
     switch (s) {
@@ -1151,6 +1160,13 @@ export default function PropertyBookings() {
       </div>
 
       <AdSpace variant="banner" />
+
+      <Input
+        value={bookingSearch}
+        onChange={e => setBookingSearch(e.target.value)}
+        placeholder="🔍 Search by renter, contact, or asset…"
+        className="h-9"
+      />
 
       <Tabs defaultValue="pending">
         <TabsList className="grid grid-cols-4">
