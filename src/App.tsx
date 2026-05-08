@@ -260,6 +260,7 @@ const App = () => (
       <AuthProvider>
         <AppContent />
       </AuthProvider>
+      <UpdateGate />
     </TooltipProvider>
   </QueryClientProvider>
 );
