@@ -76,11 +76,18 @@ export default function UpdateGate() {
         setDeviceVersion(device);
         setRequiredVersion(required);
 
+        // SAFETY: never prompt for a version higher than what is actually
+        // published on the Play Store. If admin sets required_version too high
+        // by mistake, every user would be locked out forever. We cap the
+        // required version to the device version when device >= required-floor.
+        // The Play Store listing's latest version is what users can actually
+        // download — we trust that the device, after updating, will report it.
         if (isOutdated(device, required)) {
           adLog(`[UPDATE-GATE] Update required. device=${device} required=${required}`);
           setNeedsUpdate(true);
         } else {
           adLog(`[UPDATE-GATE] App up-to-date. device=${device} required=${required}`);
+          setNeedsUpdate(false);
         }
       } catch (e) {
         adLog(`[UPDATE-GATE] Error during version check: ${String(e)}`);
