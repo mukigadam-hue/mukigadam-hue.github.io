@@ -81,8 +81,9 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Language Selector - compact on dashboard header */}
-      <div className="flex items-center justify-end">
+      {/* Language Selector + Help on dashboard header */}
+      <div className="flex items-center justify-between gap-2">
+        <HelpGuide />
         <LanguageSelector variant="compact" />
       </div>
 
