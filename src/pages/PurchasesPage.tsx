@@ -64,13 +64,19 @@ export default function PurchasesPage() {
     return s.name.toLowerCase().includes(q) || s.category.toLowerCase().includes(q) || (s.quality || '').toLowerCase().includes(q);
   });
 
+  const [historySearch, setHistorySearch] = useState('');
   const todayPurchases = purchases.filter(p => new Date(p.created_at).toDateString() === new Date().toDateString());
   const previousPurchases = purchases.filter(p => new Date(p.created_at).toDateString() !== new Date().toDateString());
   const currentList = activeTab === 'today' ? todayPurchases : previousPurchases;
   const filteredPurchases = currentList.filter(p => {
-    if (paymentFilter === 'all') return true;
-    if (paymentFilter === 'paid') return p.payment_status === 'paid';
-    return p.payment_status === 'partial' || p.payment_status === 'unpaid';
+    if (paymentFilter === 'paid' && p.payment_status !== 'paid') return false;
+    if (paymentFilter === 'debt' && p.payment_status !== 'partial' && p.payment_status !== 'unpaid') return false;
+    const q = historySearch.trim().toLowerCase();
+    if (!q) return true;
+    if ((p.supplier || '').toLowerCase().includes(q)) return true;
+    if ((p.recorded_by || '').toLowerCase().includes(q)) return true;
+    if ((p.items || []).some((it: any) => (it.item_name || '').toLowerCase().includes(q))) return true;
+    return false;
   });
 
   function applyCase(field: 'name' | 'category' | 'quality') {
@@ -403,6 +409,12 @@ export default function PurchasesPage() {
           </button>
         ))}
       </div>
+      <Input
+        value={historySearch}
+        onChange={e => setHistorySearch(e.target.value)}
+        placeholder="🔍 Search by supplier or item…"
+        className="h-9"
+      />
 
       <Card className="shadow-card">
         <CardContent className="p-4">

@@ -133,11 +133,17 @@ export default function FactoryPurchases() {
   const previousPurchases = purchases.filter(p => new Date(p.created_at).toDateString() !== new Date().toDateString());
   const [activeTab, setActiveTab] = useState<'today' | 'previous'>('today');
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'debt'>('all');
+  const [historySearch, setHistorySearch] = useState('');
   const currentList = activeTab === 'today' ? todayPurchases : previousPurchases;
   const filteredPurchases = currentList.filter(p => {
-    if (paymentFilter === 'all') return true;
-    if (paymentFilter === 'paid') return p.payment_status === 'paid';
-    return p.payment_status === 'partial' || p.payment_status === 'unpaid';
+    if (paymentFilter === 'paid' && p.payment_status !== 'paid') return false;
+    if (paymentFilter === 'debt' && p.payment_status !== 'partial' && p.payment_status !== 'unpaid') return false;
+    const q = historySearch.trim().toLowerCase();
+    if (!q) return true;
+    if ((p.supplier || '').toLowerCase().includes(q)) return true;
+    if ((p.recorded_by || '').toLowerCase().includes(q)) return true;
+    if ((p.items || []).some((it: any) => (it.item_name || '').toLowerCase().includes(q))) return true;
+    return false;
   });
 
   return (
