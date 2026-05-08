@@ -102,6 +102,14 @@ export default function ServicesPage() {
   const todayServices = services.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const prevServices = services.filter(s => new Date(s.created_at).toDateString() !== new Date().toDateString());
   const [activeTab, setActiveTab] = useState<'today' | 'previous'>('today');
+  const [historySearch, setHistorySearch] = useState('');
+  const visibleServices = (activeTab === 'today' ? todayServices : prevServices).filter(s => {
+    const q = historySearch.trim().toLowerCase();
+    if (!q) return true;
+    return (s.service_name || '').toLowerCase().includes(q)
+      || (s.customer_name || '').toLowerCase().includes(q)
+      || (s.seller_name || '').toLowerCase().includes(q);
+  });
 
   function PaymentBadge({ s }: { s: ServiceRecord }) {
     if (s.payment_status === 'paid' || !s.payment_status || Number(s.balance) <= 0) {
@@ -301,14 +309,20 @@ export default function ServicesPage() {
           Previous ({prevServices.length})
         </button>
       </div>
+      <Input
+        value={historySearch}
+        onChange={e => setHistorySearch(e.target.value)}
+        placeholder="🔍 Search by service or customer…"
+        className="h-9"
+      />
 
       <Card className="shadow-card">
         <CardContent className="p-4">
-          {(activeTab === 'today' ? todayServices : prevServices).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No services yet.</p>
+          {visibleServices.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No services match.</p>
           ) : (
             <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-              {(activeTab === 'today' ? todayServices : prevServices).map(s => (
+              {visibleServices.map(s => (
                 <ServiceCard key={s.id} s={s} />
               ))}
             </div>
