@@ -305,6 +305,12 @@ export default function FactoryPurchases() {
           </button>
         ))}
       </div>
+      <Input
+        value={historySearch}
+        onChange={e => setHistorySearch(e.target.value)}
+        placeholder="🔍 Search by supplier or item…"
+        className="h-9"
+      />
 
       <Card className="shadow-card">
         <CardContent className="p-4">
