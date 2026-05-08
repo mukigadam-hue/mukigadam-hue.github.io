@@ -1218,5 +1218,20 @@
       "card": "Tarjeta",
       "other": "Otro"
     }
+  },
+  "bulkCleanup": {
+    "button": "Limpiar",
+    "title": "Eliminar registros antiguos",
+    "description": "Eliminar permanentemente registros antiguos. Las deudas pendientes y el Archivo de Recibos se conservan.",
+    "lastWeek": "Última semana",
+    "lastMonth": "Último mes",
+    "older3Months": "Más de 3 meses",
+    "olderYear": "Más de 1 año",
+    "preview_one": "{{count}} registro",
+    "preview_other": "{{count}} registros",
+    "confirm": "¿Eliminar permanentemente {{count}} registros? No se puede deshacer. Las deudas y el Archivo de Recibos se mantienen.",
+    "success_one": "Eliminado {{count}} registro antiguo",
+    "success_other": "Eliminados {{count}} registros antiguos",
+    "none": "No se encontraron registros"
   }
 }

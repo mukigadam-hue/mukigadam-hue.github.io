@@ -1218,5 +1218,20 @@
       "card": "Cartão",
       "other": "Outro"
     }
+  },
+  "bulkCleanup": {
+    "button": "Limpar",
+    "title": "Excluir registros antigos",
+    "description": "Remover permanentemente registros antigos. Dívidas pendentes e o Arquivo de Recibos são mantidos.",
+    "lastWeek": "Última semana",
+    "lastMonth": "Último mês",
+    "older3Months": "Mais de 3 meses",
+    "olderYear": "Mais de 1 ano",
+    "preview_one": "{{count}} registro",
+    "preview_other": "{{count}} registros",
+    "confirm": "Excluir permanentemente {{count}} registros? Ação irreversível. Dívidas e Arquivo de Recibos permanecem.",
+    "success_one": "{{count}} registro antigo excluído",
+    "success_other": "{{count}} registros antigos excluídos",
+    "none": "Nenhum registro encontrado"
   }
 }

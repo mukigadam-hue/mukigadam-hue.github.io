@@ -1285,5 +1285,20 @@
       "card": "Kadi",
       "other": "Nyingine"
     }
+  },
+  "bulkCleanup": {
+    "button": "Futa Zamani",
+    "title": "Futa rekodi za zamani",
+    "description": "Ondoa kabisa rekodi za zamani. Rekodi zenye madeni na Hifadhi ya Risiti zitabaki.",
+    "lastWeek": "Wiki iliyopita",
+    "lastMonth": "Mwezi uliopita",
+    "older3Months": "Zaidi ya miezi 3",
+    "olderYear": "Zaidi ya mwaka 1",
+    "preview_one": "rekodi {{count}}",
+    "preview_other": "rekodi {{count}}",
+    "confirm": "Futa kabisa rekodi {{count}}? Hatua hii haiwezi kutenduliwa. Rekodi za madeni na Hifadhi ya Risiti zitabaki.",
+    "success_one": "Imefuta rekodi {{count}} ya zamani",
+    "success_other": "Imefuta rekodi {{count}} za zamani",
+    "none": "Hakuna rekodi zinazolingana"
   }
 }

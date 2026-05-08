@@ -1292,5 +1292,20 @@
       "card": "Card",
       "other": "Other"
     }
+  },
+  "bulkCleanup": {
+    "button": "Clean Old",
+    "title": "Delete old records",
+    "description": "Permanently remove old records. Records with outstanding debt and the Receipt Archive will be kept.",
+    "lastWeek": "Last week",
+    "lastMonth": "Last month",
+    "older3Months": "Older than 3 months",
+    "olderYear": "Older than 1 year",
+    "preview_one": "{{count}} record",
+    "preview_other": "{{count}} records",
+    "confirm": "Permanently delete {{count}} records? This cannot be undone. Records with debts and your Receipt Archive will be kept.",
+    "success_one": "Deleted {{count}} old record",
+    "success_other": "Deleted {{count}} old records",
+    "none": "No matching records found"
   }
 }

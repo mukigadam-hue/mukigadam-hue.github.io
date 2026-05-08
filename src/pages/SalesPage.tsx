@@ -1,3 +1,4 @@
+import BulkCleanupButton from '@/components/BulkCleanupButton';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useBusiness } from '@/context/BusinessContext';
@@ -344,7 +345,10 @@ export default function SalesPage() {
         onExistingItemFound={handlePartScanExisting}
         onNewItemCreated={handleScanNewItem}
       />
-      <h1 className="text-2xl font-bold">{t('sales.title')}</h1>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold">{t('sales.title')}</h1>
+        <BulkCleanupButton table="sales" />
+      </div>
 
       <Card className="shadow-card">
         <CardContent className="p-4 space-y-4">
