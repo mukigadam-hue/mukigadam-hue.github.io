@@ -10,6 +10,7 @@ import { Home, CalendarCheck, TrendingUp, Plus, AlertTriangle, Search, Camera } 
 import { useNavigate } from 'react-router-dom';
 import { APP_VERSION } from '@/version';
 import LanguageSelector from '@/components/LanguageSelector';
+import HelpGuide from '@/components/HelpGuide';
 import ImageUpload from '@/components/ImageUpload';
 import AdSpace from '@/components/AdSpace';
 import BannerAd from '@/components/BannerAd';
