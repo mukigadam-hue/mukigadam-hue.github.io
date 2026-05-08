@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { adLog, isDespiaNativeShell } from '@/lib/despiaAds';
 
-const PLAY_STORE_URL = 'https://google.com';
+const PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=com.despia.biztrack';
 
 function withTimeout<T>(promise: Promise<T>, fallback: T, ms = 2500): Promise<T> {
   return Promise.race([
