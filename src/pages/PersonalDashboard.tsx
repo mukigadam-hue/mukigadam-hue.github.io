@@ -5,6 +5,7 @@ import { ClipboardList, Globe, Contact, CalendarCheck, Plus, Search } from 'luci
 import { Link } from 'react-router-dom';
 import AdSpace from '@/components/AdSpace';
 import BannerAd from '@/components/BannerAd';
+import HelpGuide from '@/components/HelpGuide';
 
 export default function PersonalDashboard() {
   const { currentBusiness, orders } = useBusiness();
