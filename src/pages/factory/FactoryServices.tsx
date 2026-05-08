@@ -26,11 +26,15 @@ const SERVICE_TYPES = [
 
 export default function FactoryServices() {
   const { t } = useTranslation();
-  const { services, stock, addService, saveReceipt, currentBusiness } = useBusiness();
+  const { services, stock, addService, saveReceipt, currentBusiness, updateServicePayment } = useBusiness();
   const { fmt } = useCurrency();
   const [form, setForm] = useState({ service_name: '', description: '', cost: '', customer_name: '', seller_name: '' });
   const [receiptService, setReceiptService] = useState<ServiceRecord | null>(null);
   const [scannerOpen, setScannerOpen] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState<'paid' | 'partial' | 'unpaid'>('paid');
+  const [amountPaid, setAmountPaid] = useState('');
+  const [editPaymentService, setEditPaymentService] = useState<ServiceRecord | null>(null);
+  const [editAmountPaid, setEditAmountPaid] = useState('');
 
   const [itemsUsed, setItemsUsed] = useState<{ stock_item_id: string; item_name: string; category: string; quality: string; quantity: number; unit_price: number; subtotal: number }[]>([]);
   const [selectedStock, setSelectedStock] = useState('');
@@ -64,8 +68,12 @@ export default function FactoryServices() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmit) return;
+    const paid = paymentStatus === 'paid' ? totalCost : (parseFloat(amountPaid) || 0);
+    const bal = Math.max(0, totalCost - paid);
+    const status = bal <= 0 ? 'paid' : (paid > 0 ? 'partial' : 'unpaid');
+
     const newService = await addService(
-      { service_name: toSentenceCase(form.service_name.trim()), description: toSentenceCase(form.description.trim()), cost: totalCost, customer_name: toTitleCase(form.customer_name.trim()), seller_name: toTitleCase(form.seller_name.trim()), payment_status: 'paid', amount_paid: totalCost, balance: 0 },
+      { service_name: toSentenceCase(form.service_name.trim()), description: toSentenceCase(form.description.trim()), cost: totalCost, customer_name: toTitleCase(form.customer_name.trim()), seller_name: toTitleCase(form.seller_name.trim()), payment_status: status, amount_paid: paid, balance: bal },
       itemsUsed.length > 0 ? itemsUsed : undefined
     );
     if (newService && currentBusiness) {
@@ -73,22 +81,34 @@ export default function FactoryServices() {
         { itemName: newService.service_name, category: 'Service', quality: newService.description || '-', quantity: 1, priceType: 'service', unitPrice: serviceCost, subtotal: serviceCost },
         ...itemsUsed.map(i => ({ itemName: `[Part] ${i.item_name}`, category: i.category, quality: i.quality, quantity: i.quantity, priceType: 'part', unitPrice: i.unit_price, subtotal: i.subtotal })),
       ];
-      await saveReceipt({
-        business_id: currentBusiness.id, receipt_type: 'service', transaction_id: newService.id,
-        buyer_name: newService.customer_name, seller_name: newService.seller_name,
-        grand_total: totalCost, items: receiptItems,
-        business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
-        code: null,
-      });
-      setReceiptService({ ...newService, cost: totalCost, payment_status: 'paid', amount_paid: totalCost, balance: 0 });
+      if (status === 'paid') {
+        await saveReceipt({
+          business_id: currentBusiness.id, receipt_type: 'service', transaction_id: newService.id,
+          buyer_name: newService.customer_name, seller_name: newService.seller_name,
+          grand_total: totalCost, items: receiptItems,
+          business_info: { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email },
+          code: null,
+        });
+      }
+      setReceiptService({ ...newService, cost: totalCost, payment_status: status, amount_paid: paid, balance: bal });
     }
     setForm({ service_name: '', description: '', cost: '', customer_name: '', seller_name: '' });
-    setItemsUsed([]);
+    setItemsUsed([]); setPaymentStatus('paid'); setAmountPaid('');
   }
 
   const todayServices = services.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const prevServices = services.filter(s => new Date(s.created_at).toDateString() !== new Date().toDateString());
   const [activeTab, setActiveTab] = useState<'today' | 'previous'>('today');
+
+  function PaymentBadge({ s }: { s: ServiceRecord }) {
+    if (s.payment_status === 'paid' || !s.payment_status || Number(s.balance) <= 0) {
+      return <span className="text-[10px] font-semibold text-success bg-success/10 px-1.5 py-0.5 rounded">✅ {t('invoice.receipt')}</span>;
+    }
+    if (s.payment_status === 'partial') {
+      return <span className="text-[10px] font-semibold text-warning bg-warning/10 px-1.5 py-0.5 rounded">📄 {t('invoice.invoice')} · {t('invoice.balance')}: {fmt(Number(s.balance))} ({t('invoice.paid')} {fmt(Number(s.amount_paid))})</span>;
+    }
+    return <span className="text-[10px] font-semibold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded">📄 {t('invoice.invoice')} · {t('invoice.balance')}: {fmt(Number(s.balance))}</span>;
+  }
 
   return (
     <div className="space-y-6">
@@ -153,6 +173,30 @@ export default function FactoryServices() {
               </div>
             )}
 
+            {/* Payment Status */}
+            {totalCost > 0 && (
+              <div className="p-3 bg-muted/40 rounded-lg border space-y-2">
+                <Label className="text-xs font-semibold">💰 Payment Status</Label>
+                <div className="flex gap-2 flex-wrap">
+                  {(['paid', 'partial', 'unpaid'] as const).map(s => (
+                    <button key={s} type="button" onClick={() => setPaymentStatus(s)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${paymentStatus === s
+                        ? s === 'paid' ? 'bg-success text-success-foreground' : s === 'partial' ? 'bg-warning text-warning-foreground' : 'bg-destructive text-destructive-foreground'
+                        : 'bg-muted text-muted-foreground'}`}>
+                      {s === 'paid' ? '✅ Paid Full' : s === 'partial' ? '⚠️ Paid Partial' : '❌ Credit'}
+                    </button>
+                  ))}
+                </div>
+                {paymentStatus !== 'paid' && (
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Label className="text-xs whitespace-nowrap">Amount Paid:</Label>
+                    <Input type="number" min="0" step="0.01" value={amountPaid} onChange={e => setAmountPaid(e.target.value)} placeholder="0.00" className="w-32" />
+                    <span className="text-xs text-muted-foreground">Balance: <span className="font-bold text-destructive">{fmt(totalCost - (parseFloat(amountPaid) || 0))}</span></span>
+                  </div>
+                )}
+              </div>
+            )}
+
             <Button type="submit" className="w-full" disabled={!canSubmit}>
               <Wrench className="h-4 w-4 mr-2" />{t('factoryUI.recordService')}
             </Button>
@@ -174,15 +218,31 @@ export default function FactoryServices() {
             <p className="text-sm text-muted-foreground">{t('factoryUI.noServicesYet')}</p>
           ) : (
             <div className="space-y-2 max-h-[500px] overflow-y-auto">
-              {(activeTab === 'today' ? todayServices : prevServices).map(s => (
-                <div key={s.id} className="border rounded-lg p-3 flex justify-between items-start">
-                  <div><p className="font-medium text-sm">{s.service_name}</p><p className="text-xs text-muted-foreground">👤 {s.customer_name}</p></div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-success bg-success/10 px-2 py-0.5 rounded-md text-sm tabular-nums">{fmt(Number(s.cost))}</span>
-                    <Button size="sm" variant="ghost" onClick={() => setReceiptService(s)}><ReceiptIcon className="h-3.5 w-3.5" /></Button>
+              {(activeTab === 'today' ? todayServices : prevServices).map(s => {
+                const isOverdue = s.payment_status !== 'paid' && Number(s.balance) > 0 && (Date.now() - new Date(s.created_at).getTime()) > 3 * 24 * 60 * 60 * 1000;
+                return (
+                  <div key={s.id} className={`border rounded-lg p-3 flex justify-between items-start ${isOverdue ? 'border-destructive/50 bg-destructive/5' : s.payment_status === 'partial' ? 'border-warning/40 bg-warning/5' : s.payment_status === 'unpaid' ? 'border-destructive/40 bg-destructive/5' : ''}`}>
+                    <div className="flex-1">
+                      <p className="font-medium text-sm">{s.service_name}</p>
+                      <p className="text-xs text-muted-foreground">👤 {s.customer_name}</p>
+                      <div className="flex items-center gap-2 mt-1 flex-wrap">
+                        <PaymentBadge s={s} />
+                        {isOverdue && <span className="text-[10px] font-bold text-destructive animate-pulse">🔴 OVERDUE</span>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 ml-2">
+                      <span className="font-bold text-success bg-success/10 px-2 py-0.5 rounded-md text-sm tabular-nums">{fmt(Number(s.cost))}</span>
+                      {s.payment_status !== 'paid' && Number(s.balance) > 0 && (
+                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => { setEditPaymentService(s); setEditAmountPaid(String(s.amount_paid || 0)); }}>
+                          💰 Pay
+                        </Button>
+                      )}
+                      <Button size="sm" variant="ghost" onClick={() => setReceiptService(s)}><ReceiptIcon className="h-3.5 w-3.5" /></Button>
+                      <RecycleDeleteButton table="services" recordId={s.id} />
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </CardContent>
@@ -194,10 +254,33 @@ export default function FactoryServices() {
           {receiptService && (
             <Receipt
               items={[{ itemName: receiptService.service_name, category: 'Service', quality: receiptService.description || '-', quantity: 1, priceType: 'service', unitPrice: Number(receiptService.cost), subtotal: Number(receiptService.cost) }]}
-              grandTotal={Number(receiptService.cost)} buyerName={receiptService.customer_name} sellerName={receiptService.seller_name}
+              grandTotal={Number(receiptService.cost)}
+              amountPaid={Number(receiptService.amount_paid ?? receiptService.cost)}
+              paymentStatus={receiptService.payment_status}
+              buyerName={receiptService.customer_name} sellerName={receiptService.seller_name}
               date={receiptService.created_at} type="service"
               businessInfo={currentBusiness ? { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email } : undefined}
             />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Update Payment Dialog */}
+      <Dialog open={!!editPaymentService} onOpenChange={o => { if (!o) setEditPaymentService(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader><DialogTitle>Update Payment — {editPaymentService?.customer_name}</DialogTitle></DialogHeader>
+          {editPaymentService && (
+            <div className="space-y-3">
+              <p className="text-sm">Total: <span className="font-bold">{fmt(Number(editPaymentService.cost))}</span></p>
+              <p className="text-sm">Previously Paid: <span className="font-bold">{fmt(Number(editPaymentService.amount_paid))}</span></p>
+              <div><Label>New Total Amount Paid</Label><Input type="number" min="0" step="0.01" value={editAmountPaid} onChange={e => setEditAmountPaid(e.target.value)} /></div>
+              <p className="text-sm">New Balance: <span className="font-bold text-destructive">{fmt(Number(editPaymentService.cost) - (parseFloat(editAmountPaid) || 0))}</span></p>
+              <Button className="w-full" onClick={async () => {
+                const amt = parseFloat(editAmountPaid) || 0;
+                await updateServicePayment(editPaymentService.id, amt, amt >= Number(editPaymentService.cost) ? 'paid' : amt > 0 ? 'partial' : 'unpaid');
+                setEditPaymentService(null);
+              }}>💰 Save Payment</Button>
+            </div>
           )}
         </DialogContent>
       </Dialog>
