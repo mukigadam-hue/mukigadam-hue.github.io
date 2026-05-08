@@ -37,7 +37,8 @@ export default function PropertyDashboard() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between gap-2">
+        <HelpGuide />
         <LanguageSelector variant="compact" />
       </div>
 
