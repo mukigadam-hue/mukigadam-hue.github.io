@@ -74,14 +74,20 @@ export default function SalesPage() {
   const [scannerOpen, setScannerOpen] = useState(false);
   const [partScannerOpen, setPartScannerOpen] = useState(false);
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'paid' | 'debt'>('all');
+  const [historySearch, setHistorySearch] = useState('');
   const activeStock = stock.filter(s => !s.deleted_at);
   const todaySales = sales.filter(s => new Date(s.created_at).toDateString() === new Date().toDateString());
   const previousSales = sales.filter(s => new Date(s.created_at).toDateString() !== new Date().toDateString());
   const currentSalesList = activeTab === 'today' ? todaySales : previousSales;
   const filteredSales = currentSalesList.filter(s => {
-    if (paymentFilter === 'all') return true;
-    if (paymentFilter === 'paid') return s.payment_status === 'paid';
-    return s.payment_status === 'partial' || s.payment_status === 'unpaid';
+    if (paymentFilter === 'paid' && s.payment_status !== 'paid') return false;
+    if (paymentFilter === 'debt' && s.payment_status !== 'partial' && s.payment_status !== 'unpaid') return false;
+    const q = historySearch.trim().toLowerCase();
+    if (!q) return true;
+    if ((s.customer_name || '').toLowerCase().includes(q)) return true;
+    if ((s.recorded_by || '').toLowerCase().includes(q)) return true;
+    if ((s.items || []).some((it: any) => (it.item_name || '').toLowerCase().includes(q))) return true;
+    return false;
   });
 
   // Filter stock items by search text
@@ -719,6 +725,12 @@ export default function SalesPage() {
           </button>
         ))}
       </div>
+      <Input
+        value={historySearch}
+        onChange={e => setHistorySearch(e.target.value)}
+        placeholder={`🔍 ${t('common.searchHistory', 'Search by customer or item…')}`}
+        className="h-9"
+      />
 
       <Card className="shadow-card">
         <CardContent className="p-4">
