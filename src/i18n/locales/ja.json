@@ -1218,5 +1218,20 @@
       "card": "カード",
       "other": "その他"
     }
+  },
+  "bulkCleanup": {
+    "button": "古い記録削除",
+    "title": "古い記録を削除",
+    "description": "古い記録を完全に削除します。未払い債務とレシート保管庫は保持されます。",
+    "lastWeek": "先週",
+    "lastMonth": "先月",
+    "older3Months": "3ヶ月以上前",
+    "olderYear": "1年以上前",
+    "preview_one": "{{count}} 件",
+    "preview_other": "{{count}} 件",
+    "confirm": "{{count}} 件を完全に削除しますか？元に戻せません。債務とレシート保管庫は保持されます。",
+    "success_one": "{{count}} 件の古い記録を削除",
+    "success_other": "{{count}} 件の古い記録を削除",
+    "none": "該当する記録なし"
   }
 }

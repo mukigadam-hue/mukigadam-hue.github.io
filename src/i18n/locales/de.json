@@ -1218,5 +1218,20 @@
       "card": "Karte",
       "other": "Andere"
     }
+  },
+  "bulkCleanup": {
+    "button": "Bereinigen",
+    "title": "Alte Datensätze löschen",
+    "description": "Alte Datensätze dauerhaft entfernen. Offene Schulden und das Belegarchiv bleiben erhalten.",
+    "lastWeek": "Letzte Woche",
+    "lastMonth": "Letzter Monat",
+    "older3Months": "Älter als 3 Monate",
+    "olderYear": "Älter als 1 Jahr",
+    "preview_one": "{{count}} Datensatz",
+    "preview_other": "{{count}} Datensätze",
+    "confirm": "{{count}} Datensätze endgültig löschen? Nicht rückgängig zu machen. Schulden und Belegarchiv bleiben.",
+    "success_one": "{{count}} alter Datensatz gelöscht",
+    "success_other": "{{count}} alte Datensätze gelöscht",
+    "none": "Keine passenden Datensätze gefunden"
   }
 }

@@ -1218,5 +1218,20 @@
       "card": "카드",
       "other": "기타"
     }
+  },
+  "bulkCleanup": {
+    "button": "오래된 삭제",
+    "title": "오래된 기록 삭제",
+    "description": "오래된 기록을 영구 삭제합니다. 미결제 부채와 영수증 보관함은 유지됩니다.",
+    "lastWeek": "지난 주",
+    "lastMonth": "지난 달",
+    "older3Months": "3개월 이상",
+    "olderYear": "1년 이상",
+    "preview_one": "{{count}}건",
+    "preview_other": "{{count}}건",
+    "confirm": "{{count}}건을 영구 삭제하시겠습니까? 되돌릴 수 없습니다. 부채와 영수증 보관함은 유지됩니다.",
+    "success_one": "오래된 기록 {{count}}건 삭제됨",
+    "success_other": "오래된 기록 {{count}}건 삭제됨",
+    "none": "일치하는 기록 없음"
   }
 }

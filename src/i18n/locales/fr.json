@@ -1260,5 +1260,20 @@
       "card": "Carte",
       "other": "Autre"
     }
+  },
+  "bulkCleanup": {
+    "button": "Nettoyer",
+    "title": "Supprimer les anciens enregistrements",
+    "description": "Supprimer définitivement les anciens enregistrements. Les dettes en cours et l’Archive des reçus sont conservées.",
+    "lastWeek": "Semaine dernière",
+    "lastMonth": "Mois dernier",
+    "older3Months": "Plus de 3 mois",
+    "olderYear": "Plus d’un an",
+    "preview_one": "{{count}} enregistrement",
+    "preview_other": "{{count}} enregistrements",
+    "confirm": "Supprimer définitivement {{count}} enregistrements ? Action irréversible. Les dettes et l’Archive des reçus restent.",
+    "success_one": "{{count}} ancien enregistrement supprimé",
+    "success_other": "{{count}} anciens enregistrements supprimés",
+    "none": "Aucun enregistrement correspondant"
   }
 }
