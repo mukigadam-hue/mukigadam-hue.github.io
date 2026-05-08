@@ -28,10 +28,9 @@ const PERIODS: CleanupPeriod[] = ['last_week', 'last_month', 'older_3m', 'older_
  */
 export default function BulkCleanupButton({ table, businessId, onDone, className }: Props) {
   const { t } = useTranslation();
-  const { currentBusiness, getRoleForBusiness, refreshData } = useBusiness();
+  const { currentBusiness, userRole, refreshData } = useBusiness();
   const bid = businessId || currentBusiness?.id || '';
-  const role = bid ? getRoleForBusiness(bid) : null;
-  const allowed = role === 'owner' || role === 'admin';
+  const allowed = userRole === 'owner' || userRole === 'admin';
 
   const [open, setOpen] = useState(false);
   const [counts, setCounts] = useState<Record<CleanupPeriod, number | null>>({
