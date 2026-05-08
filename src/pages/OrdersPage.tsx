@@ -1316,6 +1316,13 @@ export default function OrdersPage() {
         <BulkCleanupButton table="orders" />
       </div>
 
+      <Input
+        value={orderSearch}
+        onChange={e => setOrderSearch(e.target.value)}
+        placeholder="🔍 Search by customer, supplier, or item…"
+        className="h-9"
+      />
+
       {/* Create new order */}
       {!fromDiscover && (
         <div className="flex gap-2 flex-wrap">
