@@ -601,7 +601,19 @@ export function BusinessProvider({ children }: { children: React.ReactNode }) {
   const createBusiness = useCallback(async (name: string, address: string, contact: string, email: string, countryCode?: string) => {
     if (!user) return;
     const insertData: any = { name, address, contact, email, owner_id: user.id };
-    if (countryCode) insertData.country_code = countryCode;
+    if (countryCode) {
+      insertData.country_code = countryCode;
+      // Auto-detect currency symbol from country so users in different countries
+      // don't end up with the wrong symbol if they forget to change it.
+      try {
+        const { getCountryByCode } = await import('@/lib/countries');
+        const c = getCountryByCode(countryCode);
+        if (c?.currencySymbol) {
+          insertData.currency_symbol = c.currencySymbol;
+          try { localStorage.setItem('biztrack_currency_symbol', c.currencySymbol); } catch {}
+        }
+      } catch {}
+    }
     const { data, error } = await supabase.from('businesses').insert(insertData).select().single();
     if (error) { toast.error(error.message); return; }
     toast.success('Business created!');
