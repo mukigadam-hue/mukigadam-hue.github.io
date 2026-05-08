@@ -17,9 +17,12 @@ export default function PersonalDashboard() {
 
   return (
     <div className="space-y-4">
-      <div>
-        <h1 className="text-xl font-bold">👤 Welcome, {currentBusiness?.name}</h1>
-        <p className="text-sm text-muted-foreground">Your personal dashboard</p>
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-bold">👤 Welcome, {currentBusiness?.name}</h1>
+          <p className="text-sm text-muted-foreground">Your personal dashboard</p>
+        </div>
+        <HelpGuide />
       </div>
 
       {/* Quick Stats */}
