@@ -157,9 +157,19 @@ export default function OrdersPage() {
     ? ['Electricity', 'Water', 'Gas', 'Machinery Repair', 'Building Repair', 'Lubricants', 'Cleaning Supplies', 'Safety Gear', 'Factory Rent', 'Transport Costs', 'Insurance', 'Other']
     : ['Rent', 'Electricity', 'Water', 'Internet', 'Cleaning Equipment', 'Food for Workers', 'Transport', 'Repairs & Maintenance', 'Office Supplies', 'Security', 'Other'];
 
-  const liveOrders = orders.filter(o => o.type === 'my_order');
-  const inboxOrders = orders.filter(o => o.type === 'inbox');
-  const myRequests = orders.filter(o => o.type === 'request');
+  const [orderSearch, setOrderSearch] = useState('');
+  const matchOrder = (o: any) => {
+    const q = orderSearch.trim().toLowerCase();
+    if (!q) return true;
+    if ((o.customer_name || '').toLowerCase().includes(q)) return true;
+    if ((o.supplier_name || '').toLowerCase().includes(q)) return true;
+    if ((o.recorded_by || '').toLowerCase().includes(q)) return true;
+    if ((o.items || []).some((it: any) => (it.item_name || '').toLowerCase().includes(q))) return true;
+    return false;
+  };
+  const liveOrders = orders.filter(o => o.type === 'my_order').filter(matchOrder);
+  const inboxOrders = orders.filter(o => o.type === 'inbox').filter(matchOrder);
+  const myRequests = orders.filter(o => o.type === 'request').filter(matchOrder);
   const requestsNeedingAction = myRequests.filter(o => o.status === 'priced' || o.status === 'confirmed').length;
   // Yellow badge on "Customers" tab: only count UNREAD notifications related to incoming orders.
   // Once the user reads/opens those notifications, the badge disappears.
@@ -1305,6 +1315,13 @@ export default function OrdersPage() {
         <h1 className="text-2xl font-bold">{t('orders.title')}</h1>
         <BulkCleanupButton table="orders" />
       </div>
+
+      <Input
+        value={orderSearch}
+        onChange={e => setOrderSearch(e.target.value)}
+        placeholder="🔍 Search by customer, supplier, or item…"
+        className="h-9"
+      />
 
       {/* Create new order */}
       {!fromDiscover && (
