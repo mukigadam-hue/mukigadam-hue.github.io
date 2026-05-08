@@ -144,7 +144,10 @@ export default function ServicesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{t('services.title')}</h1>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold">{t('services.title')}</h1>
+        <BulkCleanupButton table="services" />
+      </div>
       <Card className="shadow-card">
         <CardContent className="p-4">
           <h2 className="text-base font-semibold mb-3">Record Service</h2>

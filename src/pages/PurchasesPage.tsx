@@ -202,7 +202,10 @@ export default function PurchasesPage() {
         onExistingItemFound={handleScanExistingItem}
         onNewItemCreated={handleScanNewItem}
       />
-      <h1 className="text-2xl font-bold">{t('purchases.title')}</h1>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold">{t('purchases.title')}</h1>
+        <BulkCleanupButton table="purchases" />
+      </div>
 
       <Card className="shadow-card">
         <CardContent className="p-4 space-y-4">

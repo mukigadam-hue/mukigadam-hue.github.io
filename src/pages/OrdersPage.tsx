@@ -1300,8 +1300,9 @@ export default function OrdersPage() {
   return (
     <div className="space-y-6">
       <BarcodeScanner open={scannerOpen} onOpenChange={setScannerOpen} onScan={handleBarcodeScan} />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <h1 className="text-2xl font-bold">{t('orders.title')}</h1>
+        <BulkCleanupButton table="orders" />
       </div>
 
       {/* Create new order */}

@@ -1136,7 +1136,8 @@ export default function PropertyBookings() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold">📅 {t('propertyUI.bookingsTitle')}</h1>
-        <div className="flex gap-1">
+        <div className="flex gap-1 items-center">
+          <BulkCleanupButton table="property_bookings" />
           {isOwnerOrAdmin && (
             <Button size="sm" variant="outline" onClick={() => setDirectBookOpen(true)}>
               <Banknote className="h-4 w-4 mr-1" /> {t('propertyUI.newBooking')}

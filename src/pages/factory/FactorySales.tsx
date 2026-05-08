@@ -153,7 +153,10 @@ export default function FactorySales() {
   return (
     <div className="space-y-6">
       <BarcodeScanner open={scannerOpen} onOpenChange={setScannerOpen} onScan={handleBarcodeScan} />
-      <h1 className="text-2xl font-bold flex items-center gap-2"><TrendingUp className="h-6 w-6" /> {t('sales.title')}</h1>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold flex items-center gap-2"><TrendingUp className="h-6 w-6" /> {t('sales.title')}</h1>
+        <BulkCleanupButton table="sales" />
+      </div>
 
       <Card className="shadow-card">
         <CardContent className="p-4 space-y-4">
