@@ -1300,5 +1300,52 @@
     "success_one": "Imefuta rekodi {{count}} ya zamani",
     "success_other": "Imefuta rekodi {{count}} za zamani",
     "none": "Hakuna rekodi zinazolingana"
+  },
+  "help": {
+    "button": "Msaada",
+    "title": "Jinsi ya kutumia programu hii",
+    "intro": "Mwongozo mfupi na rahisi kwa watumiaji wapya. Bofya mada yoyote hapa chini.",
+    "topics": {
+      "gettingStarted": {
+        "title": "Kuanza",
+        "body": "Baada ya kujisajili, sajili biashara, kiwanda au mali yako. Jaza jina, nchi na mawasiliano. Programu itaweka lugha na sarafu yako kiotomatiki — unaweza kuzibadilisha kwenye Mipangilio wakati wowote."
+      },
+      "settings": {
+        "title": "Mipangilio (ukurasa muhimu zaidi)",
+        "body": "Fungua Mipangilio kutoka menyu. Hapa unaweza:\n• Kubadilisha msimbo wa biashara, jina, nembo, anwani na mawasiliano\n• Kuweka alama ya sarafu (juu kabisa, chini ya msimbo wa biashara)\n• Kubadilisha lugha\n• Kusimamia wafanyakazi, malipo, premium na zaidi\nTembelea Mipangilio mara moja na uchunguze."
+      },
+      "discover": {
+        "title": "Gundua",
+        "body": "Gundua hukuruhusu kupata biashara, viwanda na mali za kukodisha karibu nawe au duniani kote. Tumia kutuma maagizo, kutuma ujumbe, au kuhifadhi mali. Unaweza pia kufanya biashara yako ionekane kwa wengine."
+      },
+      "addingItems": {
+        "title": "Kuongeza bidhaa kwenye stoo",
+        "body": "Nenda kwenye Stoo na bofya \"Ongeza Bidhaa\". Jaza jina, kipimo, bei na idadi. Unaweza kuongeza picha sasa au baadaye.\n\nKuwa na subira — kuongeza bidhaa nyingi kunachukua muda. Habari njema: unafanya mara moja tu. Ikiwa una wafanyakazi, wanaweza kuongeza bidhaa kutoka kwenye simu zao baada ya kuwaalika kwenye timu yako."
+      },
+      "team": {
+        "title": "Timu (wafanyakazi)",
+        "body": "Kwenye Timu, alika wafanyakazi kwa namba ya simu au barua pepe. Weka nafasi yao (Msimamizi au Mfanyakazi). Wafanyakazi wanaweza kuuza, kuongeza bidhaa na zaidi kutoka simu zao. Hii inakuokoa muda mwingi."
+      },
+      "receipts": {
+        "title": "Risiti, ankara na kushiriki",
+        "body": "Kila mauzo, manunuzi na huduma vinaweza kuzalisha risiti au ankara. Bofya rekodi kuona, shiriki kupitia WhatsApp/SMS, au chapisha. Risiti zote huhifadhiwa daima kwenye Mipangilio → Hifadhi ya Risiti, hata kama rekodi ya asili imefutwa."
+      },
+      "orders": {
+        "title": "Maagizo na mazungumzo ya bei",
+        "body": "Wateja wanaweza kuagiza kutoka kwako kupitia Gundua. Unaweza pia kuagiza kutoka kwa wasambazaji kwa njia hiyo hiyo. Maagizo yanaruhusu mazungumzo ya bei: tuma bei, upande mwingine ukubali au utoe bei nyingine. Mkikubaliana, agizo linathibitishwa na stoo inabadilika kiotomatiki."
+      },
+      "wasteExpenses": {
+        "title": "Upotevu na matumizi mengine",
+        "body": "Tumia Upotevu kurekodi bidhaa zilizoharibika au kupotea — stoo itapunguzwa na hasara itarekodiwa kama matumizi. Tumia Matumizi kwa gharama nyingine kama kodi, usafiri au mishahara. Hizi zinasaidia ripoti zako za faida kuwa sahihi."
+      },
+      "multiBusiness": {
+        "title": "Kubadilisha na biashara nyingi",
+        "body": "Unaweza kusajili biashara, viwanda au mali zaidi ya moja chini ya akaunti moja. Tumia kibadilishi cha biashara juu ili kuhama kati yao. Kila moja ina stoo, timu, mauzo na ripoti zake."
+      },
+      "tips": {
+        "title": "Vidokezo vya haraka",
+        "body": "• Tumia upau wa kutafuta juu ya orodha kupata mteja au deni haraka\n• Tumia Futa-Wengi kusafisha rekodi za zamani (madeni yanahifadhiwa salama)\n• Hifadhi Msaada huu — fungua wakati wowote unaposahau"
+      }
+    }
   }
 }
