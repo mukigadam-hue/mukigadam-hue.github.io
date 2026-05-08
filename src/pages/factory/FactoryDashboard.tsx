@@ -12,6 +12,7 @@ import AdSpace from '@/components/AdSpace';
 import BannerAd from '@/components/BannerAd';
 import DailyTipBanner from '@/components/DailyTipBanner';
 import AnnouncementsBanner from '@/components/AnnouncementsBanner';
+import HelpGuide from '@/components/HelpGuide';
 import WorkerActivityTracker from '@/components/WorkerActivityTracker';
 
 export default function FactoryDashboard() {
