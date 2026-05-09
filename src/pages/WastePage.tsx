@@ -254,9 +254,12 @@ export default function WastePage() {
                         {e.recorded_by && ` · ${t('waste.by')}: ${e.recorded_by}`}
                       </p>
                     </div>
-                    <span className="text-sm font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-md tabular-nums">
-                      -{fmt(Number(e.amount))}
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-sm font-semibold text-destructive bg-destructive/10 px-2 py-0.5 rounded-md tabular-nums">
+                        -{fmt(Number(e.amount))}
+                      </span>
+                      <RecycleDeleteButton table="business_expenses" recordId={e.id} label={t('common.cancel', 'Cancel')} />
+                    </div>
                   </div>
                 </div>
               ))}
