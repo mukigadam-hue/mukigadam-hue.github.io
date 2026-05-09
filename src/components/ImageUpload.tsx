@@ -114,11 +114,11 @@ export default function ImageUpload({ bucket, path, currentUrl, onUploaded, onRe
           )}
         </div>
         <div className="flex gap-1.5">
-          <Button type="button" size="sm" variant="outline" className="text-xs h-7 px-2" disabled={uploading}
+          <Button type="button" size="sm" variant="default" className="text-xs h-7 px-2" disabled={uploading}
             onClick={handleCameraClick}>
             <Camera className="h-3 w-3 mr-1" />Photo
           </Button>
-          <Button type="button" size="sm" variant="outline" className="text-xs h-7 px-2" disabled={uploading}
+          <Button type="button" size="sm" variant="default" className="text-xs h-7 px-2" disabled={uploading}
             onClick={() => fileInputRef.current?.click()}>
             <Upload className="h-3 w-3 mr-1" />Upload
           </Button>
