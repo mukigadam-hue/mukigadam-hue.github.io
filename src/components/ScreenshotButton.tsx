@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { isDespiaShell, takeNativeScreenshot } from '@/lib/despiaScreenshot';
 
 interface ScreenshotButtonProps {
-  variant?: 'icon' | 'compact';
+  variant?: 'icon' | 'compact' | 'floating';
   className?: string;
 }
 
