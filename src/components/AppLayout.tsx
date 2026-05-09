@@ -447,7 +447,6 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
           <div className="md:hidden flex items-center justify-between px-3 pt-2 pb-1">
             <span className="text-xs font-semibold text-muted-foreground truncate">{currentBusiness?.name}</span>
             <div className="flex items-center gap-1">
-              <ScreenshotButton variant="compact" />
               <Button variant="ghost" size="sm" className="h-7 px-2 gap-1 text-xs" onClick={handleRefresh} disabled={refreshing}>
                 <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh
               </Button>
