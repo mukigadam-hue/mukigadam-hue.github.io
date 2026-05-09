@@ -754,7 +754,21 @@ export default function SettingsPage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">Settings</h1>
-        <Card className="shadow-card">
+        <Card className="shadow-card relative">
+          <div className="absolute top-2 right-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="More options">
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowResetDialog(true)}>
+                  <KeyRound className="h-4 w-4 mr-2" /> Forgot password? Reset
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <CardContent className="p-6 space-y-4 max-w-sm mx-auto">
             <div className="text-center">
               <Lock className="h-12 w-12 mx-auto text-primary mb-3" />
@@ -766,8 +780,52 @@ export default function SettingsPage() {
                 onKeyDown={e => e.key === 'Enter' && handleUnlock()} />
             </div>
             <Button onClick={handleUnlock} className="w-full"><Lock className="h-4 w-4 mr-2" />Unlock</Button>
+            <button
+              type="button"
+              onClick={() => setShowResetDialog(true)}
+              className="w-full text-xs text-primary hover:underline text-center"
+            >
+              Forgot password?
+            </button>
           </CardContent>
         </Card>
+
+        <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <KeyRound className="h-5 w-5 text-primary" /> Reset Settings Password
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Enter your <strong>Business Code</strong> to verify ownership, then choose a new settings password.
+                You can find your Business Code on your printed receipts or the Discover page.
+              </p>
+              <div>
+                <Label>Business Code</Label>
+                <Input
+                  value={resetCode}
+                  onChange={e => setResetCode(e.target.value.toUpperCase())}
+                  placeholder="e.g. UG-XXXXXXXX"
+                  autoCapitalize="characters"
+                />
+              </div>
+              <div>
+                <Label>New Settings Password</Label>
+                <Input
+                  type="password"
+                  value={resetNewPassword}
+                  onChange={e => setResetNewPassword(e.target.value)}
+                  placeholder="Leave empty to disable lock"
+                />
+              </div>
+              <Button onClick={handleResetWithCode} disabled={resetting} className="w-full">
+                {resetting ? 'Resetting…' : 'Reset Password'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
