@@ -1319,7 +1319,7 @@
       },
       "settings": {
         "title": "Settings (the most useful page)",
-        "body": "Open Settings from the menu. Here you can:\n• Change your business code, name, logo, address & contact\n• Set the currency symbol (right at the top, below the business code)\n• Change the language\n• Manage workers, payments, premium and more\nVisit Settings once and explore — most app behavior is controlled from here."
+        "body": "Open Settings from the menu. Here you can:\n• Change your business code, name, logo, address & contact\n• Set the currency symbol (right at the top, below the business code)\n• Change the language\n• Manage workers, payments, premium and more\nVisit Settings once and explore — most app behavior is controlled from here.\n\n🔒 Settings Password (lock the page):\nScroll to \"Settings Password\" inside Settings. Type a password and tap Save — only you (the boss) will be able to open Settings after that. Leave it empty and Save again to remove the lock.\n\n🆘 Forgot the Settings Password?\nOn the lock screen, tap the three dots (⋮) in the top-right corner — or the \"Forgot password?\" link below Unlock. You will be asked for your Business Code (printed on every receipt and shown at the top of Settings). Enter it together with a new password and tap Reset Password. The lock is updated immediately."
       },
       "discover": {
         "title": "Discover",
