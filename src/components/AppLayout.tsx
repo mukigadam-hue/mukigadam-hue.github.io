@@ -447,7 +447,6 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
           <div className="md:hidden flex items-center justify-between px-3 pt-2 pb-1">
             <span className="text-xs font-semibold text-muted-foreground truncate">{currentBusiness?.name}</span>
             <div className="flex items-center gap-1">
-              <ScreenshotButton variant="compact" />
               <Button variant="ghost" size="sm" className="h-7 px-2 gap-1 text-xs" onClick={handleRefresh} disabled={refreshing}>
                 <RefreshCw className={`h-3.5 w-3.5 ${refreshing ? 'animate-spin' : ''}`} /> Refresh
               </Button>
@@ -461,6 +460,9 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
 
       {/* Proof Video Floating Button - visible on all screens */}
       <ProofVideoButton />
+
+      {/* Floating Screenshot Button — always visible regardless of scroll */}
+      <ScreenshotButton variant="floating" />
 
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center py-1.5 pb-safe px-safe">

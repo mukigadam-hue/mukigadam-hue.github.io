@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { isDespiaShell, takeNativeScreenshot } from '@/lib/despiaScreenshot';
 
 interface ScreenshotButtonProps {
-  variant?: 'icon' | 'compact';
+  variant?: 'icon' | 'compact' | 'floating';
   className?: string;
 }
 
@@ -61,6 +61,21 @@ export default function ScreenshotButton({ variant = 'icon', className }: Screen
     } finally {
       setBusy(false);
     }
+  }
+
+  if (variant === 'floating') {
+    return (
+      <button
+        type="button"
+        onClick={handleClick}
+        disabled={busy}
+        title="Take a screenshot"
+        aria-label="Take a screenshot"
+        className={`fixed right-3 bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] md:bottom-6 z-50 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg ring-1 ring-primary/30 hover:bg-primary/90 active:scale-95 transition disabled:opacity-60 flex items-center justify-center ${className || ''}`}
+      >
+        <Camera className="h-5 w-5" />
+      </button>
+    );
   }
 
   if (variant === 'compact') {
