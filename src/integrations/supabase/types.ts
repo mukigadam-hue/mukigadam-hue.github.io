@@ -2551,6 +2551,14 @@ export type Database = {
         Args: { _source_id: string; _source_type: string }
         Returns: undefined
       }
+      reset_settings_password_with_code: {
+        Args: {
+          _business_code: string
+          _business_id: string
+          _new_password: string
+        }
+        Returns: boolean
+      }
       search_businesses: {
         Args: {
           _country_code?: string
@@ -2610,6 +2618,10 @@ export type Database = {
           sub_category: string
           total_rooms: number
         }[]
+      }
+      set_settings_password: {
+        Args: { _business_id: string; _password: string }
+        Returns: boolean
       }
       verify_settings_password: {
         Args: { _business_id: string; _password: string }

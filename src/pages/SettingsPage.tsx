@@ -10,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Save, DollarSign, TrendingUp, Wallet, Building2, Plus, Crown, User, ChevronRight, Receipt as ReceiptIcon, Search, ShoppingCart, Trash2, RotateCcw, Wrench, Lock, Copy, Factory, KeyRound, Eye, EyeOff, ShieldBan, X, Flame, Home, Mail, UserX, LogOut } from 'lucide-react';
+import { Save, DollarSign, TrendingUp, Wallet, Building2, Plus, Crown, User, ChevronRight, Receipt as ReceiptIcon, Search, ShoppingCart, Trash2, RotateCcw, Wrench, Lock, Copy, Factory, KeyRound, Eye, EyeOff, ShieldBan, X, Flame, Home, Mail, UserX, LogOut, MoreVertical } from 'lucide-react';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import Receipt from '@/components/Receipt';
@@ -271,6 +272,10 @@ export default function SettingsPage() {
   const [unlocked, setUnlocked] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [hasPassword, setHasPassword] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetCode, setResetCode] = useState('');
+  const [resetNewPassword, setResetNewPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
 
   // Check if business has a settings password via secure RPC
   useEffect(() => {
@@ -294,6 +299,37 @@ export default function SettingsPage() {
       setPasswordInput('');
     } else {
       toast.error('Incorrect settings password');
+    }
+  }
+
+  async function handleResetWithCode() {
+    if (!currentBusiness?.id) return;
+    if (!resetCode.trim() || !resetNewPassword) {
+      toast.error('Enter your Business Code and a new password');
+      return;
+    }
+    setResetting(true);
+    try {
+      const { data, error } = await supabase.rpc('reset_settings_password_with_code', {
+        _business_id: currentBusiness.id,
+        _business_code: resetCode.trim(),
+        _new_password: resetNewPassword,
+      });
+      if (error) throw error;
+      if (data === true) {
+        toast.success('Settings password reset. You can sign in now.');
+        setShowResetDialog(false);
+        setResetCode('');
+        setResetNewPassword('');
+        setHasPassword(!!resetNewPassword);
+        if (!resetNewPassword) setUnlocked(true);
+      } else {
+        toast.error('Business Code does not match');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reset password');
+    } finally {
+      setResetting(false);
     }
   }
 
@@ -498,13 +534,16 @@ export default function SettingsPage() {
 
   async function handleSavePassword() {
     if (!currentBusiness?.id) return;
-    const { error } = await (supabase as any)
-      .from('business_secrets')
-      .upsert({ business_id: currentBusiness.id, settings_password: settingsPassword }, { onConflict: 'business_id' });
-    if (error) {
-      toast.error('Failed to save password');
+    const { data, error } = await supabase.rpc('set_settings_password', {
+      _business_id: currentBusiness.id,
+      _password: settingsPassword,
+    });
+    if (error || data !== true) {
+      toast.error(error?.message || 'Failed to save password');
     } else {
-      toast.success('Settings password updated!');
+      toast.success(settingsPassword ? 'Settings password updated!' : 'Settings password removed');
+      setHasPassword(!!settingsPassword);
+      setSettingsPassword('');
     }
   }
 
@@ -715,7 +754,21 @@ export default function SettingsPage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold">Settings</h1>
-        <Card className="shadow-card">
+        <Card className="shadow-card relative">
+          <div className="absolute top-2 right-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="More options">
+                  <MoreVertical className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => setShowResetDialog(true)}>
+                  <KeyRound className="h-4 w-4 mr-2" /> Forgot password? Reset
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
           <CardContent className="p-6 space-y-4 max-w-sm mx-auto">
             <div className="text-center">
               <Lock className="h-12 w-12 mx-auto text-primary mb-3" />
@@ -727,8 +780,52 @@ export default function SettingsPage() {
                 onKeyDown={e => e.key === 'Enter' && handleUnlock()} />
             </div>
             <Button onClick={handleUnlock} className="w-full"><Lock className="h-4 w-4 mr-2" />Unlock</Button>
+            <button
+              type="button"
+              onClick={() => setShowResetDialog(true)}
+              className="w-full text-xs text-primary hover:underline text-center"
+            >
+              Forgot password?
+            </button>
           </CardContent>
         </Card>
+
+        <Dialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <KeyRound className="h-5 w-5 text-primary" /> Reset Settings Password
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Enter your <strong>Business Code</strong> to verify ownership, then choose a new settings password.
+                You can find your Business Code on your printed receipts or the Discover page.
+              </p>
+              <div>
+                <Label>Business Code</Label>
+                <Input
+                  value={resetCode}
+                  onChange={e => setResetCode(e.target.value.toUpperCase())}
+                  placeholder="e.g. UG-XXXXXXXX"
+                  autoCapitalize="characters"
+                />
+              </div>
+              <div>
+                <Label>New Settings Password</Label>
+                <Input
+                  type="password"
+                  value={resetNewPassword}
+                  onChange={e => setResetNewPassword(e.target.value)}
+                  placeholder="Leave empty to disable lock"
+                />
+              </div>
+              <Button onClick={handleResetWithCode} disabled={resetting} className="w-full">
+                {resetting ? 'Resetting…' : 'Reset Password'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }
