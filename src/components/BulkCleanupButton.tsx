@@ -79,12 +79,12 @@ export default function BulkCleanupButton({ table, businessId, onDone, className
   return (
     <>
       <Button
-        type="button" size="sm" variant="outline"
+        type="button" size="sm" variant="destructive"
         onClick={openDialog}
-        className={`text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive ${className || ''}`}
+        className={`shadow-md font-semibold min-h-[40px] px-3 ${className || ''}`}
       >
-        <Trash2 className="h-4 w-4 mr-1" />
-        {t('bulkCleanup.button', 'Clean Old')}
+        <Trash2 className="h-4 w-4 mr-1.5" />
+        {t('bulkCleanup.button', 'Delete Old Records')}
       </Button>
 
       <Dialog open={open} onOpenChange={o => !busy && setOpen(o)}>
