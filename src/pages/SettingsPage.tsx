@@ -272,6 +272,10 @@ export default function SettingsPage() {
   const [unlocked, setUnlocked] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [hasPassword, setHasPassword] = useState(false);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [resetCode, setResetCode] = useState('');
+  const [resetNewPassword, setResetNewPassword] = useState('');
+  const [resetting, setResetting] = useState(false);
 
   // Check if business has a settings password via secure RPC
   useEffect(() => {
@@ -295,6 +299,37 @@ export default function SettingsPage() {
       setPasswordInput('');
     } else {
       toast.error('Incorrect settings password');
+    }
+  }
+
+  async function handleResetWithCode() {
+    if (!currentBusiness?.id) return;
+    if (!resetCode.trim() || !resetNewPassword) {
+      toast.error('Enter your Business Code and a new password');
+      return;
+    }
+    setResetting(true);
+    try {
+      const { data, error } = await supabase.rpc('reset_settings_password_with_code', {
+        _business_id: currentBusiness.id,
+        _business_code: resetCode.trim(),
+        _new_password: resetNewPassword,
+      });
+      if (error) throw error;
+      if (data === true) {
+        toast.success('Settings password reset. You can sign in now.');
+        setShowResetDialog(false);
+        setResetCode('');
+        setResetNewPassword('');
+        setHasPassword(!!resetNewPassword);
+        if (!resetNewPassword) setUnlocked(true);
+      } else {
+        toast.error('Business Code does not match');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to reset password');
+    } finally {
+      setResetting(false);
     }
   }
 
