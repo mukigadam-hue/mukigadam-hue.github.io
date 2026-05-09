@@ -1294,7 +1294,7 @@
     }
   },
   "bulkCleanup": {
-    "button": "Clean Old",
+    "button": "Delete Old Records",
     "title": "Delete old records",
     "description": "Permanently remove old records. Records with outstanding debt and the Receipt Archive will be kept.",
     "lastWeek": "Last week",
