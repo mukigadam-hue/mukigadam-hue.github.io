@@ -461,6 +461,9 @@ function DesktopPageNav({ navItems, pathname }: { navItems: { to: string; label:
       {/* Proof Video Floating Button - visible on all screens */}
       <ProofVideoButton />
 
+      {/* Floating Screenshot Button — always visible regardless of scroll */}
+      <ScreenshotButton variant="floating" />
+
       {/* Mobile Bottom Nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex justify-around items-center py-1.5 pb-safe px-safe">
         {mobileMainNav.map(({ to, label, icon: Icon }) => {
