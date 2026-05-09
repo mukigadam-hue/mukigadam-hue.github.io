@@ -380,6 +380,7 @@ export default function FactorySales() {
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-success bg-success/10 px-2 py-0.5 rounded-md text-sm tabular-nums">{fmt(Number(s.grand_total))}</span>
                       <Button size="sm" variant="ghost" onClick={() => setReceiptSale(s)}><ReceiptIcon className="h-3.5 w-3.5" /></Button>
+                      <RecycleDeleteButton table="sales" recordId={s.id} label={t('common.cancel', 'Cancel')} />
                     </div>
                   </div>
                   {s.payment_status !== 'paid' && <p className="text-xs font-semibold text-destructive">Balance: {fmt(Number(s.balance))}</p>}
