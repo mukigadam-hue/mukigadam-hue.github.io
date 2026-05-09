@@ -820,9 +820,26 @@ export default function SettingsPage() {
                   placeholder="Leave empty to disable lock"
                 />
               </div>
-              <Button onClick={handleResetWithCode} disabled={resetting} className="w-full">
-                {resetting ? 'Resetting…' : 'Reset Password'}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => { setShowResetDialog(false); setResetCode(''); setResetNewPassword(''); }}
+                  disabled={resetting}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleResetWithCode} disabled={resetting} className="flex-1">
+                  {resetting ? 'Resetting…' : 'Reset Password'}
+                </Button>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setShowResetDialog(false); setResetCode(''); setResetNewPassword(''); }}
+                className="w-full text-xs text-muted-foreground hover:text-foreground text-center mt-1"
+              >
+                ← Back to Sign In
+              </button>
             </div>
           </DialogContent>
         </Dialog>
