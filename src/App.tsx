@@ -102,6 +102,7 @@ function AppContent() {
           {/* Public routes */}
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify/:type/:id" element={<VerifyReceiptPage />} />
           {/* Auth-gated routes */}
           <Route path="/*" element={
             !user ? <AuthPage /> : (
