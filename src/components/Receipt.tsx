@@ -25,16 +25,18 @@ interface ReceiptProps {
   customerName?: string;
   code?: string;
   date: string;
-  type: 'sale' | 'order' | 'service' | 'checkout' | 'purchase';
+  type: 'sale' | 'order' | 'service' | 'checkout' | 'purchase' | 'booking' | 'archive';
   businessInfo?: { name: string; address: string; contact: string; email: string };
   counterpartyInfo?: { name: string; contact: string };
   recordedBy?: string;
   recordedByRole?: string;
   amountPaid?: number;
   paymentStatus?: string;
+  verifyId?: string;
+  verifyType?: 'sale' | 'order' | 'service' | 'purchase' | 'booking' | 'archive';
 }
 
-export default function Receipt({ items, grandTotal, buyerName, sellerName, customerName, code, date, type, businessInfo, counterpartyInfo, recordedBy, recordedByRole, amountPaid, paymentStatus }: ReceiptProps) {
+export default function Receipt({ items, grandTotal, buyerName, sellerName, customerName, code, date, type, businessInfo, counterpartyInfo, recordedBy, recordedByRole, amountPaid, paymentStatus, verifyId, verifyType }: ReceiptProps) {
   const { fmt } = useCurrency();
   const { canShareReceipts, canDownloadReceipts, canPrintReceipts } = usePremium();
   const buyer = buyerName || customerName || '';
