@@ -151,6 +151,11 @@ export default function Receipt({ items, grandTotal, buyerName, sellerName, cust
                 <span className="font-medium text-foreground">{recordedBy} {recordedByRole && <span className="text-[10px]">({recordedByRole})</span>}</span>
               </div>
             )}
+            {verifyId && verifyType && (
+              <div className="pt-2 flex flex-col items-center gap-1 border-t border-dashed">
+                <ReceiptQR url={`${window.location.origin}/verify/${verifyType}/${verifyId}`} size={92} />
+              </div>
+            )}
             <p className="text-center text-xs text-muted-foreground pt-2">
               {isInvoice ? 'Please settle the outstanding balance. Thank you!' : 'Thank you for your business!'}
             </p>
