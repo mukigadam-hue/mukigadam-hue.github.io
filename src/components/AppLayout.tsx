@@ -1,5 +1,6 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { triggerInterstitialOnScreenChange } from '@/lib/interstitialAd';
 import { useTranslation } from 'react-i18next';
 import { LayoutDashboard, Package, TrendingUp, ShoppingCart, ClipboardList, Wrench, Settings, Users, LogOut, Building2, Crown, User, Bell, BellDot, Factory, Flame, Boxes, Menu, Contact, Globe, Home, CalendarCheck, MessageSquare, Search, AlertTriangle, ChevronLeft, ChevronRight, Plus, RefreshCw } from 'lucide-react';
 import ProofVideoButton from '@/components/ProofVideoButton';
@@ -268,6 +269,18 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const queryClient = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Trigger B: fire an interstitial when the user switches between main
+  // screens (subject to 45-min gap + global 2/90min cap, see interstitialAd.ts).
+  const lastPathRef = useRef<string | null>(null);
+  useEffect(() => {
+    const prev = lastPathRef.current;
+    lastPathRef.current = pathname;
+    // Skip the initial mount — only react to actual screen changes.
+    if (prev !== null && prev !== pathname) {
+      triggerInterstitialOnScreenChange(`nav:${prev}->${pathname}`);
+    }
+  }, [pathname]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
