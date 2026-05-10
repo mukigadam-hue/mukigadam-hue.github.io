@@ -339,6 +339,8 @@ export default function ServicesPage() {
               grandTotal={Number(receiptService.cost)} buyerName={receiptService.customer_name} sellerName={receiptService.seller_name}
               date={receiptService.created_at} type="service"
               businessInfo={currentBusiness ? { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email } : undefined}
+              verifyId={receiptService.id}
+              verifyType="service"
             />
           )}
         </DialogContent>
