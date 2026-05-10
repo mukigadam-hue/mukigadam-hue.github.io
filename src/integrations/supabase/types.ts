@@ -2623,6 +2623,7 @@ export type Database = {
         Args: { _business_id: string; _password: string }
         Returns: boolean
       }
+      verify_receipt: { Args: { _id: string; _type: string }; Returns: Json }
       verify_settings_password: {
         Args: { _business_id: string; _password: string }
         Returns: boolean

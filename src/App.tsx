@@ -15,6 +15,7 @@ import UpdateGate from "@/components/UpdateGate";
 import AuthPage from "./pages/AuthPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import BusinessSetupPage from "./pages/BusinessSetupPage";
+import VerifyReceiptPage from "./pages/VerifyReceiptPage";
 
 // Lazy-load all page components for faster initial load
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -101,6 +102,7 @@ function AppContent() {
           {/* Public routes */}
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/verify/:type/:id" element={<VerifyReceiptPage />} />
           {/* Auth-gated routes */}
           <Route path="/*" element={
             !user ? <AuthPage /> : (

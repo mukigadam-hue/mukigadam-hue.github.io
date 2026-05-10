@@ -69,6 +69,8 @@ function ReceiptArchive({ businessId }: { businessId: string }) {
               date={selectedReceipt.created_at}
               type="sale"
               businessInfo={selectedReceipt.business_info || undefined}
+              verifyId={selectedReceipt.id}
+              verifyType="archive"
             />
           </DialogContent>
         </Dialog>

@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCurrency } from '@/hooks/useCurrency';
 import ReceiptActions from '@/components/ReceiptActions';
 import { usePremium } from '@/hooks/usePremium';
+import ReceiptQR from '@/components/ReceiptQR';
 
 interface ReceiptItem {
   itemName: string;
@@ -24,16 +25,18 @@ interface ReceiptProps {
   customerName?: string;
   code?: string;
   date: string;
-  type: 'sale' | 'order' | 'service' | 'checkout' | 'purchase';
+  type: 'sale' | 'order' | 'service' | 'checkout' | 'purchase' | 'booking' | 'archive';
   businessInfo?: { name: string; address: string; contact: string; email: string };
   counterpartyInfo?: { name: string; contact: string };
   recordedBy?: string;
   recordedByRole?: string;
   amountPaid?: number;
   paymentStatus?: string;
+  verifyId?: string;
+  verifyType?: 'sale' | 'order' | 'service' | 'purchase' | 'booking' | 'archive';
 }
 
-export default function Receipt({ items, grandTotal, buyerName, sellerName, customerName, code, date, type, businessInfo, counterpartyInfo, recordedBy, recordedByRole, amountPaid, paymentStatus }: ReceiptProps) {
+export default function Receipt({ items, grandTotal, buyerName, sellerName, customerName, code, date, type, businessInfo, counterpartyInfo, recordedBy, recordedByRole, amountPaid, paymentStatus, verifyId, verifyType }: ReceiptProps) {
   const { fmt } = useCurrency();
   const { canShareReceipts, canDownloadReceipts, canPrintReceipts } = usePremium();
   const buyer = buyerName || customerName || '';
@@ -146,6 +149,11 @@ export default function Receipt({ items, grandTotal, buyerName, sellerName, cust
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Recorded by:</span>
                 <span className="font-medium text-foreground">{recordedBy} {recordedByRole && <span className="text-[10px]">({recordedByRole})</span>}</span>
+              </div>
+            )}
+            {verifyId && verifyType && (
+              <div className="pt-2 flex flex-col items-center gap-1 border-t border-dashed">
+                <ReceiptQR url={`${window.location.origin}/verify/${verifyType}/${verifyId}`} size={92} />
               </div>
             )}
             <p className="text-center text-xs text-muted-foreground pt-2">

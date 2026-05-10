@@ -425,6 +425,8 @@ export default function FactorySales() {
               amountPaid={Number((receiptSale as any).amount_paid ?? receiptSale.grand_total)}
               paymentStatus={(receiptSale as any).payment_status}
               businessInfo={currentBusiness ? { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email } : undefined}
+              verifyId={receiptSale.id}
+              verifyType="sale"
             />
           )}
         </DialogContent>
