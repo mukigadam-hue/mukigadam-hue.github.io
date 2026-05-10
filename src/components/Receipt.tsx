@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { useCurrency } from '@/hooks/useCurrency';
 import ReceiptActions from '@/components/ReceiptActions';
 import { usePremium } from '@/hooks/usePremium';
+import ReceiptQR from '@/components/ReceiptQR';
 
 interface ReceiptItem {
   itemName: string;
