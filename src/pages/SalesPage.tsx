@@ -768,6 +768,8 @@ export default function SalesPage() {
               amountPaid={Number(receiptSale.amount_paid ?? receiptSale.grand_total)}
               paymentStatus={receiptSale.payment_status}
               businessInfo={currentBusiness ? { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email } : undefined}
+              verifyId={receiptSale.id}
+              verifyType="sale"
             />
           )}
         </DialogContent>
