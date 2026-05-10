@@ -2295,6 +2295,8 @@ export default function OrdersPage() {
               amountPaid={Number((receiptOrder as any).amount_paid ?? receiptOrder.grand_total)}
               paymentStatus={(receiptOrder as any).payment_status}
               businessInfo={currentBusiness ? { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email } : undefined}
+              verifyId={receiptOrder.id}
+              verifyType="order"
             />
           )}
         </DialogContent>
