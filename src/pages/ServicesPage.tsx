@@ -336,7 +336,10 @@ export default function ServicesPage() {
           {receiptService && (
             <Receipt
               items={[{ itemName: receiptService.service_name, category: 'Service', quality: receiptService.description || '-', quantity: 1, priceType: 'service', unitPrice: Number(receiptService.cost), subtotal: Number(receiptService.cost) }]}
-              grandTotal={Number(receiptService.cost)} buyerName={receiptService.customer_name} sellerName={receiptService.seller_name}
+              grandTotal={Number(receiptService.cost)}
+              amountPaid={Number(receiptService.amount_paid ?? receiptService.cost)}
+              paymentStatus={receiptService.payment_status}
+              buyerName={receiptService.customer_name} sellerName={receiptService.seller_name}
               date={receiptService.created_at} type="service"
               businessInfo={currentBusiness ? { name: currentBusiness.name, address: currentBusiness.address, contact: currentBusiness.contact, email: currentBusiness.email } : undefined}
               verifyId={receiptService.id}
