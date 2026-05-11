@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Camera } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -64,18 +65,19 @@ export default function ScreenshotButton({ variant = 'icon', className }: Screen
   }
 
   if (variant === 'floating') {
-    return (
+    const button = (
       <button
         type="button"
         onClick={handleClick}
         disabled={busy}
         title="Take a screenshot"
         aria-label="Take a screenshot"
-        className={`fixed right-3 bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] md:bottom-6 z-50 h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg ring-1 ring-primary/30 hover:bg-primary/90 active:scale-95 transition disabled:opacity-60 flex items-center justify-center ${className || ''}`}
+        className={`fixed right-3 bottom-[calc(6rem+env(safe-area-inset-bottom,0px))] md:bottom-6 z-[9999] h-12 w-12 rounded-full bg-primary text-primary-foreground shadow-lg ring-1 ring-primary/30 hover:bg-primary/90 active:scale-95 transition disabled:opacity-60 flex items-center justify-center pointer-events-auto ${className || ''}`}
       >
         <Camera className="h-5 w-5" />
       </button>
     );
+    return createPortal(button, document.body);
   }
 
   if (variant === 'compact') {
