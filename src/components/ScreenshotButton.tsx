@@ -103,6 +103,7 @@ export default function ScreenshotButton({ variant = 'icon', className }: Screen
       onClick={handleClick}
       disabled={busy}
       title="Take a screenshot"
+      aria-label="Take a screenshot"
     >
       <Camera className="h-4 w-4" />
     </Button>

@@ -95,7 +95,7 @@ export default function Dashboard() {
           <div className="shrink-0">
             {currentBusiness?.logo_url ? (
               <div className="relative cursor-pointer" onClick={() => setShowLogoUpload(v => !v)}>
-                <img src={currentBusiness.logo_url} alt="Logo" className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl object-cover border-2 border-primary-foreground/30" />
+                <img src={currentBusiness.logo_url} alt={`${currentBusiness.name} logo`} className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl object-cover border-2 border-primary-foreground/30" />
               </div>
             ) : (
               <button onClick={() => setShowLogoUpload(v => !v)}
@@ -191,7 +191,7 @@ export default function Dashboard() {
       {hasOverdue && (
         <Card className="shadow-card border-destructive/50 bg-destructive/5 animate-pulse-slow">
           <CardContent className="p-4 space-y-2">
-            <h3 className="text-base font-bold flex items-center gap-2 text-destructive">{t('dashboard.overdueDebts')}</h3>
+            <h2 className="text-base font-bold flex items-center gap-2 text-destructive">{t('dashboard.overdueDebts')}</h2>
             <p className="text-xs text-muted-foreground">{t('dashboard.overdueWarning')}</p>
             {overdueSales.length > 0 && (
               <div className="space-y-1">
@@ -233,7 +233,7 @@ export default function Dashboard() {
       {(totalOwedToYou > 0 || totalYouOwe > 0) && (
         <Card className="shadow-card border-warning/30 bg-warning/5">
           <CardContent className="p-4 space-y-3">
-            <h3 className="text-base font-bold flex items-center gap-2">💳 {t('dashboard.outstandingDebts')}</h3>
+            <h2 className="text-base font-bold flex items-center gap-2">💳 {t('dashboard.outstandingDebts')}</h2>
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 rounded-lg bg-success/10 border border-success/20">
                 <p className="text-xs text-muted-foreground">{t('dashboard.owedToYou')}</p>
