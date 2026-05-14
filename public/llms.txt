@@ -1,0 +1,16 @@
+# BizTrack – Business Manager
+
+> All-in-one web and mobile app to manage a business, factory, or rental property: sales, stock, purchases, expenses, orders, services, team, and receipts. Works offline-first with optional Premium tier.
+
+BizTrack (also published as Business Manager and My Factory) supports three workspace types — retail/wholesale Business, Factory production, and FlexRent rental — with shared core features for inventory, finance, multi-tenant teams, and B2B discovery between businesses.
+
+## Pages
+
+- [Home](/): Sign-in, sign-up, and product hero.
+- [Privacy Policy](/privacy): How user and business data is handled.
+- [Browse Listings](/browse): Public discovery of rentals and listings.
+- [Orders](/orders): B2B order placement, tracking, and disputes.
+
+## Optional
+
+- [Reset Password](/reset-password): Account recovery flow.
