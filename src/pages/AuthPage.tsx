@@ -157,7 +157,7 @@ export default function AuthPage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground mb-2">
                   <KeyRound className="h-8 w-8" />
                 </div>
-                <h1 className="text-2xl font-bold text-foreground">Recover Account</h1>
+                <h2 className="text-2xl font-bold text-foreground">Recover Account</h2>
                 <p className="text-sm text-muted-foreground">
                   Choose how you'd like to recover your account
                 </p>
@@ -193,7 +193,7 @@ export default function AuthPage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground mb-2">
                   <Mail className="h-8 w-8" />
                 </div>
-                <h1 className="text-2xl font-bold text-foreground">Reset Password</h1>
+                <h2 className="text-2xl font-bold text-foreground">Reset Password</h2>
                 <p className="text-sm text-muted-foreground">
                   Enter your email and we'll send you a password reset link
                 </p>
@@ -222,7 +222,7 @@ export default function AuthPage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground mb-2">
                   <Phone className="h-8 w-8" />
                 </div>
-                <h1 className="text-2xl font-bold text-foreground">Find Your Account</h1>
+                <h2 className="text-2xl font-bold text-foreground">Find Your Account</h2>
                 <p className="text-sm text-muted-foreground">
                   Enter the phone number you used when you registered
                 </p>
@@ -251,7 +251,7 @@ export default function AuthPage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground mb-2">
                   ✅
                 </div>
-                <h1 className="text-2xl font-bold text-foreground">Account Found!</h1>
+                <h2 className="text-2xl font-bold text-foreground">Account Found!</h2>
                 <p className="text-sm text-muted-foreground">
                   We found an account linked to your phone number
                 </p>
@@ -281,7 +281,7 @@ export default function AuthPage() {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground text-3xl mb-2">
                   📦
                 </div>
-                <h1 className="text-2xl font-bold text-foreground">BizTrack</h1>
+                <h2 className="text-2xl font-bold text-foreground">BizTrack</h2>
                 <p className="text-sm text-muted-foreground">
                   {isSignUp ? 'Create your account' : 'Sign in to your business'}
                 </p>
