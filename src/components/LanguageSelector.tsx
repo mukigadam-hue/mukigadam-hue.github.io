@@ -22,6 +22,7 @@ export default function LanguageSelector({ variant = 'full' }: { variant?: 'full
         <select
           value={i18n.language}
           onChange={(e) => setLanguage(e.target.value)}
+          aria-label="Select language"
           className="text-sm bg-muted/50 border border-border rounded-md px-2 py-1.5 text-foreground"
         >
           {languages.map(lang => (

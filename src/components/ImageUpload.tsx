@@ -102,7 +102,7 @@ export default function ImageUpload({ bucket, path, currentUrl, onUploaded, onRe
           )}
           {displayUrl ? (
             <>
-              <img src={displayUrl} alt="Upload" className="h-full w-full object-cover" />
+              <img src={displayUrl} alt="Uploaded image preview" className="h-full w-full object-cover" />
               {onRemoved && (
                 <button onClick={handleRemove} className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-0.5 z-10">
                   <X className="h-3 w-3" />

@@ -69,7 +69,7 @@ export default function DailyTipBanner() {
               )}
             </div>
           </div>
-          <Button variant="ghost" size="icon" className="h-6 w-6 shrink-0" onClick={dismiss}>
+          <Button variant="ghost" size="icon" aria-label="Dismiss tip" className="h-6 w-6 shrink-0" onClick={dismiss}>
             <X className="h-3.5 w-3.5" />
           </Button>
         </div>

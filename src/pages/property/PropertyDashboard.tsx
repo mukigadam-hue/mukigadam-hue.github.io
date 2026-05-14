@@ -51,7 +51,7 @@ export default function PropertyDashboard() {
           <div className="shrink-0">
             {currentBusiness?.logo_url ? (
               <div className="relative cursor-pointer" onClick={() => setShowLogoUpload(v => !v)}>
-                <img src={currentBusiness.logo_url} alt="Logo" className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl object-cover border-2 border-primary-foreground/30" />
+                <img src={currentBusiness.logo_url} alt={`${currentBusiness.name} logo`} className="h-12 w-12 sm:h-16 sm:w-16 rounded-xl object-cover border-2 border-primary-foreground/30" />
               </div>
             ) : (
               <button onClick={() => setShowLogoUpload(v => !v)}
